@@ -37,6 +37,10 @@ class PlayerController extends Controller
 
         $request->user()->player()->create($validated);
 
+        $player = (Player::with('user')->where('user_id', Auth::id())->get())[0];
+
+        $player->createTrain();
+
         return redirect(route('player.index'));
     }
 

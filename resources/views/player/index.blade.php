@@ -1,6 +1,8 @@
 <x-app-layout>
+    <script src="{{ asset('vendor/bladewind/js/helpers.js') }}"></script>
     @if (count($player))
-        <?php $player = $player[0]?>
+        <?php $player = $player[0];?>
+        <?php $train = $player->train;?>
         <x-slot name="header">
             <div class="flex justify-between">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -52,6 +54,109 @@
                     </div>
                 @endif
             </div>
+        </div>
+        <div class="mt-6 ml-64 mr-64 bg-white shadow-sm rounded-lg divide-y">
+            <h2 class="p-5 ml-10 font-semibold text-xl text-gray-800 leading-tight">
+                My Train
+            </h2>
+        </div>
+        <div class="mt-6 ml-64 mr-64 bg-white shadow-sm rounded-lg divide-y">
+            <x-bladewind.tab-group name="train-info" color="gray">
+                <x-slot name="headings">
+                    <x-bladewind.tab-heading
+                        name="locomotive"
+                        active="true"
+                        label="Locomotive" />
+                    @foreach($train->wagon as $wagon)
+                        <x-bladewind.tab-heading
+                            name="wagon{{$wagon->id}}"
+                            label="{{$wagon->name}}" />
+                    @endforeach
+                </x-slot>
+
+                <x-bladewind.tab-body>
+                    <x-bladewind.tab-content name="locomotive" active="true">
+                        <div class="p-6 ml-5 flex-col">
+                                <?php $locomotive = $train->locomotive;?>
+                            <h3 class="p-5 font-semibold text-xl text-gray-800 leading-tight">
+                                Locomotive
+                            </h3>
+                            <div class="p-6 flex-col">
+                                <p class="mt-4 text-lg text-gray-900">Name:             {{ $locomotive->name }}</p>
+                                <p class="mt-4 text-lg text-gray-900">Level:            {{ $locomotive->lvl }}</p>
+                                <p class="mt-4 text-lg text-gray-900">Weight:           {{ $locomotive->weight }}t</p>
+                                <p class="mt-4 text-lg text-gray-900">Power:            {{ $locomotive->power }}hp</p>
+                                <p class="mt-4 text-lg text-gray-900">Wagon Capacity:   {{ $locomotive->getWagonCap() }}</p>
+                                <p class="mt-4 text-lg text-gray-900">Armor:            {{ $locomotive->armor }} / {{ $locomotive->max_armor }}</p>
+                                <p class="mt-4 text-lg text-gray-900">Fuel:             {{ $locomotive->fuel }} / {{ $locomotive->max_fuel }}</p>
+                            </div>
+                        </div>
+                    </x-bladewind.tab-content>
+                    @foreach($train->wagon as $wagon)
+                        <x-bladewind.tab-content name="wagon{{$wagon->id}}">
+                                <?php $type = str_replace('App\\Models\\', '', $wagon->wagonable_type)?>
+                            <div class="p-6 ml-5 flex-col">
+                                <h3 class="p-5 font-semibold text-xl text-gray-800 leading-tight">
+                                    {{ $wagon->name }}
+                                </h3>
+                                <div class="p-6 flex-col">
+                                    <p class="mt-4 text-lg text-gray-900">Name:             {{ $wagon->name }}</p>
+                                    <p class="mt-4 text-lg text-gray-900">Level:            {{ $wagon->lvl }}</p>
+                                    <p class="mt-4 text-lg text-gray-900">Weight:           {{ $wagon->weight }}t</p>
+                                    <p class="mt-4 text-lg text-gray-900">Armor:            {{ $wagon->armor }} / {{ $wagon->max_armor }}</p>
+                                    <p class="mt-4 text-lg text-gray-900">Type:             {{ $type }}</p>
+                                    @if($type == 'CargoWagon')
+                                        <?php $specWagon = \App\Models\CargoWagon::find($wagon->wagonable_id) ?>
+                                        <p class="mt-4 text-lg text-gray-900">Capacity:     {{ $specWagon->capacity }}t</p>
+                                    @elseif($type == 'WeaponWagon')
+                                            <?php $specWagon = \App\Models\WeaponWagon::find($wagon->wagonable_id) ?>
+                                        <p class="mt-4 text-lg text-gray-900">Weapon slots available:     {{ $specWagon->slots_available }}</p>
+                                        @if($specWagon->weapons)
+                                            <x-bladewind.tab-group name="weapon-info-{{$wagon->wagonable_id}}" color="gray">
+                                                <x-slot name="headings">
+                                                    @foreach($specWagon->weapons as $weapon)
+                                                        <x-bladewind.tab-heading
+                                                            name="weapon-{{$weapon->id}}"
+                                                            label="{{$weapon->name}}" />
+                                                    @endforeach
+                                                </x-slot>
+                                                <x-bladewind.tab-body>
+                                                    @foreach($specWagon->weapons as $weapon)
+                                                        <x-bladewind.tab-content name="weapon-{{$weapon->id}}">
+                                                            <div class="p-6 ml-5 flex-col">
+                                                                <h3 class="p-5 font-semibold text-xl text-gray-800 leading-tight">
+                                                                    {{ $weapon->name }}
+                                                                </h3>
+                                                                <div class="p-6 flex-col">
+                                                                    <p class="mt-4 text-lg text-gray-900">Name:             {{ $weapon->name }}</p>
+                                                                    <p class="mt-4 text-lg text-gray-900">Level:            {{ $weapon->lvl }}</p>
+                                                                    <p class="mt-4 text-lg text-gray-900">Damage:           {{ $weapon->damage }}</p>
+                                                                    <p class="mt-4 text-lg text-gray-900">Type:             {{ $weapon->type }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </x-bladewind.tab-content>
+                                                    @endforeach
+                                                </x-bladewind.tab-body>
+                                            </x-bladewind.tab-group>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </x-bladewind.tab-content>
+                    @endforeach
+                </x-bladewind.tab-body>
+
+            </x-bladewind.tab-group>
+            @if($train->locomotive)
+
+            @endif
+        </div>
+        <div class="mt-6 ml-64 mr-64 bg-white shadow-sm rounded-lg divide-y">
+            @if($train->wagon)
+                @foreach($train->wagon as $wagon)
+
+                @endforeach
+            @endif
         </div>
     @else
         <x-slot name="header">
