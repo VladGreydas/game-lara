@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                         {{ __('Player') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('town.index')" :active="request()->routeIs('town.index')">
+                        {{ __('Town') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -81,6 +84,9 @@
             </x-nav-link>
             <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                 {{ __('Player') }}
+            </x-nav-link>
+            <x-nav-link :href="route('town.index')" :active="request()->routeIs('town.index')">
+                {{ __('Town') }}
             </x-nav-link>
         </div>
 

@@ -27,12 +27,14 @@ class PlayerController extends Controller
     {
         $request->merge([
             'max_exp' => 100,
-            'lvl' => 1
+            'lvl' => 1,
+            'current_town_id' => 1
         ]);
         $validated = $request->validate([
             'nickname' => 'required|string|max:255',
             'max_exp' => 'int',
-            'lvl' => 'int'
+            'lvl' => 'int',
+            'current_town_id' => 'int'
         ]);
 
         $request->user()->player()->create($validated);

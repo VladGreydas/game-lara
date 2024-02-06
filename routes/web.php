@@ -3,6 +3,7 @@
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChirpController;
+use App\Http\Controllers\TownController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,4 +63,10 @@ Route::prefix('player')->group(function () {
     Route::get('/{player}/edit', [PlayerController::class, 'edit'])->name('player.edit');
     Route::patch('/{player}', [PlayerController::class, 'update'])->name('player.update');
     Route::delete('/{player}', [PlayerController::class, 'destroy'])->name('player.destroy');
+});
+
+Route::prefix('town')->group(function () {
+    Route::get('/', [TownController::class, 'index'])->name('town.index');
+    Route::get('/{town}/depart', [TownController::class, 'depart'])->name('town.depart');
+    Route::patch('/travel', [TownController::class, 'travel'])->name('town.travel');
 });

@@ -16,13 +16,27 @@ class Player extends Model
         'money',
         'exp',
         'max_exp',
-        'lvl'
+        'lvl',
+        'current_town_id'
     ];
 
     public function createTrain(): void
     {
         $this->train()->create();
         $this->train->firstCreation();
+    }
+
+    public function travel($town_id, $cost): bool
+    {
+        $current_fuel = $this->train->locomotive->fuel;
+        if ($current_fuel >= $cost) {
+            $this->update(['current_town_id' => $town_id]);
+            $this->train->locomotive->update(['fuel' => $current_fuel-$cost]);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public function user(): BelongsTo
@@ -33,5 +47,10 @@ class Player extends Model
     public function train() : HasOne
     {
         return $this->hasOne(Train::class);
+    }
+
+    public function town(): BelongsTo
+    {
+        return $this->belongsTo(Town::class, 'current_town_id');
     }
 }
