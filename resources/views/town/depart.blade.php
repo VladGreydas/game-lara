@@ -1,7 +1,6 @@
 <x-app-layout>
     <script src="{{ asset('vendor/bladewind/js/helpers.js') }}"></script>
     <link href="{{ asset('vendor/bladewind/css/animate.min.css') }}" rel="stylesheet" />
-    <link href="{{ asset('vendor/bladewind/css/bladewind-ui.min.css') }}" rel="stylesheet" />
     <x-slot name="header">
         <div class="flex justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -13,21 +12,28 @@
         <x-bladewind.table>
             <x-slot name="header">
                 <th class="text-white p-4">Town</th>
+                <th class="text-white p-4">Workshop</th>
+                <th class="text-white p-4">Rail Shop</th>
+                <th class="text-white p-4">Shop</th>
+                <th class="text-white p-4">Saloon</th>
                 <th class="text-white p-4">Fuel Cost</th>
-                <th class="text-white p-4">Depart</th>
+                <th class="text-white p-4">Action</th>
             </x-slot>
             @foreach($destinations as $destination)
                 <tr>
                     <td class="p-4 font-semibold">{{$destination['town']->name}}</td>
-                    <td>{{$destination['fuel_cost']}}</td>
-                    <td>
+                    <td class="text-center">{{$destination['town']->workshop == 1 ? '+' : '-'}}</td>
+                    <td class="text-center">{{$destination['town']->rail_shop == 1 ? '+' : '-'}}</td>
+                    <td class="text-center">{{$destination['town']->shop == 1 ? '+' : '-'}}</td>
+                    <td class="text-center">{{$destination['town']->saloon == 1 ? '+' : '-'}}</td>
+                    <td class="text-center">{{$destination['fuel_cost']}}</td>
+                    <td class="text-center">
                         <form method="post" action="{{route('town.travel', [
                                 'player' => $player,
                                 'town_id' => $destination['town']->id,
                                 'cost' => $destination['fuel_cost']])}}">
-
                         </form>
-                        <x-bladewind.button onclick="showModal('action-modal-{{$destination['town']->id}}')" color="black">
+                        <x-bladewind.button onclick="showModal('action-modal-{{$destination['town']->id}}')" class="text-white w-9/12 h-full p-2 bg-slate-800">
                             {{__('Depart')}}
                         </x-bladewind.button>
                         <x-bladewind::modal
@@ -52,5 +58,8 @@
                 </tr>
             @endforeach
         </x-bladewind.table>
+        <div class="p-6 rounded-lg divide-y">
+            <a href="{{url()->previous()}}"><x-secondary-button>{{__('Back')}}</x-secondary-button></a>
+        </div>
     </div>
 </x-app-layout>

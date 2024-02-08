@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LocomotiveController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChirpController;
@@ -69,4 +70,8 @@ Route::prefix('town')->group(function () {
     Route::get('/', [TownController::class, 'index'])->name('town.index');
     Route::get('/{town}/depart', [TownController::class, 'depart'])->name('town.depart');
     Route::patch('/travel', [TownController::class, 'travel'])->name('town.travel');
+});
+
+Route::controller(LocomotiveController::class)->prefix('locomotive')->group(function () {
+    Route::patch('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
 });

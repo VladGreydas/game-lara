@@ -19,7 +19,8 @@ class TownController extends Controller
         return view('town.index', [
             'town' => Town::whereHas('players', function (Builder $query) {
                 $query->where('user_id', Auth::id());
-            })->get()
+            })->get(),
+            'player' => Player::with('user')->where('user_id', Auth::id())->get()
         ]);
     }
 

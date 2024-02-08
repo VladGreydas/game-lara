@@ -26,14 +26,16 @@ class PlayerController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->merge([
+            'money' => 200,
             'max_exp' => 100,
             'lvl' => 1,
             'current_town_id' => 1
         ]);
         $validated = $request->validate([
             'nickname' => 'required|string|max:255',
+            'money' => 'int|max:200',
             'max_exp' => 'int',
-            'lvl' => 'int',
+            'lvl' => 'int|max:1',
             'current_town_id' => 'int'
         ]);
 
