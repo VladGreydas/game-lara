@@ -26,7 +26,7 @@ class Locomotive extends Model
 
     public function getWagonCap(): int
     {
-        return floor($this->power / 100);
+        return floor($this->power / 1000);
     }
 
     public function lvlUp()
@@ -38,8 +38,8 @@ class Locomotive extends Model
             $player->update(['money' => $player->money - $this->upgrade_cost]);
             $this->update([
                 'lvl' => $newLvl,
-                'weight' => $this->weight + 150 * $newLvl,
-                'power' => $this->power + 50 * $newLvl,
+                'weight' => $this->weight + 50 * $newLvl,
+                'power' => $this->power + 500 * $newLvl,
                 'armor' => $this->max_armor + 100 * $newLvl,
                 'max_armor' => $this->max_armor + 100 * $newLvl,
                 'fuel' => $this->max_fuel + 5 * $newLvl,

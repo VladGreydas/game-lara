@@ -29,6 +29,24 @@ class Weapon extends Model
         ];
     }
 
+    public function lvlUp(): bool
+    {
+        $player = $this->weapon_wagon->wagon->train->player;
+
+        if($player->money >= $this->upgrade_cost) {
+            $newLvl = $this->lvl + 1;
+            $player->update(['money' => $player->money - $this->upgrade_cost]);
+            $this->update([
+                'lvl' => $newLvl,
+                'damage' => $this->damage + 50 * $newLvl,
+                'upgrade_cost' => $this->upgrade_cost + 100 * $newLvl
+            ]);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function weapon_wagon(): BelongsTo
     {
         return $this->belongsTo(WeaponWagon::class);

@@ -5,8 +5,8 @@
 <div class="p-6 flex-col">
     <p class="mt-4 text-lg text-gray-900">Name:             {{ $locomotive->name }}</p>
     <p class="mt-4 text-lg text-gray-900">Level:            {{ $locomotive->lvl }}(+1)</p>
-    <p class="mt-4 text-lg text-gray-900">Weight:           {{ $locomotive->weight }} (+{{ 150 * ($locomotive->lvl+1) }})t</p>
-    <p class="mt-4 text-lg text-gray-900">Power:            {{ $locomotive->power }} (+{{ 50 * ($locomotive->lvl+1) }})khp</p>
+    <p class="mt-4 text-lg text-gray-900">Weight:           {{ $locomotive->weight }} (+{{ 50 * ($locomotive->lvl+1) }})t</p>
+    <p class="mt-4 text-lg text-gray-900">Power:            {{ $locomotive->power }} (+{{ 500 * ($locomotive->lvl+1) }}) hp</p>
     <p class="mt-4 text-lg text-gray-900">Armor:            {{ $locomotive->max_armor }} (+{{ 100 * ($locomotive->lvl+1) }})</p>
     <p class="mt-4 text-lg text-gray-900">Fuel:             {{ $locomotive->max_fuel }} (+{{ 5 * ($locomotive->lvl+1) }})</p>
     <p class="mt-4 text-lg text-gray-900">Upgrade Cost:     {{ $locomotive->upgrade_cost }}</p>

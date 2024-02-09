@@ -87,6 +87,10 @@ class PlayerController extends Controller
     {
         $this->authorize('delete', $player);
 
+        foreach ($player->train->wagon as $wagon) {
+            $wagon->destroyRelatives();
+        }
+
         $player->delete();
 
         return redirect(route('player.index'));

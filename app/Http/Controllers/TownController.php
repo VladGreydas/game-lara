@@ -24,6 +24,11 @@ class TownController extends Controller
         ]);
     }
 
+    public function refuel()
+    {
+        
+    }
+
     public function depart(Town $town)
     {
         $destinations = $town->getTravelDestinations();

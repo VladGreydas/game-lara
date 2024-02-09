@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Locomotive;
+use App\Models\Weapon;
 use Illuminate\Http\Request;
 
-class LocomotiveController extends Controller
+class WeaponController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class LocomotiveController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Locomotive $locomotive)
+    public function show(Weapon $weapon)
     {
         //
     }
@@ -42,18 +42,18 @@ class LocomotiveController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Locomotive $locomotive)
+    public function edit(Weapon $weapon)
     {
         //
     }
 
     /**
-     * Update (levelup) the locomotive in storage.
+     * Update the specified resource in storage.
      */
-    public function upgrade(Request $request, Locomotive $locomotive)
+    public function upgrade(Request $request, Weapon $weapon)
     {
         $status = '';
-        if ($locomotive->lvlUp()) {
+        if ($weapon->lvlUp()) {
             $status = 'upgrade-successful';
         } else {
             $status = 'upgrade-failed';
@@ -62,9 +62,9 @@ class LocomotiveController extends Controller
     }
 
     /**
-     * Update (purchase) the locomotive in storage.
+     * Remove the specified resource from storage.
      */
-    public function purchase(Request $request, Locomotive $locomotive)
+    public function destroy(Weapon $weapon)
     {
         //
     }

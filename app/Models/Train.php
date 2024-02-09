@@ -12,11 +12,6 @@ class Train extends Model
 {
     use HasFactory;
 
-    public static function created($callback)
-    {
-
-    }
-
     public function firstCreation(): void
     {
         $this->locomotive()->create();
@@ -43,6 +38,9 @@ class Train extends Model
         $weapon->addWeapon();
     }
 
+    /*
+     * Relations
+     */
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);

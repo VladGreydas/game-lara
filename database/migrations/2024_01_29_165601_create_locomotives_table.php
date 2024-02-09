@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('train_id')->constrained()->cascadeOnDelete();
             $table->string('name')->nullable(false)->default('Steamy Joe');
-            $table->integer('weight')->nullable(false)->default(3500);
+            $table->integer('weight')->nullable(false)->default(350);
             $table->string('type')->nullable(false)->default('Steam');
-            $table->integer('power')->nullable(false)->default(250);
+            $table->integer('power')->nullable(false)->default(2500);
             $table->integer('armor')->nullable(false)->default(500);
             $table->integer('max_armor')->nullable(false)->default(500);
             $table->integer('fuel')->nullable(false)->default(10);

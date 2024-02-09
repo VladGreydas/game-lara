@@ -5,6 +5,7 @@ use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChirpController;
 use App\Http\Controllers\TownController;
+use App\Http\Controllers\WagonController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,4 +75,12 @@ Route::prefix('town')->group(function () {
 
 Route::controller(LocomotiveController::class)->prefix('locomotive')->group(function () {
     Route::patch('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
+});
+
+Route::controller(WagonController::class)->prefix('wagon')->group(function () {
+    Route::patch('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
+});
+
+Route::controller(\App\Http\Controllers\WeaponController::class)->prefix('weapon')->group(function () {
+    Route::patch('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
 });
