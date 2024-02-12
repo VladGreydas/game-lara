@@ -31,7 +31,7 @@ class Player extends Model
         $current_fuel = $this->train->locomotive->fuel;
         if ($current_fuel >= $cost) {
             $this->update(['current_town_id' => $town_id]);
-            $this->train->locomotive->update(['fuel' => $current_fuel-$cost]);
+            $this->train->locomotive->update(['fuel' => $current_fuel - $cost]);
             return true;
         }
         else {

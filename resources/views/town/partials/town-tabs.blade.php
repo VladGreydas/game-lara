@@ -11,18 +11,31 @@
                 label="Workshop"
             />
         @endif
+        @if($town->rail_shop)
+            <x-bladewind.tab-heading
+                name="rail_shop"
+                label="Rail shop"
+            />
+        @endif
+        @if($town->shop)
+            <x-bladewind.tab-heading
+                name="shop"
+                label="Shop"
+            />
+        @endif
     </x-slot>
     <x-bladewind.tab-body>
         <x-bladewind.tab-content name="station" active="true">
-            <?php $fuel = $player->train->locomotive->max_fuel - $player->train->locomotive->fuel?>
-            <p class="mt-4 text-lg text-gray-900">Fuel: {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}</p>
-            @if($fuel > 0)
-
-            @endif
+            @include('town.partials.station')
         </x-bladewind.tab-content>
         @if($town->workshop)
             <x-bladewind.tab-content name="workshop">
                 @include('town.partials.workshop')
+            </x-bladewind.tab-content>
+        @endif
+        @if($town->rail_shop)
+            <x-bladewind.tab-content name="rail_shop">
+                @include('town.partials.rail_shop')
             </x-bladewind.tab-content>
         @endif
     </x-bladewind.tab-body>

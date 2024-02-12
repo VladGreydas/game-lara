@@ -49,30 +49,7 @@
         </x-bladewind.tab-content>
         @if($isWeapons)
             <x-bladewind.tab-content name="weapon">
-                <x-bladewind.tab-group name="weapons">
-                    <x-slot name="headings">
-                        @foreach($player->train->wagon as $wagon)
-                            @if($wagon->wagonable instanceof \App\Models\WeaponWagon && $wagon->wagonable->weapons)
-                                @foreach($wagon->wagonable->weapons as $weapon)
-                                    <x-bladewind.tab-heading
-                                        name="weapon{{$weapon->id}}"
-                                        label="{{$weapon->name.' - '.$wagon->name}}" />
-                                @endforeach
-                            @endif
-                        @endforeach
-                    </x-slot>
-                    <x-bladewind.tab-body>
-                        @foreach($player->train->wagon as $wagon)
-                            @if($wagon->wagonable instanceof \App\Models\WeaponWagon && $wagon->wagonable->weapons)
-                                @foreach($wagon->wagonable->weapons as $weapon)
-                                    <x-bladewind.tab-content name="weapon{{$weapon->id}}">
-                                        @include('town.partials.upgrade.weapons')
-                                    </x-bladewind.tab-content>
-                                @endforeach
-                            @endif
-                        @endforeach
-                    </x-bladewind.tab-body>
-                </x-bladewind.tab-group>
+                @include('town.partials.upgrade.weapons')
             </x-bladewind.tab-content>
         @endif
     </x-bladewind.tab-body>

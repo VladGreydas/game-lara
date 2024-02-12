@@ -52,11 +52,13 @@ class LocomotiveController extends Controller
      */
     public function upgrade(Request $request, Locomotive $locomotive)
     {
-        $status = '';
+        $status = [];
         if ($locomotive->lvlUp()) {
-            $status = 'upgrade-successful';
+            $status['status'] = 'success';
+            $status['message'] = 'Successfully upgraded '.$locomotive->name;
         } else {
-            $status = 'upgrade-failed';
+            $status['status'] = 'failed';
+            $status['message'] = 'Not enough money to upgrade';
         }
         return redirect(route('town.index'))->with('status', $status);
     }
@@ -66,6 +68,9 @@ class LocomotiveController extends Controller
      */
     public function purchase(Request $request, Locomotive $locomotive)
     {
-        //
+        $new_locomotive = (array)json_decode($request['locom']);
+        $new_locomotive = Locomotive::factory()->make($new_locomotive);
+        var_dump($new_locomotive);
+        die;
     }
 }

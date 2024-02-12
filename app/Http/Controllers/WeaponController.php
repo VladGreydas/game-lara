@@ -52,11 +52,13 @@ class WeaponController extends Controller
      */
     public function upgrade(Request $request, Weapon $weapon)
     {
-        $status = '';
+        $status = [];
         if ($weapon->lvlUp()) {
-            $status = 'upgrade-successful';
+            $status['status'] = 'success';
+            $status['message'] = 'Successfully upgraded '.$weapon->name;
         } else {
-            $status = 'upgrade-failed';
+            $status['status'] = 'failed';
+            $status['message'] = 'Not enough money to upgrade';
         }
         return redirect(route('town.index'))->with('status', $status);
     }

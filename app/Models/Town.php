@@ -31,10 +31,21 @@ class Town extends Model
         });
     }
 
-    public function workshop()
+    public function trainRefuel(Player $player, $cost)
     {
-        //TODO: Workshop interaction
+        $max_fuel = $player->train->locomotive->max_fuel;
+        if ($cost <= $player->money) {
+            $player->train->locomotive->update(['fuel' => $max_fuel]);
+            $player->update(['money' => ($player->money - $cost)]);
+            return true;
+        } else {
+            return false;
+        }
     }
+
+    /*
+     * Relations
+     */
 
     public function routesFrom(): HasMany
     {

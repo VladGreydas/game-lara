@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChirpController;
 use App\Http\Controllers\TownController;
 use App\Http\Controllers\WagonController;
+use App\Http\Controllers\WeaponController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -71,16 +72,18 @@ Route::prefix('town')->group(function () {
     Route::get('/', [TownController::class, 'index'])->name('town.index');
     Route::get('/{town}/depart', [TownController::class, 'depart'])->name('town.depart');
     Route::patch('/travel', [TownController::class, 'travel'])->name('town.travel');
+    Route::patch('/refuel', [TownController::class, 'refuel'])->name('town.refuel');
 });
 
 Route::controller(LocomotiveController::class)->prefix('locomotive')->group(function () {
     Route::patch('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
+    Route::patch('/{locomotive}/purchase', 'purchase')->name('locomotive.purchase');
 });
 
 Route::controller(WagonController::class)->prefix('wagon')->group(function () {
     Route::patch('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
 });
 
-Route::controller(\App\Http\Controllers\WeaponController::class)->prefix('weapon')->group(function () {
+Route::controller(WeaponController::class)->prefix('weapon')->group(function () {
     Route::patch('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
 });

@@ -24,9 +24,20 @@ class TownController extends Controller
         ]);
     }
 
-    public function refuel()
+    public function refuel(Request $request)
     {
-        
+        $status = [];
+        $player = Player::find($request->get('player'));
+        $town = Town::find($request->get('town_id'));
+        $cost = $request->get('cost');
+        if ($town->trainRefuel($player, $cost)) {
+            $status['status'] = 'success';
+            $status['message'] = 'Successfully refueled the train';
+        } else {
+            $status['status'] = 'failed';
+            $status['message'] = 'Not enough money to refuel';
+        }
+        return redirect(route('town.index'))->with('status', $status);
     }
 
     public function depart(Town $town)

@@ -36,11 +36,13 @@ class WagonController extends Controller
      */
     public function upgrade(Request $request, Wagon $wagon)
     {
-        $status = '';
+        $status = [];
         if ($wagon->lvlUp()) {
-            $status = 'upgrade-successful';
+            $status['status'] = 'success';
+            $status['message'] = 'Successfully upgraded '.$wagon->name;
         } else {
-            $status = 'upgrade-failed';
+            $status['status'] = 'failed';
+            $status['message'] = 'Not enough money to upgrade';
         }
         return redirect(route('town.index'))->with('status', $status);
     }

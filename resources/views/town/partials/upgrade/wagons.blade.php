@@ -15,7 +15,7 @@
     @endif
     <p class="mt-4 text-lg text-gray-900">Upgrade Cost:     {{ $wagon->upgrade_cost }}</p>
 
-    <form method="POST" action="{{ route('locomotive.upgrade', $wagon) }}">
+    <form method="POST" action="{{ route('wagon.upgrade', $wagon) }}">
         @csrf
         @method('PATCH')
         <div class="mt-4 space-x-2">
