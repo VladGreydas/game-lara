@@ -70,7 +70,14 @@ class LocomotiveController extends Controller
     {
         $new_locomotive = (array)json_decode($request['locom']);
         $new_locomotive = Locomotive::factory()->make($new_locomotive);
-        var_dump($new_locomotive);
-        die;
+        $status = [];
+        if ($locomotive->purchase($new_locomotive)) {
+            $status['status'] = 'success';
+            $status['message'] = 'Successfully bought '.$new_locomotive->name;
+        } else {
+            $status['status'] = 'failed';
+            $status['message'] = 'Not enough money to buy';
+        }
+        return redirect(route('town.index'))->with('status', $status);
     }
 }

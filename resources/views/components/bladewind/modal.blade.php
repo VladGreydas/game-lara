@@ -1,6 +1,6 @@
 @props([
     // determines types of icon to display. Available options: info, success, error, warning
-    // only the blank type (type='') has no icon. useful if you want your modal to contain a form 
+    // only the blank type (type='') has no icon. useful if you want your modal to contain a form
     // or other custom content
     'type' => '',
 
@@ -18,12 +18,12 @@
     'cancel_button_label' => 'Cancel',
     'cancelButtonLabel' => 'Cancel',
 
-    // action to perform when secondary button is clicked. default is close. 
+    // action to perform when secondary button is clicked. default is close.
     // provide a custom js function as string to execute that function. example "saveUser"
     'ok_button_action' => 'close',
     'okButtonAction' => 'close',
 
-    // action to perform when primary button is clicked. default is close. 
+    // action to perform when primary button is clicked. default is close.
     // provide a custom js function as a string to execute that function. example "confirmAction"
     'cancel_button_action' => 'close',
     'cancelButtonAction' => 'close',
@@ -122,11 +122,11 @@
 <div data-name="{{$name}}" data-backdrop-can-close="{{$backdrop_can_close}}"
      class="w-full h-full bg-black/40 fixed left-0 top-0 @if($blur_backdrop) backdrop-blur-md @endif z-40 flex bw-modal bw-{{$name}}-modal hidden">
     <div class="sm:{{$sizes[$size]}} w-full p-4 m-auto bw-{{$name}} animate__faster">
-        <div class="bg-white dark:bg-slate-900 dark:border dark:border-slate-800 rounded-lg drop-shadow-2xl">
+        <div class="bg-white  rounded-lg drop-shadow-2xl">
             @if( $show_action_buttons && $show_close_icon)
                 <a href="javascript:void(0)" onclick="{!! $cancelAction !!}">
                     <x-bladewind::icon name="x-mark"
-                                       class="text-gray-400 hover:bg-gray-200 hover:rounded-full dark:hover:bg-slate-800 p-1 absolute right-3 top-3 modal-close-icon"/>
+                                       class="text-gray-400 hover:bg-gray-200 hover:rounded-full p-1 absolute right-3 top-3 modal-close-icon"/>
                 </a>
             @endif
             <div class="{{(!empty($type))?'flex':'flex-initial'}}">
@@ -136,14 +136,14 @@
                     </div>
                 @endif
                 <div class="modal-body grow p-7 @if(!empty($type)) !pl-3 @endif {{ $body_css  }}">
-                    <h1 class="text-[22px] font-bold text-slate-900/80 dark:text-slate-300 modal-title text-left">{{ $title }}</h1>
-                    <div class="modal-text text-gray-600 dark:text-gray-400 pt-2 text-base leading-6 tracking-wide text-left">
+                    <h1 class="text-[22px] font-bold text-slate-900/80 modal-title text-left">{{ $title }}</h1>
+                    <div class="modal-text text-gray-600 pt-2 text-base leading-6 tracking-wide text-left">
                         {{ $slot }}
                     </div>
                 </div>
             </div>
             @if( $show_action_buttons )
-                <div class="modal-footer @if($stretch_action_buttons) flex flex-col-reverse @endif @if($center_action_buttons || in_array($size, ['tiny', 'small', 'medium'])) text-center @else text-right @endif bg-gray-100 dark:bg-slate-800/50 border-t border-t-gray-200/60 dark:border-slate-800 py-3 px-6 rounded-br-lg rounded-bl-lg {{ $footer_css }}">
+                <div class="modal-footer @if($stretch_action_buttons) flex flex-col-reverse @endif @if($center_action_buttons || in_array($size, ['tiny', 'small', 'medium'])) text-center @else text-right @endif bg-gray-100 border-t border-t-gray-200/60 py-3 px-6 rounded-br-lg rounded-bl-lg {{ $footer_css }}">
                     <x-bladewind::button
                             type="secondary"
                             size="{{$button_size}}"

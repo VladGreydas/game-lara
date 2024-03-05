@@ -35,7 +35,64 @@ class Train extends Model
         $weapon = WeaponWagon::create();
         $weapon->wagon()->create($weapon_stats);
         $weapon = WeaponWagon::get()->last();
-        $weapon->addWeapon();
+        $weapon->addFirstWeapon();
+    }
+
+    public function addWagon($wagon_data): array
+    {
+        $response = [];
+        unset($wagon_data['id']);
+        if($this->player->checkIfEnough($wagon_data['price'])) {
+            switch ($wagon_data['type']) {
+                case 'Cargo':
+                {
+                    $wagon_data['train_id'] = $this->id;
+                    $capacity = $wagon_data['capacity'];
+
+                    unset($wagon_data['capacity']);
+                    unset($wagon_data['type']);
+
+                    $cargo = CargoWagon::create(['name' => $wagon_data['name'], 'capacity' => $capacity]);
+                    $cargo->wagon()->create($wagon_data);
+
+                    $response['status'] = 'success';
+                    $response['message'] = 'Successfully bought '.$wagon_data['name'];
+                    break;
+                }
+                case 'Weapon':
+                {
+                    $wagon_data['train_id'] = $this->id;
+                    $slots = $wagon_data['slots_available'];
+
+                    unset($wagon_data['slots_available']);
+                    unset($wagon_data['type']);
+
+                    $weapon = WeaponWagon::create(['slots_available' => $slots]);
+                    $weapon->wagon()->create($wagon_data);
+
+                    $response['status'] = 'success';
+                    $response['message'] = 'Successfully bought '.$wagon_data['name'];
+                    break;
+                }
+            }
+        } else {
+            $response['status'] = 'failed';
+            $response['message'] = 'Not enough money to buy';
+        }
+        return $response;
+    }
+
+    public function getWeaponWagons()
+    {
+        $weapon_wagons = collect();
+        $wagons = $this->wagon;
+        foreach ($wagons as $wagon) {
+            $wagonable = $wagon->wagonable;
+            if ($wagonable instanceof WeaponWagon && $wagonable->slots_available > 0) {
+                $weapon_wagons->push($wagonable);
+            }
+        }
+        return $weapon_wagons;
     }
 
     /*

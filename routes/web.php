@@ -82,8 +82,11 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
 
 Route::controller(WagonController::class)->prefix('wagon')->group(function () {
     Route::patch('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
+    Route::patch('{wagon}/sell', 'sell')->name('wagon.sell');
+    Route::patch('/{train}/wagon/purchase', 'purchase')->name('wagon.purchase');
 });
 
 Route::controller(WeaponController::class)->prefix('weapon')->group(function () {
     Route::patch('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
+    Route::patch('/purchase', 'purchase')->name('weapon.purchase');
 });

@@ -39,7 +39,8 @@ class Weapon extends Model
             $this->update([
                 'lvl' => $newLvl,
                 'damage' => $this->damage + 50 * $newLvl,
-                'upgrade_cost' => $this->upgrade_cost + 100 * $newLvl
+                'price' => $this->price + $this->upgrade_cost,
+                'upgrade_cost' => $this->upgrade_cost + 100 * $newLvl,
             ]);
             return true;
         } else {

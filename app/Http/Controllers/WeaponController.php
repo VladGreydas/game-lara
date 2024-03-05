@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Train;
 use App\Models\Weapon;
+use App\Models\WeaponWagon;
 use Illuminate\Http\Request;
 
 class WeaponController extends Controller
@@ -61,6 +63,23 @@ class WeaponController extends Controller
             $status['message'] = 'Not enough money to upgrade';
         }
         return redirect(route('town.index'))->with('status', $status);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function purchase(Request $request)
+    {
+        if (!$request['wagon']) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Choose wagon before weapon purchase';
+        } else {
+            $weapon_wagon = WeaponWagon::find($request['wagon']);
+            $weapon = (array)json_decode($request['weapon']);
+            $weapon = Weapon::factory()->make($weapon);
+            $response = $weapon_wagon->purchaseWeapon($weapon);
+        }
+        return redirect(route('town.index'))->with('status', $response);
     }
 
     /**

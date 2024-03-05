@@ -23,7 +23,6 @@ class CargoWagon extends Model
             'name' => 'Cargo Wagon',
             'weight' => 125,
             'price' => 250,
-            'train_id' => 1,
             'armor' => 500,
             'max_armor' => 500
         ];

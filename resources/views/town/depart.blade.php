@@ -28,32 +28,27 @@
                     <td class="text-center">{{$destination['town']->saloon == 1 ? '+' : '-'}}</td>
                     <td class="text-center">{{$destination['fuel_cost']}}</td>
                     <td class="text-center">
-                        <form method="post" action="{{route('town.travel', [
-                                'player' => $player,
-                                'town_id' => $destination['town']->id,
-                                'cost' => $destination['fuel_cost']])}}">
-                        </form>
                         <x-bladewind.button onclick="showModal('action-modal-{{$destination['town']->id}}')" class="text-white w-9/12 h-full p-2 bg-slate-800">
                             {{__('Depart')}}
                         </x-bladewind.button>
-                        <x-bladewind::modal
+                        <x-bladewind.modal
                             backdrop_can_close="false"
                             name="action-modal-{{$destination['town']->id}}"
                             ok_button_label=""
-                            cancel_button_label="Stay here">
-
-                            <form method="post" action="{{route('town.travel')}}">
+                            cancel_button_label="Stay here"
+                        >
+                            <form method="post" action="{{route('town.travel')}}" class="flex flex-col flex-wrap items-center">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="player" value="{{$player[0]->id}}">
                                 <input type="hidden" name="town_id" value="{{$destination['town']->id}}">
                                 <input type="hidden" name="cost" value="{{$destination['fuel_cost']}}">
                                 Are you sure you want to go to {{$destination['town']->name}}?
-                                <x-bladewind::button can_submit="true">
+                                <x-bladewind.button can_submit="true" class="w-9/12 m-2 p-2 h-10 bg-slate-800 text-white">
                                     Go
-                                </x-bladewind::button>
+                                </x-bladewind.button>
                             </form>
-                        </x-bladewind::modal>
+                        </x-bladewind.modal>
                     </td>
                 </tr>
             @endforeach

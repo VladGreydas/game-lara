@@ -33,25 +33,6 @@ class LocomotiveFactory extends Factory
         ];
     }
 
-    public function shopLocomotives()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'name' => 'Elrick',
-                'weight' => 400,
-                'type' => 'Steam',
-                'power' => 3750,
-                'armor' => 650,
-                'max_armor' => 650,
-                'fuel' => 25,
-                'max_fuel' => 25,
-                'price' => 1250,
-                'lvl' => 1,
-                'upgrade_cost' => 100
-            ];
-        });
-    }
-
     public function makeMultipleShopLocomotives()
     {
         $locomotives = collect();

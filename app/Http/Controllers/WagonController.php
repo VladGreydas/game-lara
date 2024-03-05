@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Train;
 use App\Models\Wagon;
 use Illuminate\Http\Request;
 
@@ -36,25 +37,30 @@ class WagonController extends Controller
      */
     public function upgrade(Request $request, Wagon $wagon)
     {
-        $status = [];
-        if ($wagon->lvlUp()) {
-            $status['status'] = 'success';
-            $status['message'] = 'Successfully upgraded '.$wagon->name;
-        } else {
-            $status['status'] = 'failed';
-            $status['message'] = 'Not enough money to upgrade';
-        }
-        return redirect(route('town.index'))->with('status', $status);
+        $response = $wagon->lvlUp();
+        return redirect(route('town.index'))->with('status', $response);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function barter(Request $request, Wagon $wagon)
+    public function sell(Request $request, Wagon $wagon)
     {
-        //
+        $wagon = Wagon::find($request['replace-wagon-id']);
+        $new_wagon = (array)json_decode($request['new_wagon']);
+
+
     }
 
+    /**
+     * Create (purchase) the wagon in storage.
+     */
+    public function purchase(Request $request, Train $train)
+    {
+        $new_wagon = (array)json_decode($request['wagon']);
+        $response = $train->addWagon($new_wagon);
+        return redirect(route('town.index'))->with('status', $response);
+    }
 
     /**
      * Remove the specified resource from storage.

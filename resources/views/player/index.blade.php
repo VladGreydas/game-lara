@@ -42,6 +42,7 @@
                                     @elseif($type == 'WeaponWagon')
                                             <?php $specWagon = \App\Models\WeaponWagon::find($wagon->wagonable_id) ?>
                                         <p class="mt-4 text-lg text-gray-900">Weapon slots available:     {{ $specWagon->slots_available }}</p>
+                                        <p class="mt-4 text-lg text-gray-900">Weapons:</p>
                                     @endif
                                 </div>
                                 @if($specWagon->weapons)

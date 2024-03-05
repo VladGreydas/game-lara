@@ -21,22 +21,44 @@ class WeaponWagon extends Model
             'name' => 'Weapon Wagon',
             'weight' => 125,
             'price' => 250,
-            'train_id' => 1,
             'armor' => 500,
             'max_armor' => 500
         ];
     }
 
-    public function addWeapon(bool $first = true, array $weapon_stats = [])
+    public function addFirstWeapon()
     {
         if ($this->slots_available > 0) {
-            if ($first) {
-                $weapon_stats = Weapon::getFirstWeaponData();
-                $this->weapons()->create($weapon_stats);
+            $weapon_stats = Weapon::getFirstWeaponData();
+            $this->weapons()->create($weapon_stats);
+            $this->slots_available--;
+            $this->update(['slots_available' => $this->slots_available]);
+        }
+    }
+
+    public function purchaseWeapon($weapon)
+    {
+        $response = [];
+        if ($this->slots_available > 0) {
+            $player = $this->wagon->train->player;
+            if ($player->money >= $weapon->price) {
+                $this->weapons()->save($weapon);
+                $player->update(['money' => ($player->money - $weapon->price)]);
                 $this->slots_available--;
                 $this->update(['slots_available' => $this->slots_available]);
+
+                $response['status'] = 'success';
+                $response['message'] = 'Successfully bought '.$weapon->name;
+            } else {
+                $response['status'] = 'failed';
+                $response['message'] = 'Not enough money to buy';
             }
+        } else {
+            $response['status'] = 'failed';
+            $response['message'] = 'Not enough available slots';
         }
+
+        return $response;
     }
 
     public function wagon(): MorphOne

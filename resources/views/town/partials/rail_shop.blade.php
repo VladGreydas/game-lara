@@ -19,11 +19,28 @@
         <x-bladewind.tab-content name="shop-locomotive">
             @include('town.partials.shop.locomotive')
         </x-bladewind.tab-content>
-{{--        <x-bladewind.tab-content name="shop-wagon">--}}
-{{--            @include('')--}}
-{{--        </x-bladewind.tab-content>--}}
-{{--        <x-bladewind.tab-content name="shop-weapon">--}}
-{{--            @include('')--}}
-{{--        </x-bladewind.tab-content>--}}
+        <x-bladewind.tab-content name="shop-wagon">
+            <x-bladewind.tab-group name="shop-wagons">
+                <x-slot name="headings">
+                    <x-bladewind.tab-heading
+                        name="cargo-wagons"
+                        label="{{__('Cargo Wagons')}}" />
+                    <x-bladewind.tab-heading
+                        name="weapon-wagons"
+                        label="{{__('Weapon Wagons')}}" />
+                </x-slot>
+                <x-bladewind.tab-body>
+                    <x-bladewind.tab-content name="cargo-wagons">
+                        @include('town.partials.shop.cargo_wagons')
+                    </x-bladewind.tab-content>
+                    <x-bladewind.tab-content name="weapon-wagons">
+                        @include('town.partials.shop.weapon_wagons')
+                    </x-bladewind.tab-content>
+                </x-bladewind.tab-body>
+            </x-bladewind.tab-group>
+        </x-bladewind.tab-content>
+        <x-bladewind.tab-content name="shop-weapon">
+            @include('town.partials.shop.weapons')
+        </x-bladewind.tab-content>
     </x-bladewind.tab-body>
 </x-bladewind.tab-group>

@@ -20,6 +20,11 @@ class Player extends Model
         'current_town_id'
     ];
 
+    public function checkIfEnough($cost)
+    {
+        return $this->money >= $cost;
+    }
+
     public function createTrain(): void
     {
         $this->train()->create();
