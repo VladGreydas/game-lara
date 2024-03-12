@@ -61,6 +61,27 @@ class WeaponWagon extends Model
         return $response;
     }
 
+    public function addSlot()
+    {
+        $this->update(['slots_available' => $this->slots_available + 1]);
+    }
+
+    public function getAllWeapons()
+    {
+        $weapons = collect();
+
+        foreach ($this->weapons as $weapon) {
+            $weapons->push($weapon);
+        }
+
+        return $weapons;
+    }
+
+    public function isExtendable()
+    {
+        return $this->slots_available > 0;
+    }
+
     public function wagon(): MorphOne
     {
         return $this->morphOne(Wagon::class, 'wagonable');

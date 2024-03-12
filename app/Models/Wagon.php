@@ -105,6 +105,11 @@ class Wagon extends Model
         return $response;
     }
 
+    public function getType(): string
+    {
+        return str_replace('App\\Models\\', '', $this->wagonable_type);
+    }
+
     public function train(): BelongsTo
     {
         return $this->belongsTo(Train::class);

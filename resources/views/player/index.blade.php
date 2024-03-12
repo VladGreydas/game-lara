@@ -1,5 +1,6 @@
 <x-app-layout>
     <script src="{{ asset('vendor/bladewind/js/helpers.js') }}"></script>
+    <link href="{{ asset('vendor/bladewind/css/animate.min.css') }}" rel="stylesheet" />
     @if (count($player))
         <?php $player = $player[0];?>
         <?php $train = $player->train;?>
@@ -16,7 +17,7 @@
                     <x-bladewind.tab-heading
                         name="locomotive"
                         label="Locomotive" />
-                    @foreach($train->wagon as $wagon)
+                    @foreach($train->wagons as $wagon)
                         <x-bladewind.tab-heading
                             name="wagon{{$wagon->id}}"
                             label="{{$wagon->name}}" />
@@ -27,7 +28,7 @@
                     <x-bladewind.tab-content name="locomotive">
                         @include('player.partials.locomotive-info')
                     </x-bladewind.tab-content>
-                    @foreach($train->wagon as $wagon)
+                    @foreach($train->wagons as $wagon)
                         <x-bladewind.tab-content name="wagon{{$wagon->id}}">
                                 <?php $type = str_replace('App\\Models\\', '', $wagon->wagonable_type)?>
                             <div class="p-6 ml-5 flex-col">

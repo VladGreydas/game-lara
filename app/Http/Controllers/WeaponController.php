@@ -85,8 +85,27 @@ class WeaponController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Weapon $weapon)
+    public function sell(Weapon $weapon)
     {
-        //
+        $player = $weapon->weapon_wagon->wagon->train->player;
+        $weaponName = $weapon->name;
+
+        $weapon->weapon_wagon->addSlot();
+        $player->addMoney($weapon->price / 2);
+
+        $weapon->delete();
+
+        $response['status'] = 'success';
+        $response['message'] = 'Successfully sold '.$weaponName;
+
+        return redirect(route('town.index'))->with('status', $response);
+    }
+
+    public function rename(Request $request, Weapon $weapon)
+    {
+        $name = (string)$request['new_name'];
+        $weapon->update(['name' => $name]);
+
+        return redirect(route('player.index'));
     }
 }

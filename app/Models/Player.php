@@ -44,6 +44,13 @@ class Player extends Model
         }
     }
 
+    public function addMoney($money)
+    {
+        if ($money > 0) {
+            $this->update(['money' => $this->money + $money]);
+        }
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

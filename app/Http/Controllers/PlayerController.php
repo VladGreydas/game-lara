@@ -87,7 +87,7 @@ class PlayerController extends Controller
     {
         $this->authorize('delete', $player);
 
-        foreach ($player->train->wagon as $wagon) {
+        foreach ($player->train->wagons as $wagon) {
             $wagon->destroyRelatives();
         }
 

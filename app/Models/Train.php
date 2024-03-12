@@ -82,17 +82,41 @@ class Train extends Model
         return $response;
     }
 
-    public function getWeaponWagons()
+    public function getWeaponWagons($not_empty_only = true)
     {
         $weapon_wagons = collect();
-        $wagons = $this->wagon;
+        $wagons = $this->wagons;
         foreach ($wagons as $wagon) {
             $wagonable = $wagon->wagonable;
-            if ($wagonable instanceof WeaponWagon && $wagonable->slots_available > 0) {
-                $weapon_wagons->push($wagonable);
+            if ($wagonable instanceof WeaponWagon) {
+                if ($not_empty_only) {
+                    if ($wagonable->isExtendable()) {
+                        $weapon_wagons->push($wagonable);
+                    }
+                } else {
+                    $weapon_wagons->push($wagonable);
+                }
             }
         }
         return $weapon_wagons;
+    }
+
+    public function getCargoWagons()
+    {
+        $cargo_wagons = collect();
+        $wagons = $this->wagons;
+        foreach ($wagons as $wagon) {
+            $wagonable = $wagon->wagonable;
+            if ($wagonable instanceof CargoWagon) {
+                $cargo_wagons->push($wagonable);
+            }
+        }
+        return $cargo_wagons;
+    }
+
+    public function getAllWeaponWagons()
+    {
+
     }
 
     /*
@@ -108,7 +132,7 @@ class Train extends Model
         return $this->hasOne(Locomotive::class);
     }
 
-    public function wagon(): HasMany
+    public function wagons(): HasMany
     {
         return $this->hasMany(Wagon::class)->with(['wagonable']);
     }

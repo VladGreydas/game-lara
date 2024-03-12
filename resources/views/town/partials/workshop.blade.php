@@ -2,7 +2,7 @@
     {{ __('Choose what do you want to upgrade') }}
 </h2>
 <?php
-    foreach ($player->train->wagon as $wagon) {
+    foreach ($player->train->wagons as $wagon) {
         if($wagon->wagonable instanceof \App\Models\WeaponWagon && $wagon->wagonable->weapons) {
             $isWeapons = true;
             break;
@@ -32,14 +32,14 @@
         <x-bladewind.tab-content name="wagon">
             <x-bladewind.tab-group name="wagons">
                 <x-slot name="headings">
-                    @foreach($player->train->wagon as $wagon)
+                    @foreach($player->train->wagons as $wagon)
                         <x-bladewind.tab-heading
                             name="wagon{{$wagon->id}}"
                             label="{{$wagon->name}}" />
                     @endforeach
                 </x-slot>
                 <x-bladewind.tab-body>
-                    @foreach($player->train->wagon as $wagon)
+                    @foreach($player->train->wagons as $wagon)
                         <x-bladewind.tab-content name="wagon{{$wagon->id}}">
                             @include('town.partials.upgrade.wagons')
                         </x-bladewind.tab-content>

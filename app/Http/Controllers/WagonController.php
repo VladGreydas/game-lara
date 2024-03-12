@@ -42,17 +42,6 @@ class WagonController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     */
-    public function sell(Request $request, Wagon $wagon)
-    {
-        $wagon = Wagon::find($request['replace-wagon-id']);
-        $new_wagon = (array)json_decode($request['new_wagon']);
-
-
-    }
-
-    /**
      * Create (purchase) the wagon in storage.
      */
     public function purchase(Request $request, Train $train)
@@ -65,8 +54,44 @@ class WagonController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Wagon $wagon)
+    public function sell(Request $request, Wagon $wagon)
     {
-        //
+        $player = $wagon->train->player;
+        $wagonName = $wagon->name;
+        $money = 0;
+
+        switch ($wagon->getType()) {
+            case 'CargoWagon': {
+                //TODO: Transfer resources or sell them
+                $money = $wagon->price / 2;
+                break;
+            }
+            case 'WeaponWagon': {
+                $money = $wagon->price / 2;
+                //TODO: Keep weapons as items into Cargo Wagons (if available)
+                foreach ($wagon->wagonable->weapons as $weapon) {
+                    $money += $weapon->price / 2;
+                }
+                break;
+            }
+        }
+
+        $player->addMoney($money);
+
+        $wagon->destroyRelatives();
+        $wagon->delete();
+
+        $response['status'] = 'success';
+        $response['message'] = 'Successfully sold '.$wagonName;
+
+        return redirect(route('town.index'))->with('status', $response);
+    }
+
+    public function rename(Request $request, Wagon $wagon)
+    {
+        $name = (string)$request['new_name'];
+        $wagon->update(['name' => $name]);
+
+        return redirect(route('player.index'));
     }
 }

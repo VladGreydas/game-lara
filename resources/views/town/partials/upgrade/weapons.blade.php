@@ -1,6 +1,6 @@
 <x-bladewind.tab-group name="weapons">
     <x-slot name="headings">
-        @foreach($player->train->wagon as $wagon)
+        @foreach($player->train->wagons as $wagon)
             @if($wagon->wagonable instanceof \App\Models\WeaponWagon && $wagon->wagonable->weapons)
                 @foreach($wagon->wagonable->weapons as $weapon)
                     <x-bladewind.tab-heading
@@ -11,7 +11,7 @@
         @endforeach
     </x-slot>
     <x-bladewind.tab-body>
-        @foreach($player->train->wagon as $wagon)
+        @foreach($player->train->wagons as $wagon)
             @if($wagon->wagonable instanceof \App\Models\WeaponWagon && $wagon->wagonable->weapons)
                 @foreach($wagon->wagonable->weapons as $weapon)
                     <x-bladewind.tab-content name="weapon{{$weapon->id}}">

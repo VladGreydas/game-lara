@@ -5,12 +5,15 @@
             Locomotive
         </h3>
         <div class="p-6 flex-col">
-            <p class="mt-4 text-lg text-gray-900">Name:             {{ $locomotive->name }}</p>
+            <div class="flex">
+                <p class="pt-2 pr-2 text-lg text-gray-900">Name:             {{ $locomotive->name }}</p>
+                <x-rename name="locomotive" id="{{$locomotive->id}}"/>
+            </div>
             <p class="mt-4 text-lg text-gray-900">Level:            {{ $locomotive->lvl }}</p>
             <p class="mt-4 text-lg text-gray-900">Weight:           {{ $locomotive->weight }}t</p>
             <p class="mt-4 text-lg text-gray-900">Type:             {{ $locomotive->type }}</p>
             <p class="mt-4 text-lg text-gray-900">Power:            {{ $locomotive->power }}hp</p>
-            <p class="mt-4 text-lg text-gray-900">Wagon Capacity:   {{ count($train->wagon) }} / {{ $locomotive->getWagonCap() }}</p>
+            <p class="mt-4 text-lg text-gray-900">Wagon Capacity:   {{ count($train->wagons) }} / {{ $locomotive->getWagonCap() }}</p>
             <p class="mt-4 text-lg text-gray-900">Armor:            {{ $locomotive->armor }} / {{ $locomotive->max_armor }}</p>
             <p class="mt-4 text-lg text-gray-900">Fuel:             {{ $locomotive->fuel }} / {{ $locomotive->max_fuel }}</p>
         </div>
