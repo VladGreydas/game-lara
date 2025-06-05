@@ -61,12 +61,12 @@ class WagonController extends Controller
         $money = 0;
 
         switch ($wagon->getType()) {
-            case 'CargoWagon': {
+            case 'cargo': {
                 //TODO: Transfer resources or sell them
                 $money = $wagon->price / 2;
                 break;
             }
-            case 'WeaponWagon': {
+            case 'weapon': {
                 $money = $wagon->price / 2;
                 //TODO: Keep weapons as items into Cargo Wagons (if available)
                 foreach ($wagon->wagonable->weapons as $weapon) {

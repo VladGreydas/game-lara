@@ -10,6 +10,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property $name User name
+ * @property $email User email
+ * @property $password User password
+ * @property $chirps User chirps
+ * @property $player User player
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;

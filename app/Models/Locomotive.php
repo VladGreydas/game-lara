@@ -6,11 +6,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id Locomotive ID
+ * @property int $train_id Locomotive's train ID
+ * @property string $name Locomotive's name
+ * @property int $weight Locomotive's weight
+ * @property string $type Locomotive's type - steam, diesel, electric, etc.
+ * @property int $power Locomotive's power
+ * @property int $armor Locomotive's armor
+ * @property int $max_armor Locomotive's max armor
+ * @property int $fuel Locomotive's fuel
+ * @property int $max_fuel Locomotive's max fuel
+ * @property int $price Locomotive's price
+ * @property int $lvl Current locomotive level
+ * @property int $upgrade_cost Locomotive's upgrade cost
+ * @property Train $train Locomotive's train
+ */
 class Locomotive extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'train_id',
         'name',
         'weight',
         'type',

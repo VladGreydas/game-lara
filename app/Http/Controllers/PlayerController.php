@@ -16,8 +16,14 @@ class PlayerController extends Controller
     public function index(): View
     {
         return view('player.index', [
-            'player' => Player::with('user')->where('user_id', Auth::id())->get()
+            'player' => Player::with([
+                'user',
+                'train.locomotive',
+                'train.wagons.cargo_wagon',
+                'train.wagons.weapon_wagon.weapons'
+            ])->where('user_id', Auth::id())->get()
         ]);
+
     }
 
     /**
@@ -29,21 +35,19 @@ class PlayerController extends Controller
             'money' => 200,
             'max_exp' => 100,
             'lvl' => 1,
-            'current_town_id' => 1
+            'city_id' => 1
         ]);
         $validated = $request->validate([
             'nickname' => 'required|string|max:255',
             'money' => 'int|max:200',
             'max_exp' => 'int',
             'lvl' => 'int|max:1',
-            'current_town_id' => 'int'
+            'city_id' => 'int|max:1'
         ]);
 
         $request->user()->player()->create($validated);
 
         $player = (Player::with('user')->where('user_id', Auth::id())->get())[0];
-
-        $player->createTrain();
 
         return redirect(route('player.index'));
     }
@@ -80,16 +84,31 @@ class PlayerController extends Controller
         return redirect(route('player.index'));
     }
 
+    public function levelUp(Player $player)
+    {
+        // Це можна винести в окремий сервіс
+        if (!$player->canLevelUp()) {
+            return redirect()->back()->withErrors('Not enough experience to level up.');
+        }
+
+        $this->authorize('update', $player);
+
+        $player->lvl += 1;
+        $player->exp -= $player->max_exp;
+        $player->max_exp = ceil($player->max_exp * 1.75);
+        $player->money += 500;
+        $player->save();
+
+        return redirect()->back()->with('success', 'Level up successful!');
+    }
+
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Player $player): RedirectResponse
     {
         $this->authorize('delete', $player);
-
-        foreach ($player->train->wagons as $wagon) {
-            $wagon->destroyRelatives();
-        }
 
         $player->delete();
 

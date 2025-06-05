@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Train;
 use App\Models\Weapon;
 use App\Models\WeaponWagon;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 
 class WeaponController extends Controller
 {
@@ -101,7 +104,14 @@ class WeaponController extends Controller
         return redirect(route('town.index'))->with('status', $response);
     }
 
-    public function rename(Request $request, Weapon $weapon)
+    /**
+     * Weapon rename.
+     *
+     * @param Request $request
+     * @param Weapon $weapon
+     * @return Application|Redirector|RedirectResponse
+     */
+    public function rename(Request $request, Weapon $weapon): Application|Redirector|RedirectResponse
     {
         $name = (string)$request['new_name'];
         $weapon->update(['name' => $name]);

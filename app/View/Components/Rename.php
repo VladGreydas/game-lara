@@ -12,11 +12,12 @@ class Rename extends Component
      * Create a new component instance.
      */
 
-    public $name;
+    public function __construct(
+        public $type = 'wagon',
+        public $id,
+        public $name
+    ) {
 
-    public function __construct($name = 'wagon', public $id)
-    {
-        $this->name = $name;
     }
 
     /**

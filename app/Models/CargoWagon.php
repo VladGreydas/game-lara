@@ -2,34 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CargoWagon extends Model
 {
-    use HasFactory;
+    protected $fillable = ['wagon_id', 'capacity'];
 
-    const CARGO_FIRST_CAPACITY = 10;
-
-    protected $fillable = [
-        'name',
-        'capacity'
-    ];
-
-    public static function getFirstCargoWagonData(): array
+    public function wagon(): BelongsTo
     {
-        return [
-            'name' => 'Cargo Wagon',
-            'weight' => 125,
-            'price' => 250,
-            'armor' => 500,
-            'max_armor' => 500
-        ];
-    }
-
-    public function wagon(): MorphOne
-    {
-        return $this->morphOne(Wagon::class, 'wagonable');
+        return $this->belongsTo(Wagon::class);
     }
 }
