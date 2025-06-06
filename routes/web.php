@@ -73,12 +73,14 @@ Route::prefix('player')->group(function () {
 
 Route::controller(LocomotiveController::class)->prefix('locomotive')->group(function () {
     Route::post('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
+    Route::post('/{locomotive}/repair', 'repair')->name('locomotive.repair');
 //    Route::patch('/{locomotive}/purchase', 'purchase')->name('locomotive.purchase');
     Route::patch('{locomotive}/rename', 'rename')->name('locomotive.rename');
 });
 
 Route::controller(WagonController::class)->prefix('wagon')->group(function () {
     Route::post('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
+    Route::post('/{wagon}/repair', 'repair')->name('wagon.repair');
 //    Route::patch('/{train}/wagon/purchase', 'purchase')->name('wagon.purchase');
 //    Route::delete('{wagon}/sell', 'sell')->name('wagon.sell');
     Route::patch('{wagon}/rename', 'rename')->name('wagon.rename');

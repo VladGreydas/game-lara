@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Repairable;
 use App\Traits\Upgradeable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Locomotive extends Model
 {
-    use HasFactory, Upgradeable;
+    use HasFactory, Repairable, Upgradeable;
 
     protected $fillable = [
         'train_id',
@@ -45,6 +46,16 @@ class Locomotive extends Model
     public function getWagonCap(): int
     {
         return floor($this->power / 1000);
+    }
+
+    public function repair(): bool
+    {
+        return $this->repairWith(
+            fn ($locomotive) => $locomotive->train->player,
+            'armor',
+            'max_armor',
+            3
+        );
     }
 
     public function lvlUp(): bool

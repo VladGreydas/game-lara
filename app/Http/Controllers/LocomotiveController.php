@@ -57,4 +57,19 @@ class LocomotiveController extends Controller
 
         return redirect(route('player.index'));
     }
+
+    /**
+     * Repair the locomotive.
+     *
+     * @param Locomotive $locomotive
+     * @return RedirectResponse
+     */
+    public function repair(Locomotive $locomotive)
+    {
+        if (! $locomotive->repair()) {
+            return back()->with('error', 'Cannot repair Locomotive (not damaged or insufficient funds)');
+        }
+
+        return back()->with('success', 'Locomotive repaired!');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Repairable;
 use App\Traits\Upgradeable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Weapon extends Model
 {
-    use HasFactory, Upgradeable;
+    use HasFactory, Repairable, Upgradeable;
 
     protected $fillable = [
         'weapon_wagon_id',

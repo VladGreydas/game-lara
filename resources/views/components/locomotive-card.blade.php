@@ -28,6 +28,12 @@
     <p><strong>Weight:</strong> {{ $locomotive->weight }}<span class="text-green-500">  {{ $add_weight }}</span></p>
     <p><strong>Power:</strong> {{ $locomotive->power }}<span class="text-green-500">  {{ $add_power }}</span></p>
     <p><strong>Armor:</strong> {{ $locomotive->armor }} / {{ $locomotive->max_armor }}<span class="text-green-500">  {{ $add_armor }}</span></p>
+    @if($upgrade && $locomotive->armor < $locomotive->max_armor)
+        <form action="{{ route('locomotive.repair', $locomotive) }}" method="POST">
+            @csrf
+            <x-primary-button>Repair</x-primary-button>
+        </form>
+    @endif
     <p><strong>Fuel:</strong> {{ $locomotive->fuel }} / {{ $locomotive->max_fuel }}<span class="text-green-500">  {{ $add_fuel }}</span></p>
     <p><strong>Level:</strong> {{ $locomotive->lvl }}<span class="text-green-500">  {{ $new_lvl }}</span></p>
     @if($upgrade)

@@ -105,4 +105,20 @@ class WagonController extends Controller
 
         return redirect(route('player.index'));
     }
+
+    /**
+     * Repair the wagon.
+     *
+     * @param Wagon $wagon
+     * @return RedirectResponse
+     */
+    public function repair(Wagon $wagon)
+    {
+        if (! $wagon->repair()) {
+            return back()->with('error', 'Cannot repair Wagon');
+        }
+
+        return back()->with('success', 'Wagon repaired!');
+    }
+
 }

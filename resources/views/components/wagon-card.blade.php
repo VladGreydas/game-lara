@@ -7,6 +7,12 @@
     </div>
     <ul class="list-disc ml-6">
         <li>Armor: {{ $wagon->armor }} / {{ $wagon->max_armor }}</li>
+        @if($upgrade && $wagon->armor < $wagon->max_armor)
+            <form action="{{ route('wagon.repair', $wagon) }}" method="POST">
+                @csrf
+                <x-primary-button>Repair</x-primary-button>
+            </form>
+        @endif
         <li>Level: {{ $wagon->lvl }}</li>
         <li>Weight: {{ $wagon->weight }}</li>
         @if($wagon->cargo_wagon)

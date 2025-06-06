@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Repairable;
 use App\Traits\Upgradeable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Wagon extends Model
 {
-    use HasFactory, Upgradeable;
+    use HasFactory, Repairable, Upgradeable;
+
     protected $fillable = [
         'train_id',
         'name',
@@ -36,6 +38,21 @@ class Wagon extends Model
         'price',
         'upgrade_cost',
     ];
+
+    public function repair(): bool
+    {
+        $cost = match ($this->type) {
+            'cargo' => 2,
+            'weapon' => 5
+        };
+
+        return $this->repairWith(
+            fn ($wagon) => $wagon->train->player,
+            'armor',
+            'max_armor',
+            $cost
+        );
+    }
 
     public function isCargo(): bool
     {

@@ -57,7 +57,7 @@
             <div class="mt-6 p-4 border rounded bg-gray-50">
                 <h2 class="font-bold text-xl mb-2">Workshop</h2>
                 <p>Here you can upgrade your train, wagons, and weapons.</p>
-                <a href="{{ route('workshop.index') }}" class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded">Go to Workshop</a>
+                <a href="{{ route('workshop.index') }}" class="inline-block mt-2 px-4 py-2 bg-gray-800 text-white rounded font-semibold">Go to Workshop</a>
             </div>
         @endif
 
