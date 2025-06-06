@@ -62,7 +62,9 @@
                 @endif
 
                 @if($train && $train->wagons->count())
-                    <x-wagon-list :wagons="$player->train->wagons" />
+                    @foreach($train->wagons as $wagon)
+                        <x-wagon-card :wagon="$wagon" />
+                    @endforeach
                 @endif
             </div>
         </div>

@@ -15,15 +15,14 @@ class LocomotiveController extends Controller
      */
     public function upgrade(Request $request, Locomotive $locomotive): Application|Redirector|RedirectResponse
     {
-        $status = [];
-        if ($locomotive->lvlUp()) {
-            $status['status'] = 'success';
-            $status['message'] = 'Successfully upgraded '.$locomotive->name;
-        } else {
-            $status['status'] = 'failed';
-            $status['message'] = 'Not enough money to upgrade';
+        try {
+            if (!$locomotive->lvlUp()) {
+                return back()->with('error', 'Not enough money or max level reached.');
+            }
+            return back()->with('success', 'Locomotive upgraded successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Unauthorized or error: ' . $e->getMessage());
         }
-        return redirect(route('town.index'))->with('status', $status);
     }
 
     /**

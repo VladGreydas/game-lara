@@ -10,10 +10,14 @@ use Illuminate\Contracts\View\View;
 class LocomotiveCard extends Component
 {
     public Locomotive $locomotive;
+    public bool $rename;
+    public bool $upgrade;
 
-    public function __construct(Locomotive $locomotive)
+    public function __construct(Locomotive $locomotive, $rename = true, $upgrade = false)
     {
         $this->locomotive = $locomotive;
+        $this->rename = $rename;
+        $this->upgrade = $upgrade;
     }
 
     public function render(): View|Closure|string

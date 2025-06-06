@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Upgradeable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Locomotive extends Model
 {
-    use HasFactory;
+    use HasFactory, Upgradeable;
 
     protected $fillable = [
         'train_id',
@@ -46,28 +47,20 @@ class Locomotive extends Model
         return floor($this->power / 1000);
     }
 
-    public function lvlUp()
+    public function lvlUp(): bool
     {
-        $player = $this->train->player;
-
-        if($player->money >= $this->upgrade_cost && !$this->isMaxed()) {
-            $newLvl = $this->lvl + 1;
-            $player->update(['money' => $player->money - $this->upgrade_cost]);
-            $this->update([
-                'lvl' => $newLvl,
-                'weight' => $this->weight + 50 * $newLvl,
-                'power' => $this->power + 500 * $newLvl,
-                'armor' => $this->max_armor + 100 * $newLvl,
-                'max_armor' => $this->max_armor + 100 * $newLvl,
-                'fuel' => $this->max_fuel + 5 * $newLvl,
-                'max_fuel' => $this->max_fuel + 5 * $newLvl,
-                'price' => $this->price + $this->upgrade_cost,
-                'upgrade_cost' => $this->upgrade_cost + 100 * $newLvl
-            ]);
-            return true;
-        } else {
-            return false;
-        }
+        return $this->lvlUpWith(
+            fn($locomotive) => $locomotive->train->player,
+            [
+                'weight' => 50,
+                'power' => 500,
+                'armor' => 100,
+                'max_armor' => 100,
+                'fuel' => 5,
+                'max_fuel' => 5,
+            ],
+            10
+        );
     }
 
     public function purchase(Locomotive $new_locomotive)

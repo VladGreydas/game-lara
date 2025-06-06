@@ -55,17 +55,17 @@ class WeaponController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function upgrade(Request $request, Weapon $weapon)
+    public function upgrade(Weapon $weapon)
     {
-        $status = [];
-        if ($weapon->lvlUp()) {
-            $status['status'] = 'success';
-            $status['message'] = 'Successfully upgraded '.$weapon->name;
-        } else {
-            $status['status'] = 'failed';
-            $status['message'] = 'Not enough money to upgrade';
+        try {
+            if (!$weapon->lvlUp()) {
+                return back()->with('error', 'Not enough money or max level reached.');
+            }
+
+            return back()->with('success', 'Weapon upgraded!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Unauthorized: ' . $e->getMessage());
         }
-        return redirect(route('town.index'))->with('status', $status);
     }
 
     /**

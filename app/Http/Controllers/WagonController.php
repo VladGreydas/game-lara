@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CargoWagon;
 use App\Models\Train;
 use App\Models\Wagon;
+use App\Models\WeaponWagon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 
 class WagonController extends Controller
 {
@@ -35,10 +39,17 @@ class WagonController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function upgrade(Request $request, Wagon $wagon)
+    public function upgrade(Wagon $wagon)
     {
-        $response = $wagon->lvlUp();
-        return redirect(route('town.index'))->with('status', $response);
+        try {
+            if (!$wagon->lvlUp()) {
+                return back()->with('error', 'Not enough money or max level reached.');
+            }
+
+            return back()->with('success', 'Wagon upgraded!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Unauthorized: ' . $e->getMessage());
+        }
     }
 
     /**

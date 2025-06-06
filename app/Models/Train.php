@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property $player_id Player ID
+ * @property $player Player
  * @property $locomotive Locomotive
  * @property $wagons Wagons
  */

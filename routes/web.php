@@ -72,20 +72,20 @@ Route::prefix('player')->group(function () {
 });
 
 Route::controller(LocomotiveController::class)->prefix('locomotive')->group(function () {
-    Route::patch('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
-    Route::patch('/{locomotive}/purchase', 'purchase')->name('locomotive.purchase');
+    Route::post('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
+//    Route::patch('/{locomotive}/purchase', 'purchase')->name('locomotive.purchase');
     Route::patch('{locomotive}/rename', 'rename')->name('locomotive.rename');
 });
 
 Route::controller(WagonController::class)->prefix('wagon')->group(function () {
-//    Route::patch('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
+    Route::post('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
 //    Route::patch('/{train}/wagon/purchase', 'purchase')->name('wagon.purchase');
 //    Route::delete('{wagon}/sell', 'sell')->name('wagon.sell');
     Route::patch('{wagon}/rename', 'rename')->name('wagon.rename');
 });
 
 Route::controller(WeaponController::class)->prefix('weapon')->group(function () {
-//    Route::patch('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
+    Route::post('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
 //    Route::patch('/purchase', 'purchase')->name('weapon.purchase');
 //    Route::delete('{weapon}/sell', 'sell')->name('weapon.sell');
     Route::patch('{weapon}/rename', 'rename')->name('weapon.rename');
@@ -99,10 +99,4 @@ Route::controller(CityController::class)->group(function () {
 
 Route::controller(WorkshopController::class)->prefix('workshop')->group(function () {
     Route::get('/', 'index')->name('workshop.index');
-
-    Route::post('/repair-locomotive', 'repairLocomotive')->name('workshop.repair.locomotive');
-
-    Route::post('/upgrade-wagon/{wagon}', 'upgradeWagon')->name('workshop.upgrade.wagon');
-
-    Route::post('/upgrade-weapon/{weapon}', 'upgradeWeapon')->name('workshop.upgrade.weapon');
 });

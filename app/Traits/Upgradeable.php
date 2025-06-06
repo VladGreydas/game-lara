@@ -23,6 +23,10 @@ trait Upgradeable
     {
         $player = $playerResolver($this);
 
+        if (auth()->id() !== optional($player->user)->id) {
+            throw new \Exception('Unauthorized');
+        }
+
         if ($player->money < $this->upgrade_cost || $this->lvl >= $maxLvl) {
             return false;
         }
