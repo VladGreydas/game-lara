@@ -23,7 +23,7 @@ class CityController extends Controller
         $player = Auth::user()->player;
 
         // Перевірка пального, валідності маршруту тощо
-        if ($route->from_city_id !== $player->city_id) {
+        if (!$route->isAvailableFrom($player->city_id)) {
             abort(403, 'Invalid route');
         }
 
@@ -39,8 +39,9 @@ class CityController extends Controller
 
         $player->city_id = $route->to_city_id;
         $player->save();
+        $city = $player->city;
 
-        return redirect()->route('city.show')->with('success', 'You have arrived at ' . $route->toCity->name);
+        return redirect()->route('city.show', $city)->with('success', 'You have arrived at ' . $route->toCity->name);
     }
 
     public function refuel(Request $request)

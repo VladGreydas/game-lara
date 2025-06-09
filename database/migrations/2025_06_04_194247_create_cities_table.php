@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug')->unique();
             $table->boolean('has_workshop')->default(false);
+            $table->boolean('has_shop')->default(false);
             $table->timestamps();
         });
     }

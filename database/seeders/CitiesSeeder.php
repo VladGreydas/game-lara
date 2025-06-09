@@ -31,9 +31,11 @@ class CitiesSeeder extends Seeder
                 'id' => $id,
                 'name' => $name,
                 'has_workshop' => rand(0, 1) === 1,
+                'has_shop' => rand(0, 1) === 1,
             ]);
         }
 
         City::whereIn('name', ['Ironforge', 'Stormhelm', 'Sunspire'])->update(['has_workshop' => true]);
+        City::whereIn('name', ['Silverbrook', 'Sunspire'])->update(['has_shop' => true]);
     }
 }

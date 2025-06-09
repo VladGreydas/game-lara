@@ -21,9 +21,16 @@
                     <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                         {{ __('Player') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('city.show')" :active="request()->routeIs('city.show')">
-                        {{ __('City') }}
-                    </x-nav-link>
+                    @php
+                        $player = auth()->user()?->player;
+                    @endphp
+
+                    @if ($player && $player->city)
+                        <x-nav-link :href="route('city.show', $player->city)" :active="request()->routeIs('city.show')">
+                            {{ __('City') }}
+                        </x-nav-link>
+                    @endif
+
                 </div>
             </div>
 
@@ -85,9 +92,16 @@
             <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                 {{ __('Player') }}
             </x-nav-link>
-            <x-nav-link :href="route('city.show')" :active="request()->routeIs('city.show')">
-                {{ __('City') }}
-            </x-nav-link>
+            @php
+                $player = auth()->user()?->player;
+            @endphp
+
+            @if ($player && $player->city)
+                <x-nav-link :href="route('city.show', $player->city)" :active="request()->routeIs('city.show')">
+                    {{ __('City') }}
+                </x-nav-link>
+            @endif
+
         </div>
 
         <!-- Responsive Settings Options -->

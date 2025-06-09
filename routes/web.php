@@ -6,6 +6,7 @@ use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChirpController;
 //use App\Http\Controllers\TownController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WagonController;
 use App\Http\Controllers\WeaponController;
 use App\Http\Controllers\WorkshopController;
@@ -94,11 +95,16 @@ Route::controller(WeaponController::class)->prefix('weapon')->group(function () 
 });
 
 Route::controller(CityController::class)->group(function () {
-    Route::get('/city', 'show')->name('city.show');
+    Route::get('/city/{city}', 'show')->name('city.show');
     Route::post('/travel/{route}', 'travel')->name('travel');
     Route::post('/city/refuel', 'refuel')->name('city.refuel');
 });
 
 Route::controller(WorkshopController::class)->prefix('workshop')->group(function () {
-    Route::get('/', 'index')->name('workshop.index');
+    Route::get('/city/', 'index')->name('workshop.index');
+});
+
+Route::controller(ShopController::class)->prefix('shop')->group(function () {
+    Route::get('/city/', 'index')->name('shop.index');
+    Route::post('/locomotive/{uuid}/buy', 'buyLocomotive')->name('shop.locomotive.buy');
 });
