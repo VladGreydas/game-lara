@@ -20,6 +20,18 @@ class Train extends Model
         'player_id'
     ];
 
+    public function checkAvailableWeaponWagons()
+    {
+        $wagons = $this->wagons;
+        $resWagons = [];
+        foreach ($wagons as $wagon) {
+            if ($wagon->type === 'weapon' && $wagon->weapon_wagon->slots_available > 0) {
+                $resWagons[] = $wagon->weapon_wagon;
+            }
+        }
+        return $resWagons;
+    }
+
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);

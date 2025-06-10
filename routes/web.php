@@ -107,4 +107,6 @@ Route::controller(WorkshopController::class)->prefix('workshop')->group(function
 Route::controller(ShopController::class)->prefix('shop')->group(function () {
     Route::get('/city/', 'index')->name('shop.index');
     Route::post('/locomotive/{uuid}/buy', 'buyLocomotive')->name('shop.locomotive.buy');
+    Route::post('/wagon/{uuid}/buy', 'buyWagon')->name('shop.wagon.buy');
+    Route::post('/weapon/{shop_uuid}/buy', 'buyWeapon')->name('shop.weapon.buy');
 });
