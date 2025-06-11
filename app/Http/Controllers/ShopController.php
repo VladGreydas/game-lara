@@ -10,14 +10,23 @@ use App\Models\Player;
 use App\Models\Wagon;
 use App\Models\Weapon;
 use App\Models\WeaponWagon;
+use App\Services\ShopSellService;
+use App\Services\ShopSetupService;
 use Database\Factories\CargoWagonFactory;
 use Database\Factories\WeaponWagonFactory;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ShopController extends Controller
 {
+    // Інжектуємо сервіс через конструктор (рекомендований спосіб)
+    public function __construct(protected ShopSetupService $shopSetupService, protected ShopSellService $shopSellService)
+    {
+
+    }
 
     public function index(Request $request)
     {
@@ -25,34 +34,39 @@ class ShopController extends Controller
         $player = $request->user()->player;
         /** @var City $city */
         $city = $player->city;
-        $factory = Locomotive::factory();
 
-        $locomotives = $factory->makeMultipleShopLocomotives();
+        if (!$this->shopSetupService->hasSessionInventory()) {
+            $this->shopSetupService->generateInventory();
+        }
 
-        // Присвоюємо UUID кожному локомотиву та зберігаємо в сесію
-        $locomotives->each(function ($locomotive) {
-            $uuid = (string) Str::uuid();
-            $locomotive->shop_uuid = $uuid;
-            session()->put("shop.locomotives.$uuid", $locomotive);
-        });
+        $shopInventory = $this->shopSetupService->getInventory();
 
-        $wagons = WagonShopFactory::makeShopWagons();
-        $wagons->each(function ($wagon) {
-            $uuid = (string) Str::uuid();
-            $wagon->shop_uuid = $uuid;
-            session()->put("shop.wagons.$uuid", $wagon);
-        });
+        // Тепер у $shopInventory будуть такі ключі: 'locomotives', 'wagons', 'weapons'
+        $locomotives = $shopInventory['locomotives'];
+        $wagons = $shopInventory['wagons'];
+        $weapons = $shopInventory['weapons'];
 
-        $weapons = Weapon::factory()->generateShopWeapons();
-        $weapons->each(function ($weapon) {
-            $uuid = $weapon->shop_uuid;
-            session()->put("shop.weapons.$uuid",$weapon);
-        });
+        $weaponWagonsForMounting = $player->train->checkAvailableWeaponWagons();
+        $weaponWagonsForMounting = collect($weaponWagonsForMounting);
 
-        $weaponWagons = $player->train->checkAvailableWeaponWagons();
-        $weaponWagons = collect($weaponWagons);
+        $playerWagonsForSale = \App\Models\Wagon::whereHas('train', function ($query) use ($player) {
+            $query->where('player_id', $player->id);
+        })
+            ->get();
+        $playerWeaponsForSale = \App\Models\Weapon::whereHas('weapon_wagon.wagon.train', function ($query) use ($player) {
+            $query->where('player_id', $player->id);
+        })
+            ->get();
 
-        return view('city.shop.index', compact('city', 'locomotives', 'wagons', 'weaponWagons', 'weapons'));
+        return view('city.shop.index', compact(
+            'city',
+            'locomotives',
+            'wagons',
+            'weapons',
+            'weaponWagonsForMounting',
+            'playerWagonsForSale',     // Передаємо вагони для продажу
+            'playerWeaponsForSale'
+        ));
     }
 
     public function buyLocomotive(string $uuid)
@@ -99,6 +113,7 @@ class ShopController extends Controller
         $player = Auth::user()->player;
         $train = $player->train;
 
+        /** @var Wagon $wagon */
         $wagon = session("shop.wagons.$uuid");
 
         if (!$wagon) {
@@ -143,6 +158,36 @@ class ShopController extends Controller
         $player->save();
 
         return back()->with('success', 'Wagon purchased successfully.');
+    }
+
+    public function sellWagon(Request $request, Wagon $wagon) // <-- Тепер приймає об'єкт Wagon
+    {
+        /** @var Player $player */
+        $player = Auth::user()->player;
+
+        // Перевірка дозволу: чи належить цей вагон гравцеві
+        // Laravel автоматично видасть 404, якщо вагон не знайдено за ID,
+        // але ми повинні перевірити, чи він належить поточному гравцеві.
+        if ($wagon->train->player->id !== $player->id) {
+            throw new AuthorizationException('You do not own this wagon.');
+        }
+
+        try {
+            $destinationWeaponWagonId = $request->input('destination_weapon_wagon_id');
+
+            // Передаємо об'єкт Wagon напряму в сервіс
+            $this->shopSellService->sellWagon($player, $wagon, $destinationWeaponWagonId);
+
+            return back()->with('success', 'Wagon sold successfully!');
+
+        } catch (ValidationException $e) {
+            return back()->with('error', 'Validation error: ' . $e->getMessage())->withErrors($e->errors());
+        } catch (AuthorizationException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            \Log::error("Sell wagon error: " . $e->getMessage(), ['player_id' => $player->id, 'wagon_id' => $wagon->id]);
+            return back()->with('error', 'An unexpected error occurred during wagon sale. ' . $e->getMessage());
+        }
     }
 
     public function buyWeapon(Request $request, string $shop_uuid)
@@ -190,5 +235,32 @@ class ShopController extends Controller
         $weaponWagon->decrement('slots_available');
 
         return back()->with('success', "Weapon {$weapon->name} successfully mounted on wagon #{$weaponWagon->id}.");
+    }
+
+    public function sellWeapon(Request $request, Weapon $weapon) // <-- Тепер приймає об'єкт Weapon
+    {
+        /** @var Player $player */
+        $player = Auth::user()->player;
+
+        // Перевірка дозволу: чи належить ця зброя гравцеві
+        if ($weapon->weapon_wagon->wagon->train->player->id !== $player->id) {
+            throw new AuthorizationException('You do not own this weapon.');
+        }
+
+        try {
+            // Валідації тут немає, оскільки ID зброї приходить через URL
+            // і інших параметрів поки не передбачається.
+
+            // Передаємо об'єкт Weapon напряму в сервіс
+            $this->shopSellService->sellWeapon($player, $weapon);
+
+            return back()->with('success', 'Weapon sold successfully!');
+
+        } catch (AuthorizationException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            \Log::error("Sell weapon error: " . $e->getMessage(), ['player_id' => $player->id, 'weapon_id' => $weapon->id]);
+            return back()->with('error', 'An unexpected error occurred during weapon sale. ' . $e->getMessage());
+        }
     }
 }
