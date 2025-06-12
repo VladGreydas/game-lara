@@ -106,4 +106,6 @@ Route::controller(ShopController::class)->prefix('shop')->group(function () {
     Route::delete('/wagon/{wagon}/sell', 'sellWagon')->name('shop.wagon.sell');
     Route::post('/weapon/{shop_uuid}/buy', 'buyWeapon')->name('shop.weapon.buy');
     Route::delete('/weapon/{weapon}/sell', 'sellWeapon')->name('shop.weapon.sell');
+    Route::post('/buy/resource/{resource:slug}', 'buyResource')->name('shop.resource.buy');
+    Route::delete('/sell/resource/{resource:slug}', 'sellResource')->name('shop.resource.sell');
 });

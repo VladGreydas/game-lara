@@ -9,16 +9,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * @property string $nickname Player's nickname
- * @property int $id Player ID
- * @property int $money Amount of money a player has
- * @property int $exp Current experience points
- * @property int $max_exp Maximum experience points needed for level up
- * @property int $lvl Current player level
- * @property Train $train Player's train
- * @property User $user Player's User
- * @property City $city Player's current city
- * @property int $city_id Player's current city ID
+ * @property int $id
+ * @property int $user_id
+ * @property int $city_id
+ * @property int|null $current_location_id
+ * @property int $money
+ * @property string $name
+ * @property int $lvl
+ * @property int $experience
+ * @property int $hp
+ * @property int $max_hp
+ * @property-read User $user
+ * @property-read City $city
+ * @property-read Location|null $currentLocation
+ * @property-read Train $train
  */
 class Player extends Model
 {
@@ -35,7 +39,8 @@ class Player extends Model
         'exp',
         'max_exp',
         'lvl',
-        'city_id'
+        'city_id',
+        'current_location_id'
     ];
 
     protected static function booted(): void
@@ -62,7 +67,6 @@ class Player extends Model
         return $this->exp >= $this->max_exp;
     }
 
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -76,5 +80,10 @@ class Player extends Model
     public function city() : BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function currentLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'current_location_id');
     }
 }

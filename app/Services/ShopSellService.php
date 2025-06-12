@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+    use App\Models\CargoWagon;
+    use App\Models\CityResource;
     use App\Models\Player;
     use App\Models\Wagon;
     use App\Models\Weapon;
@@ -75,9 +77,35 @@ class ShopSellService
                     }
                 }
             } elseif ($wagon->type === 'cargo') {
-                // TODO: Додати логіку для ресурсів CargoWagon.
-                // Наприклад, продати всі ресурси або перемістити їх у інвентар гравця.
-                // Зараз: просто вагон, без особливих ресурсів
+                /** @var CargoWagon|null $cargoWagonData */
+                $cargoWagonData = $wagon->cargo_wagon; // Зв'язок має бути завантажений
+
+                // Перевіряємо, чи існує пов'язаний CargoWagon і чи на ньому є ресурси
+                if ($cargoWagonData && $cargoWagonData->resources->isNotEmpty()) {
+                    foreach ($cargoWagonData->resources as $cargoResource) {
+                        // Знаходимо відповідний CityResource, щоб отримати ціну продажу
+                        // Потрібно перевірити, чи місто гравця купує цей ресурс
+                        $cityResource = CityResource::where('city_id', $player->city->id)
+                            ->where('resource_id', $cargoResource->resource_id)
+                            ->first();
+
+                        if ($cityResource) {
+                            // Якщо ресурс можна продати в цьому місті, додаємо гроші
+                            $sellPricePerUnit = $cityResource->getCurrentSellPrice();
+                            $moneyEarned += $sellPricePerUnit * $cargoResource->quantity;
+
+                            // Збільшуємо кількість ресурсів у місті (зворотна операція до купівлі)
+                            $cityResource->increment('quantity', $cargoResource->quantity);
+                            // price_multiplier оновиться автоматично
+                        } else {
+                            // Якщо ресурс не можна продати в цьому місті, він просто "зникає"
+                            // Можна додати лог або повідомлення, якщо це неочікувана поведінка
+                            \Log::info("Resource {$cargoResource->resource->name} (ID: {$cargoResource->resource_id}) from cargo wagon {$wagon->id} was lost as it cannot be sold in city {$player->city->name}.");
+                        }
+                        // Видаляємо запис ресурсу з вагона, незалежно від того, чи він був проданий
+                        $cargoResource->delete();
+                    }
+                }
             } else {
                 // Якщо тип вагона невідомий або не підтримується для продажу
                 throw new InvalidArgumentException('Attempted to sell unsupported wagon type: ' . $wagon->type);

@@ -50,4 +50,9 @@ class Resource extends Model
     {
         return $this->hasMany(CityResource::class);
     }
+
+    public function locations(): HasMany
+    {
+        return $this->hasMany(LocationResource::class);
+    }
 }

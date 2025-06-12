@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Factories\WagonShopFactory;
 use App\Models\CargoWagon;
+use App\Models\CargoWagonResource;
 use App\Models\City;
+use App\Models\CityResource;
 use App\Models\Locomotive;
 use App\Models\Player;
+use App\Models\Resource;
 use App\Models\Wagon;
 use App\Models\Weapon;
 use App\Models\WeaponWagon;
@@ -16,7 +19,9 @@ use Database\Factories\CargoWagonFactory;
 use Database\Factories\WeaponWagonFactory;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -58,14 +63,65 @@ class ShopController extends Controller
         })
             ->get();
 
+        // --- ДОДАНО: ЛОГІКА ДЛЯ РЕСУРСІВ ---
+
+        // 1. Отримуємо ресурси, які можна купити в поточному місті
+        // Жадібне завантаження resource, щоб уникнути N+1 проблеми у Blade
+        $cityResources = $city->resources()->with('resource')->get();
+
+        // 2. Розраховуємо загальну вантажну ємність гравця та доступний простір
+        $totalCargoCapacity = 0;
+        $currentCargoCapacity = 0;
+        $playerCargoWagonResources = new Collection(); // Колекція для ресурсів гравця, які можна продати
+
+        if ($player->train) {
+            foreach ($player->train->wagons as $wagon) {
+                if ($wagon->isCargo() && $wagon->cargo_wagon) {
+                    // Завантажуємо ресурси для кожного вантажного вагона
+                    $wagon->cargo_wagon->load('resources.resource'); // Завантажуємо ресурси та їх визначення
+                    $totalCargoCapacity += $wagon->cargo_wagon->capacity;
+                    $currentCargoCapacity += $wagon->cargo_wagon->getCurrentCapacity();
+
+                    // Додаємо ресурси цього вантажного вагона до загальної колекції ресурсів гравця
+                    $playerCargoWagonResources = $playerCargoWagonResources->concat($wagon->cargo_wagon->resources);
+                }
+            }
+        }
+        $availableCargoSpace = $totalCargoCapacity - $currentCargoCapacity;
+
+        // Групуємо ресурси гравця за resource_id для відображення загальної кількості одного типу ресурсу
+        // Це потрібно для секції "Sell Resources"
+        $groupedPlayerCargoWagonResources = $playerCargoWagonResources->groupBy('resource_id')->map(function ($items) {
+            $firstItem = $items->first();
+            // Повертаємо об'єкт, схожий на CargoWagonResource, але з агрегованою кількістю
+            return (object)[
+                'resource_id' => $firstItem->resource_id,
+                'resource' => $firstItem->resource, // Залишаємо об'єкт Resource
+                'quantity' => $items->sum('quantity'), // Сумуємо кількості
+                // Можливо, тут знадобиться cargo_wagon_resource_id для форми продажу.
+                // Наразі залишаємо його без конкретного ID, оскільки продаватимемо "від загальної кількості"
+                // і потім розподілятимемо продаж між кількома CargoWagonResource, якщо необхідно.
+                // Для форми продажу краще передавати resource_id і вже в контролері шукати CargoWagonResource
+            ];
+        });
+
+        // --- КІНЕЦЬ: ЛОГІКА ДЛЯ РЕСУРСІВ ---
+
+
         return view('city.shop.index', compact(
+            'player',
             'city',
             'locomotives',
             'wagons',
             'weapons',
             'weaponWagonsForMounting',
-            'playerWagonsForSale',     // Передаємо вагони для продажу
-            'playerWeaponsForSale'
+            'playerWagonsForSale',
+            'playerWeaponsForSale',
+            'cityResources',                 // ДОДАНО: Ресурси для купівлі
+            'playerCargoWagonResources',     // ДОДАНО: Ресурси гравця для продажу (НЕ згрупована колекція CargoWagonResource)
+            'groupedPlayerCargoWagonResources', // ДОДАНО: Згруповані ресурси гравця для відображення
+            'availableCargoSpace',           // ДОДАНО: Доступний вантажний простір
+            'totalCargoCapacity'             // ДОДАНО: Загальна вантажна ємність
         ));
     }
 
@@ -262,5 +318,197 @@ class ShopController extends Controller
             \Log::error("Sell weapon error: " . $e->getMessage(), ['player_id' => $player->id, 'weapon_id' => $weapon->id]);
             return back()->with('error', 'An unexpected error occurred during weapon sale. ' . $e->getMessage());
         }
+    }
+
+    // --- НОВИЙ МЕТОД: buyResource ---
+    public function buyResource(Request $request, Resource $resource)
+    {
+        /** @var Player $player */
+        $player = Auth::user()->player;
+        $city = $player->city;
+
+        // 1. Валідація вхідних даних
+        $validated = $request->validate([
+            'city_resource_id' => ['required', 'integer', 'exists:city_resources,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $cityResource = CityResource::with('resource')->findOrFail($validated['city_resource_id']);
+
+        // 2. Перевірки ресурсів
+        // Перевірка, чи CityResource належить поточному місту гравця
+        if ($cityResource->city_id !== $city->id) {
+            throw new AuthorizationException('This resource is not available in your current city.');
+        }
+
+        // Перевірка, чи ресурс в URL відповідає ресурсу з city_resource_id
+        if ($cityResource->resource->slug !== $resource->slug) {
+            return back()->with('error', 'Mismatched resource ID and slug.');
+        }
+
+        // Перевірка наявності достатньої кількості в місті
+        if ($validated['quantity'] > $cityResource->quantity) {
+            return back()->with('error', 'Not enough ' . $resource->name . ' available in the city.');
+        }
+
+        // Розрахунок вартості
+        $totalCost = $cityResource->getCurrentBuyPrice() * $validated['quantity'];
+
+        // Перевірка грошей гравця
+        if ($player->money < $totalCost) {
+            return back()->with('error', 'You do not have enough money to buy this amount of ' . $resource->name . '.');
+        }
+
+        // Перевірка вільного місця у вантажних вагонах
+        $availableCargoSpace = 0;
+        if ($player->train) {
+            $player->train->load('wagons.cargo_wagon'); // Завантажуємо cargo_wagon для кожного вагона
+            foreach ($player->train->wagons as $wagon) {
+                if ($wagon->isCargo() && $wagon->cargo_wagon) {
+                    $availableCargoSpace += $wagon->cargo_wagon->capacity - $wagon->cargo_wagon->getCurrentCapacity();
+                }
+            }
+        }
+
+        if ($validated['quantity'] > $availableCargoSpace) {
+            return back()->with('error', 'Not enough free cargo space in your train for this amount of ' . $resource->name . '.');
+        }
+
+        // --- 3. Виконання транзакції ---
+        DB::transaction(function () use ($player, $cityResource, $validated, $totalCost, $resource) {
+            // 3.1. Зняття грошей з гравця
+            $player->decrement('money', $totalCost);
+
+            // 3.2. Зменшення кількості ресурсу в місті
+            $cityResource->decrement('quantity', $validated['quantity']);
+            // Оновлення price_multiplier відбудеться автоматично через хук "saving" у CityResource
+
+            // 3.3. Додавання ресурсів до вантажних вагонів гравця
+            $remainingQuantity = $validated['quantity'];
+            if ($player->train) {
+                $player->train->load('wagons.cargo_wagon.resources'); // Перезавантажуємо, щоб мати актуальні ресурси
+
+                foreach ($player->train->wagons as $wagon) {
+                    if ($wagon->isCargo() && $wagon->cargo_wagon && $remainingQuantity > 0) {
+                        $cargoWagon = $wagon->cargo_wagon;
+                        $wagonFreeSpace = $cargoWagon->capacity - $cargoWagon->getCurrentCapacity();
+
+                        if ($wagonFreeSpace > 0) {
+                            $quantityToAdd = min($remainingQuantity, $wagonFreeSpace);
+
+                            // Шукаємо, чи вже є такий ресурс у цьому вагоні
+                            $existingCargoResource = $cargoWagon->resources()
+                                ->where('resource_id', $resource->id)
+                                ->first();
+
+                            if ($existingCargoResource) {
+                                $existingCargoResource->increment('quantity', $quantityToAdd);
+                            } else {
+                                CargoWagonResource::create([
+                                    'cargo_wagon_id' => $cargoWagon->id,
+                                    'resource_id' => $resource->id,
+                                    'quantity' => $quantityToAdd,
+                                ]);
+                            }
+                            $remainingQuantity -= $quantityToAdd;
+                        }
+                    }
+                }
+            }
+
+            // Перевірка, чи всі ресурси були додані (на випадок логічної помилки)
+            if ($remainingQuantity > 0) {
+                throw new \Exception('Failed to fully add resources to train cargo. Remaining: ' . $remainingQuantity);
+            }
+        });
+
+        return back()->with('success', 'Successfully purchased ' . $validated['quantity'] . ' ' . $resource->name . '.');
+    }
+
+    // --- НОВИЙ МЕТОД: sellResource ---
+    public function sellResource(Request $request, Resource $resource)
+    {
+        /** @var Player $player */
+        $player = Auth::user()->player;
+        $city = $player->city;
+
+        // 1. Валідація вхідних даних
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        // 2. Перевірка ресурсів
+        // Знаходимо CityResource для поточного міста та даного ресурсу
+        $cityResource = CityResource::where('city_id', $city->id)
+            ->where('resource_id', $resource->id)
+            ->first();
+
+        if (!$cityResource) {
+            return back()->with('error', 'This resource cannot be sold in this city.');
+        }
+
+        // Перевіряємо, чи достатньо ресурсів у гравця для продажу (сумуємо по всіх вагонах)
+        $playerResourceQuantity = 0;
+        $playerCargoWagonResourcesForThisType = collect(); // Зберігаємо конкретні CargoWagonResource
+        // для подальшого зменшення
+
+        if ($player->train) {
+            $player->train->load(['wagons.cargo_wagon.resources' => function($query) use ($resource) {
+                $query->where('resource_id', $resource->id); // Завантажуємо тільки потрібні ресурси
+            }]);
+
+            foreach ($player->train->wagons as $wagon) {
+                if ($wagon->isCargo() && $wagon->cargo_wagon) {
+                    foreach ($wagon->cargo_wagon->resources as $cargoWagonResource) {
+                        $playerResourceQuantity += $cargoWagonResource->quantity;
+                        $playerCargoWagonResourcesForThisType->push($cargoWagonResource);
+                    }
+                }
+            }
+        }
+
+        if ($validated['quantity'] > $playerResourceQuantity) {
+            return back()->with('error', 'You do not have ' . $validated['quantity'] . ' ' . $resource->name . ' to sell.');
+        }
+
+        // Розрахунок вартості продажу
+        $totalSellPrice = $cityResource->getCurrentSellPrice() * $validated['quantity'];
+
+        // --- 3. Виконання транзакції ---
+        DB::transaction(function () use ($player, $cityResource, $validated, $totalSellPrice, $playerCargoWagonResourcesForThisType) {
+            // 3.1. Додавання грошей гравцю
+            $player->increment('money', $totalSellPrice);
+
+            // 3.2. Збільшення кількості ресурсу в місті
+            $cityResource->increment('quantity', $validated['quantity']);
+            // Оновлення price_multiplier відбудеться автоматично
+
+            // 3.3. Зменшення кількості ресурсів у вантажних вагонах гравця
+            $remainingQuantityToSell = $validated['quantity'];
+
+            // Сортуємо вагони за кількістю ресурсу (можливо, не потрібно, але може допомогти в оптимізації)
+            // Або просто проходимо по них і віднімаємо
+            foreach ($playerCargoWagonResourcesForThisType as $cargoWagonResource) {
+                if ($remainingQuantityToSell <= 0) {
+                    break;
+                }
+
+                $quantityToDecrement = min($remainingQuantityToSell, $cargoWagonResource->quantity);
+                $cargoWagonResource->decrement('quantity', $quantityToDecrement);
+                $remainingQuantityToSell -= $quantityToDecrement;
+
+                // Якщо кількість стала 0, видаляємо запис
+                if ($cargoWagonResource->quantity <= 0) {
+                    $cargoWagonResource->delete();
+                }
+            }
+
+            // Перевірка, чи всі ресурси були продані
+            if ($remainingQuantityToSell > 0) {
+                throw new \Exception('Failed to fully sell resources from train cargo. Remaining: ' . $remainingQuantityToSell);
+            }
+        });
+
+        return back()->with('success', 'Successfully sold ' . $validated['quantity'] . ' ' . $resource->name . ' for $' . number_format($totalSellPrice, 2) . '.');
     }
 }
