@@ -5,12 +5,12 @@ use App\Http\Controllers\LocomotiveController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChirpController;
-//use App\Http\Controllers\TownController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WagonController;
 use App\Http\Controllers\WeaponController;
 use App\Http\Controllers\WorkshopController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth; // Не забудьте додати цей use
 
 /*
 |--------------------------------------------------------------------------
@@ -47,9 +47,9 @@ Route::resource('chirps', ChirpController::class)
 |--------------------------------------------------------------------------
 | Auth group routes
 |--------------------------------------------------------------------------
- */
-
+*/
 Route::middleware('auth')->group(function () {
+    // Профіль користувача
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -78,26 +78,31 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
     Route::patch('{locomotive}/rename', 'rename')->name('locomotive.rename');
 });
 
-Route::controller(WagonController::class)->prefix('wagon')->group(function () {
-    Route::post('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
-    Route::post('/{wagon}/repair', 'repair')->name('wagon.repair');
-    Route::patch('{wagon}/rename', 'rename')->name('wagon.rename');
-});
+    // Вагони
+    Route::controller(WagonController::class)->prefix('wagon')->group(function () {
+        Route::post('/{wagon}/upgrade', 'upgrade')->name('wagon.upgrade');
+        Route::post('/{wagon}/repair', 'repair')->name('wagon.repair');
+        Route::patch('{wagon}/rename', 'rename')->name('wagon.rename');
+    });
 
-Route::controller(WeaponController::class)->prefix('weapon')->group(function () {
-    Route::post('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
-    Route::patch('{weapon}/rename', 'rename')->name('weapon.rename');
-});
+    // Зброя
+    Route::controller(WeaponController::class)->prefix('weapon')->group(function () {
+        Route::post('/{weapon}/upgrade', 'upgrade')->name('weapon.upgrade');
+        Route::patch('{weapon}/rename', 'rename')->name('weapon.rename');
+    });
 
-Route::controller(CityController::class)->group(function () {
-    Route::get('/city/{city}', 'show')->name('city.show');
-    Route::post('/travel/{route}', 'travel')->name('travel');
-    Route::post('/city/refuel', 'refuel')->name('city.refuel');
-});
+    // Міста
+    Route::controller(CityController::class)->group(function () {
+        Route::get('/city/{city?}', 'show')->name('city.show');
+        // Маршрут travel тепер запускає подорож і оновлює статус гравця
+        Route::post('/travel/{route}', 'travel')->name('city.travel');
+        Route::post('/city/refuel', 'refuel')->name('city.refuel');
+    });
 
-Route::controller(WorkshopController::class)->prefix('workshop')->group(function () {
-    Route::get('/city/', 'index')->name('workshop.index');
-});
+    // Майстерня
+    Route::controller(WorkshopController::class)->prefix('workshop')->group(function () {
+        Route::get('/city/', 'index')->name('workshop.index');
+    });
 
 Route::controller(ShopController::class)->prefix('shop')->group(function () {
     Route::get('/city/', 'index')->name('shop.index');

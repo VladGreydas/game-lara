@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
 use App\Models\Player;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PlayerController extends Controller
@@ -15,14 +17,25 @@ class PlayerController extends Controller
      */
     public function index(): View
     {
-        return view('player.index', [
-            'player' => Player::with([
-                'user',
+        /** @var Player $player */
+        $player = Auth::user()->player;
+
+        if ($player) {
+            // Завантажуємо всі необхідні зв'язки.
+            // isTraveling() використовуватиме currentCityRoute
+            // inCity() використовуватиме city
+            $player->load([
                 'train.locomotive',
-                'train.wagons.cargo_wagon',
-                'train.wagons.weapon_wagon.weapons'
-            ])->where('user_id', Auth::id())->get()
-        ]);
+                'train.wagons.cargo_wagon.resources.resource',
+                'train.wagons.weapon_wagon.weapons',
+                'city', // Завантажуємо поточне місто гравця
+                'currentCityRoute.fromCity', // Для інформації про подорож
+                'currentCityRoute.toCity',    // Для інформації про подорож
+                'currentLocation', // Для інформації, якщо гравець у локації
+            ]);
+        }
+
+        return view('player.index', compact('player'));
 
     }
 
@@ -31,25 +44,39 @@ class PlayerController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->merge([
-            'money' => 200,
-            'max_exp' => 100,
-            'lvl' => 1,
-            'city_id' => 1
-        ]);
+        if (Auth::user()->player) {
+            return redirect()->route('player.index')->with('error', 'You already have a player profile.');
+        }
+
         $validated = $request->validate([
-            'nickname' => 'required|string|max:255',
-            'money' => 'int|max:200',
-            'max_exp' => 'int',
-            'lvl' => 'int|max:1',
-            'city_id' => 'int|max:1'
+            'nickname' => [
+                'required',
+                'string',
+                'max:255',
+                'min:3',
+                Rule::unique('players', 'nickname'),
+            ],
         ]);
 
-        $request->user()->player()->create($validated);
+        $player = new Player();
+        $player->user_id = Auth::id();
+        $player->nickname = $validated['nickname'];
+        $player->money = 1000;
+        $player->exp = 0;
+        $player->max_exp = 100;
+        $player->lvl = 1;
 
-        $player = (Player::with('user')->where('user_id', Auth::id())->get())[0];
+        $startCity = City::first(); // Переконайтеся, що міста вже створені у сидерах
+        if ($startCity) {
+            $player->city_id = $startCity->id;
+            // $player->current_location_id = null; // Переконайтеся, що це поле встановлюється правильно
+        } else {
+            return back()->withErrors(['message' => 'No starting city available. Please seed cities first.']);
+        }
 
-        return redirect(route('player.index'));
+        $player->save();
+
+        return redirect()->route('player.index')->with('success', 'Player "' . $player->nickname . '" created successfully!');
     }
 
     /**
@@ -112,6 +139,6 @@ class PlayerController extends Controller
 
         $player->delete();
 
-        return redirect(route('player.index'));
+        return redirect()->route('dashboard')->with('success', 'Player profile deleted.');
     }
 }

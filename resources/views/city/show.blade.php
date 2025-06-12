@@ -24,24 +24,24 @@
             <p>Refueling Cost: ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
 
             @if($player->train->locomotive->fuel < $player->train->locomotive->max_fuel)
-                <form method="POST" action="{{ route('city.refuel') }}">
+                <form action="{{ route('city.refuel') }}" method="POST" class="mt-4">
                     @csrf
-                    <x-primary-button class="mt-2">Refuel</x-primary-button>
+                    <x-primary-button>Refuel</x-primary-button>
                 </form>
             @else
-                <p class="text-green-600 mt-2">Fuel tank is full</p>
+                <p class="text-gray-600 mt-2">Your fuel tank is full.</p>
             @endif
         </div>
 
-        <div class="mt-6 p-4 border rounded bg-gray-50">
-            <p class="font-semibold text-gray-800">Available Routes:</p>
+        <div class="mt-6 p-4 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-2">Outgoing Routes</h2>
             @if($city->outgoingRoutes->count())
-                <ul class="list-disc list-inside mt-2">
+                <ul class="list-disc ml-6">
                     @foreach($city->outgoingRoutes as $route)
-                        <li class="mb-1">
-                            To <strong>{{ $route->toCity->name }}</strong>
-                            (Fuel Cost: {{ $route->fuel_cost }})
-                            <form method="POST" action="{{ route('travel', $route) }}" class="inline ml-2">
+                        <li>
+                            Travel to <strong>{{ $route->toCity->name }}</strong>
+                            (Fuel Cost: {{ $route->fuel_cost }}, Travel Time: {{ $route->travel_time }} hours) {{-- Додано час подорожі --}}
+                            <form method="POST" action="{{ route('city.travel', $route) }}" class="inline ml-2"> {{-- Оновлено назву маршруту --}}
                                 @csrf
                                 <x-primary-button class="h-8 px-2 text-sm">Travel</x-primary-button>
                             </form>

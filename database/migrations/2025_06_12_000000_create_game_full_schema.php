@@ -114,6 +114,8 @@ return new class extends Migration
             $table->foreignId('from_city_id')->constrained('cities')->cascadeOnDelete();
             $table->foreignId('to_city_id')->constrained('cities')->cascadeOnDelete();
             $table->unsignedInteger('fuel_cost');
+            // NEW: Add travel_time to city_routes
+            $table->unsignedInteger('travel_time')->default(1);
             $table->timestamps();
             $table->unique(['from_city_id', 'to_city_id']);
         });
@@ -178,10 +180,13 @@ return new class extends Migration
             $table->unique(['location_id', 'resource_id']);
         });
 
-        // 2025_06_12_182636_add_current_location_id_to_players_table.php (Integrated into players table directly)
+        // Add new columns to 'players' table related to location and travel
         Schema::table('players', function (Blueprint $table) {
             $table->foreignId('current_location_id')->nullable()->after('city_id')->constrained('locations')->onDelete('set null');
-            $table->timestamp('travel_finishes_at')->nullable()->after('current_location_id');
+            $table->timestamp('travel_starts_at')->nullable()->after('current_location_id');
+            $table->timestamp('travel_finishes_at')->nullable()->after('travel_starts_at');
+            // NEW: Add current_city_route_id to players
+            $table->foreignId('current_city_route_id')->nullable()->after('travel_finishes_at')->constrained('city_routes')->nullOnDelete();
         });
     }
 
@@ -192,29 +197,34 @@ return new class extends Migration
     {
         // Drop tables in reverse order of creation to respect foreign key constraints
         Schema::dropIfExists('location_resources');
-        Schema::dropIfExists('locations'); // Drop after location_resources
+        Schema::dropIfExists('locations');
         Schema::dropIfExists('cargo_wagon_resources');
         Schema::dropIfExists('city_resources');
         Schema::dropIfExists('resources');
 
-        Schema::dropIfExists('city_routes');
+        // Drop columns from playerі table FIRST that depend on city_routes or locations
+        Schema::table('players', function (Blueprint $table) {
+            if (Schema::hasColumn('players', 'current_city_route_id')) { // Check if column exists
+                $table->dropForeign(['current_city_route_id']);
+                $table->dropColumn('current_city_route_id');
+            }
+            if (Schema::hasColumn('players', 'travel_finishes_at')) {
+                $table->dropColumn('travel_finishes_at');
+            }
+            if (Schema::hasColumn('players', 'current_location_id')) {
+                $table->dropForeign(['current_location_id']);
+                $table->dropColumn('current_location_id');
+            }
+        });
+
+        Schema::dropIfExists('city_routes'); // Drop after current_city_route_id is dropped from players
         Schema::dropIfExists('weapons');
         Schema::dropIfExists('weapon_wagons');
         Schema::dropIfExists('cargo_wagons');
         Schema::dropIfExists('wagons');
         Schema::dropIfExists('locomotives');
         Schema::dropIfExists('trains');
-
-        // Drop columns from players table
-        Schema::table('players', function (Blueprint $table) {
-            $table->dropColumn('travel_finishes_at');
-            $table->dropForeign(['current_location_id']);
-            $table->dropColumn('current_location_id');
-            $table->dropForeign(['city_id']);
-            $table->dropColumn('city_id');
-        });
-
         Schema::dropIfExists('cities');
-        Schema::dropIfExists('players'); // Drop players last due to initial user_id dependency
+        Schema::dropIfExists('players');
     }
 };

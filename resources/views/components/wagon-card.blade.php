@@ -15,9 +15,26 @@
         @endif
         <li>Level: {{ $wagon->lvl }}</li>
         <li>Weight: {{ $wagon->weight }}</li>
+
         @if($wagon->cargo_wagon)
             <li>Type: <span class="text-indigo-600">Cargo</span></li>
             <li>Capacity: {{ $wagon->cargo_wagon->capacity }}</li>
+
+            {{-- New: Display resources in CargoWagon --}}
+            @if($wagon->cargo_wagon->resources->count())
+                <div class="mt-2">
+                    <h4 class="text-md font-semibold text-gray-700 mb-1">Resources:</h4>
+                    <ul class="list-disc ml-4">
+                        @foreach($wagon->cargo_wagon->resources as $cargoResource)
+                            <li>{{ $cargoResource->resource->name }}: {{ $cargoResource->quantity }} {{ $cargoResource->resource->unit }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @else
+                <p class="text-sm text-gray-500 mt-1">No resources in this cargo wagon.</p>
+            @endif
+            {{-- End New --}}
+
         @endif
 
         @if($wagon->weapon_wagon)
