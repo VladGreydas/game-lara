@@ -35,10 +35,10 @@
         <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg divide-y">
             {{-- Область для відображення повідомлень сесії --}}
             @if(session('success'))
-                <div class="text-green-600 font-semibold mb-4">{{ session('success') }}</div>
+                <div class="text-green-600 font-semibold m-4">{{ session('success') }}</div>
             @endif
             @if(session('error'))
-                <div class="text-red-600 font-semibold mb-4">{{ session('error') }}</div>
+                <div class="text-red-600 font-semibold m-4">{{ session('error') }}</div>
             @endif
             <div class="p-6 flex-col">
                 <p class="mt-4 text-lg text-gray-900">Nickname: {{ $player->nickname }}</p>
@@ -157,7 +157,8 @@
                     <p class="text-lg font-semibold text-gray-800">You are at: {{ $player->currentLocation->name }}</p>
                     <p>{{ $player->currentLocation->description }}</p>
                     {{-- Додайте тут функціонал для взаємодії з локацією (наприклад, збір ресурсів) --}}
-
+                @elseif ($player->hasArrived())
+                    @php $player->processArrival() @endphp
                 @else
                     {{-- Якщо гравець не в місті, не в дорозі і не в локації (якийсь проміжний стан) --}}
                     <h3 class="text-xl font-semibold mb-4">Current Status: Undefined Location</h3>

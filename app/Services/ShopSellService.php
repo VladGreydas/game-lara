@@ -36,79 +36,82 @@ class ShopSellService
             $moneyEarned = $wagon->price / 2; // Ціна продажу - половина початкової ціни вагона
 
             // Логіка для WeaponWagon (якщо вагон типу 'weapon')
-            if ($wagon->type === 'weapon') {
-                /** @var WeaponWagon|null $weaponWagonData */
-                $weaponWagonData = $wagon->weapon_wagon;
+            switch ($wagon->type) {
+                case 'weapon': {
+                    /** @var WeaponWagon|null $weaponWagonData */
+                    $weaponWagonData = $wagon->weapon_wagon;
 
-                // Перевіряємо, чи існує пов'язаний WeaponWagon і чи на ньому є зброя
-                if ($weaponWagonData && $weaponWagonData->weapons->isNotEmpty()) {
-                    $attachedWeapons = $weaponWagonData->weapons;
-                    $numAttachedWeapons = $attachedWeapons->count();
+                    // Перевіряємо, чи існує пов'язаний WeaponWagon і чи на ньому є зброя
+                    if ($weaponWagonData && $weaponWagonData->weapons->isNotEmpty()) {
+                        $attachedWeapons = $weaponWagonData->weapons;
+                        $numAttachedWeapons = $attachedWeapons->count();
 
-                    if ($destinationWeaponWagonId) {
-                        // Якщо вказано цільовий вагон для переміщення зброї
-                        /** @var WeaponWagon|null $destinationWagon */
-                        $destinationWagon = WeaponWagon::where('id', $destinationWeaponWagonId)->first();
+                        if ($destinationWeaponWagonId) { // Якщо вказано цільовий вагон для переміщення зброї
+                            /** @var WeaponWagon|null $destinationWagon */
+                            $destinationWagon = WeaponWagon::where('id', $destinationWeaponWagonId)->first();
 
-                        if (!$destinationWagon) {
-                            throw new InvalidArgumentException('Destination weapon wagon not found.');
-                        }
-                        if ($destinationWagon->wagon->train->player_id !== $player->id) {
-                            throw new AuthorizationException('Destination weapon wagon does not belong to you.');
-                        }
-                        if ($destinationWagon->slots_available < $numAttachedWeapons) {
-                            throw new InvalidArgumentException('Not enough free slots on the destination wagon to transfer all weapons.');
-                        }
+                            if (!$destinationWagon) {
+                                throw new InvalidArgumentException('Destination weapon wagon not found.');
+                            }
+                            if ($destinationWagon->wagon->train->player_id !== $player->id) {
+                                throw new AuthorizationException('Destination weapon wagon does not belong to you.');
+                            }
+                            if ($destinationWagon->slots_available < $numAttachedWeapons) {
+                                throw new InvalidArgumentException('Not enough free slots on the destination wagon to transfer all weapons.');
+                            }
 
-                        // Переміщуємо зброю на новий вагон
-                        foreach ($attachedWeapons as $weapon) {
-                            $weapon->weapon_wagon_id = $destinationWagon->id;
-                            $weapon->save();
-                        }
-                        // Оновлюємо кількість слотів
-                        $destinationWagon->slots_available -= $numAttachedWeapons;
-                        $destinationWagon->save();
-                    } else {
-                        // Якщо цільовий вагон не вказано, продаємо зброю разом з вагоном
-                        foreach ($attachedWeapons as $weapon) {
-                            $moneyEarned += $weapon->price / 2; // Додаємо половину ціни зброї
-                            $weapon->delete(); // Видаляємо зброю
+                            // Переміщуємо зброю на новий вагон
+                            foreach ($attachedWeapons as $weapon) {
+                                $weapon->weapon_wagon_id = $destinationWagon->id;
+                                $weapon->save();
+                            }
+                            // Оновлюємо кількість слотів
+                            $destinationWagon->slots_available -= $numAttachedWeapons;
+                            $destinationWagon->save();
+                        } else { // Якщо цільовий вагон не вказано, продаємо зброю разом з вагоном
+                            foreach ($attachedWeapons as $weapon) {
+                                $moneyEarned += $weapon->price / 2; // Додаємо половину ціни зброї
+                                $weapon->delete(); // Видаляємо зброю
+                            }
                         }
                     }
+                    break;
                 }
-            } elseif ($wagon->type === 'cargo') {
-                /** @var CargoWagon|null $cargoWagonData */
-                $cargoWagonData = $wagon->cargo_wagon; // Зв'язок має бути завантажений
+                case 'cargo': {
+                    /** @var CargoWagon|null $cargoWagonData */
+                    $cargoWagonData = $wagon->cargo_wagon; // Зв'язок має бути завантажений
 
-                // Перевіряємо, чи існує пов'язаний CargoWagon і чи на ньому є ресурси
-                if ($cargoWagonData && $cargoWagonData->resources->isNotEmpty()) {
-                    foreach ($cargoWagonData->resources as $cargoResource) {
-                        // Знаходимо відповідний CityResource, щоб отримати ціну продажу
-                        // Потрібно перевірити, чи місто гравця купує цей ресурс
-                        $cityResource = CityResource::where('city_id', $player->city->id)
-                            ->where('resource_id', $cargoResource->resource_id)
-                            ->first();
+                    // Перевіряємо, чи існує пов'язаний CargoWagon і чи на ньому є ресурси
+                    if ($cargoWagonData && $cargoWagonData->resources->isNotEmpty()) {
+                        foreach ($cargoWagonData->resources as $cargoResource) {
+                            // Знаходимо відповідний CityResource, щоб отримати ціну продажу
+                            // Потрібно перевірити, чи місто гравця купує цей ресурс
+                            $cityResource = CityResource::where('city_id', $player->city->id)
+                                ->where('resource_id', $cargoResource->resource_id)
+                                ->first();
 
-                        if ($cityResource) {
-                            // Якщо ресурс можна продати в цьому місті, додаємо гроші
-                            $sellPricePerUnit = $cityResource->getCurrentSellPrice();
-                            $moneyEarned += $sellPricePerUnit * $cargoResource->quantity;
+                            if ($cityResource) {
+                                // Якщо ресурс можна продати в цьому місті, додаємо гроші
+                                $sellPricePerUnit = $cityResource->getCurrentSellPrice();
+                                $moneyEarned += $sellPricePerUnit * $cargoResource->quantity;
 
-                            // Збільшуємо кількість ресурсів у місті (зворотна операція до купівлі)
-                            $cityResource->increment('quantity', $cargoResource->quantity);
-                            // price_multiplier оновиться автоматично
-                        } else {
-                            // Якщо ресурс не можна продати в цьому місті, він просто "зникає"
-                            // Можна додати лог або повідомлення, якщо це неочікувана поведінка
-                            \Log::info("Resource {$cargoResource->resource->name} (ID: {$cargoResource->resource_id}) from cargo wagon {$wagon->id} was lost as it cannot be sold in city {$player->city->name}.");
+                                // Збільшуємо кількість ресурсів у місті (зворотна операція до купівлі)
+                                $cityResource->increment('quantity', $cargoResource->quantity);
+                                // price_multiplier оновиться автоматично
+                            } else {
+                                // Якщо ресурс не можна продати в цьому місті, він просто "зникає"
+                                // Можна додати лог або повідомлення, якщо це неочікувана поведінка
+                                \Log::info("Resource {$cargoResource->resource->name} (ID: {$cargoResource->resource_id}) from cargo wagon {$wagon->id} was lost as it cannot be sold in city {$player->city->name}.");
+                            }
+                            // Видаляємо запис ресурсу з вагона, незалежно від того, чи він був проданий
+                            $cargoResource->delete();
                         }
-                        // Видаляємо запис ресурсу з вагона, незалежно від того, чи він був проданий
-                        $cargoResource->delete();
                     }
+                    break;
                 }
-            } else {
-                // Якщо тип вагона невідомий або не підтримується для продажу
-                throw new InvalidArgumentException('Attempted to sell unsupported wagon type: ' . $wagon->type);
+                default: {
+                    throw new InvalidArgumentException('Attempted to sell unsupported wagon type: ' . $wagon->type);
+                }
             }
 
             // Зарахування грошей гравцеві

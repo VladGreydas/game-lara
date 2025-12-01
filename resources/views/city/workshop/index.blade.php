@@ -6,6 +6,7 @@
         <a href="{{ route('city.show', $city) }}" class="inline-block mt-2 px-4 py-2 bg-gray-800 text-white rounded font-semibold">
             Back to City
         </a>
+        <x-player-info/>
     </x-slot>
 
     <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg p-6 space-y-4">

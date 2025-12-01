@@ -34,7 +34,8 @@ class WeaponFactory extends Factory
             'Cannon' => ['damage' => 100, 'price' => 1000],
             'Mortar' => ['damage' => 75, 'price' => 750],
             'Rocket Launcher' => ['damage' => 250, 'price' => 2500],
-            'Flame Thrower' => ['damage' => 150, 'price' => 1500],
+            'Flamethrower' => ['damage' => 150, 'price' => 1500],
+            'Railgun' => ['damage' => 500, 'price' => 5000],
             default => ['damage' => 40, 'price' => 600],
         };
 

@@ -27,7 +27,6 @@ use Illuminate\Validation\ValidationException;
 
 class ShopController extends Controller
 {
-    // Інжектуємо сервіс через конструктор (рекомендований спосіб)
     public function __construct(protected ShopSetupService $shopSetupService, protected ShopSellService $shopSellService)
     {
 

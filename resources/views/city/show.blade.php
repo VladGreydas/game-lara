@@ -3,6 +3,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Current City: ') . $city->name }}
         </h2>
+        <x-player-info/>
     </x-slot>
 
     <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg p-6 space-y-4">
@@ -38,7 +39,7 @@
             @if($city->outgoingRoutes->count())
                 <ul class="list-disc ml-6">
                     @foreach($city->outgoingRoutes as $route)
-                        <li>
+                        <li class="m-2">
                             Travel to <strong>{{ $route->toCity->name }}</strong>
                             (Fuel Cost: {{ $route->fuel_cost }}, Travel Time: {{ $route->travel_time }} hours) {{-- Додано час подорожі --}}
                             <form method="POST" action="{{ route('city.travel', $route) }}" class="inline ml-2"> {{-- Оновлено назву маршруту --}}

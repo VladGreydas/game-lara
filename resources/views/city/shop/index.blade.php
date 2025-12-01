@@ -7,6 +7,7 @@
            class="inline-block mt-2 px-4 py-2 bg-gray-800 text-white rounded font-semibold">
             Back to City
         </a>
+        <x-player-info/>
     </x-slot>
 
     <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg p-6 space-y-4">
@@ -23,7 +24,6 @@
                     onchange="switchMainSection(this.value)">
                 <option value="buy-section">Buy Items</option>
                 <option value="sell-section">Sell Items</option>
-                {{-- ДОДАНО: Опції для купівлі/продажу ресурсів --}}
                 <option value="buy-resources-section">Buy Resources</option>
                 <option value="sell-resources-section">Sell Resources</option>
             </select>
@@ -55,7 +55,6 @@
                                 <p>Power: {{ $locomotive->power }}</p>
                                 <p>Armor: {{ $locomotive->armor }}</p>
                                 <p>Fuel: {{ $locomotive->fuel }}</p>
-                                <p>UUID: {{ $locomotive->shop_uuid }}</p>
                                 <p class="font-bold text-green-700">Price: ${{ $locomotive->price }}</p>
 
                                 <form action="{{ route('shop.locomotive.buy', $locomotive->shop_uuid) }}" method="POST"
@@ -83,10 +82,10 @@
                                 @elseif($wagon->type === 'weapon')
                                     <p>Weapon slot: empty</p>
                                 @endif
-                                <p>UUID: {{ $wagon->shop_uuid }}</p>
                                 <p class="font-bold text-green-700">Price: ${{ $wagon->price }}</p>
 
-                                <form action="{{ route('shop.wagon.buy', $wagon->shop_uuid) }}" method="POST" class="mt-3">
+                                <form action="{{ route('shop.wagon.buy', $wagon->shop_uuid) }}" method="POST"
+                                      class="mt-3">
                                     @csrf
                                     <x-primary-button>Buy</x-primary-button>
                                 </form>
@@ -107,17 +106,21 @@
                                     <h5 class="text-lg font-semibold">{{ $weapon->name }}</h5>
                                     <p>Type: {{ $weapon->type }}</p>
                                     <p>Damage: {{ $weapon->damage }}</p>
-                                    <p>UUID: {{ $weapon->shop_uuid }}</p>
                                     <p class="font-bold text-green-700">Price: ${{ $weapon->price }}</p>
 
-                                    <form action="{{ route('shop.weapon.buy', $weapon->shop_uuid) }}" method="POST" class="mt-3 space-y-2">
+                                    <form action="{{ route('shop.weapon.buy', $weapon->shop_uuid) }}" method="POST"
+                                          class="mt-3 space-y-2">
                                         @csrf
-                                        <label for="wagon_{{ $weapon->shop_uuid }}" class="block text-sm font-medium text-gray-700">
+                                        <label for="wagon_{{ $weapon->shop_uuid }}"
+                                               class="block text-sm font-medium text-gray-700">
                                             Mount on Weapon Wagon:
                                         </label>
-                                        <select name="weapon_wagon_id" id="wagon_{{ $weapon->shop_uuid }}" class="form-select rounded-md border-gray-300 shadow-sm w-full">
+                                        <select name="weapon_wagon_id" id="wagon_{{ $weapon->shop_uuid }}"
+                                                class="form-select rounded-md border-gray-300 shadow-sm w-full">
                                             @foreach($weaponWagonsForMounting as $wagon)
-                                                <option value="{{ $wagon->id }}">#{{ $wagon->id }} ({{ $wagon->wagon->name }})</option>
+                                                <option value="{{ $wagon->id }}">#{{ $wagon->id }}
+                                                    ({{ $wagon->wagon->name }})
+                                                </option>
                                             @endforeach
                                         </select>
 
@@ -165,13 +168,21 @@
                                         @php
                                             $weaponWagonData = $wagon->weapon_wagon;
                                             $attachedWeapons = $weaponWagonData->weapons;
+                                            $price = $wagon->price / 2;
+                                            $priceWithWeapons = $wagon->price / 2;
                                         @endphp
-                                        <p>Weapon Slots: {{ $weaponWagonData->slots_available }} available / {{ $attachedWeapons->count() }} attached</p>
+                                        <p>Weapon Slots: {{ $weaponWagonData->slots_available }} available
+                                            / {{ $attachedWeapons->count() }} attached</p>
                                         @if($attachedWeapons->isNotEmpty())
                                             <p class="font-bold text-red-600">Attached Weapons:</p>
                                             <ul>
                                                 @foreach($attachedWeapons as $attachedWeapon)
-                                                    <li>- {{ $attachedWeapon->name }} (DMG: {{ $attachedWeapon->damage }})</li>
+                                                    @php
+                                                        $priceWithWeapons += $attachedWeapon->$price/2;
+                                                    @endphp
+                                                    <li id="weapon_{{$attachedWeapon->id}}">- {{ $attachedWeapon->name }}(DMG: {{ $attachedWeapon->damage }}
+                                                        )
+                                                    </li>
                                                 @endforeach
                                             </ul>
                                         @endif
@@ -182,29 +193,33 @@
                                         <p>Cargo Capacity: {{ $cargoWagonData->capacity }}</p>
                                     @endif
 
-                                    <p class="font-bold text-red-700">Sell Price: ${{ $wagon->price / 2 }}</p>
+                                    <p class="font-bold text-red-700">Sell Price: <span id="sell-price-{{ $wagon->id }}">${{ $price }}</span></p>
 
                                     {{-- --- ФОРМА ПРОДАЖУ ВАГОНА --- --}}
-                                    <form action="{{ route('shop.wagon.sell', $wagon->id) }}" method="POST" class="mt-3 space-y-2"> {{-- Змінено action --}}
+                                    <form action="{{ route('shop.wagon.sell', $wagon->id) }}" method="POST"
+                                          class="mt-3 space-y-2">
                                         @csrf
-                                        @method('DELETE') {{-- ДОДАНО: Для імітації DELETE запиту --}}
+                                        @method('DELETE')
 
                                         @if($wagon->type === 'weapon' && $wagon->weapon_wagon->weapons->isNotEmpty())
-                                            <label for="dest_wagon_{{ $wagon->id }}" class="block font-medium text-sm text-gray-700">
-                                                Transfer attached weapons to another wagon:
+                                            <label for="dest_wagon_{{ $wagon->id }}"
+                                                   class="block font-medium text-sm text-gray-700">
+                                                Transfer attached weapons to another wagon or sell them:
                                             </label>
                                             <select name="destination_weapon_wagon_id" id="dest_wagon_{{ $wagon->id }}"
-                                                    class="form-select w-full rounded-md border-gray-300 shadow-sm">
+                                                    class="form-select w-full rounded-md border-gray-300 shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
                                                 <option value="">Sell weapons along with wagon</option>
                                                 @foreach($weaponWagonsForMounting->where('wagon_id', '!=', $wagon->id) as $destWagon)
-                                                    <option value="{{ $destWagon->id }}">
-                                                        #{{ $destWagon->id }} ({{ $destWagon->wagon->name }}) - Free Slots: {{ $destWagon->slots_available }}
+                                                    <option value="{{ $destWagon->id }}" id="dest_wagon_option_{{ $destWagon->id }}">
+                                                        #{{ $destWagon->id }} ({{ $destWagon->wagon->name }}) - Free
+                                                        Slots: {{ $destWagon->slots_available }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         @endif
 
-                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600">Sell Wagon</x-primary-button>
+                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600">Sell Wagon
+                                        </x-primary-button>
                                     </form>
                                     {{-- --- КІНЕЦЬ ФОРМИ ПРОДАЖУ ВАГОНА --- --}}
                                 </div>
@@ -228,7 +243,8 @@
                                     <p>Type: {{ $weapon->type }}</p>
                                     <p>Damage: {{ $weapon->damage }}</p>
                                     @if($weapon->weapon_wagon_id)
-                                        <p class="text-red-600">Mounted on: {{ $weapon->weaponWagon->wagon->name ?? 'Unknown Wagon' }}</p>
+                                        <p class="text-red-600">Mounted
+                                            on: {{ $weapon->weaponWagon->wagon->name ?? 'Unknown Wagon' }}</p>
                                     @else
                                         <p class="text-green-600">Status: Unmounted</p>
                                     @endif
@@ -236,10 +252,12 @@
                                     <p class="font-bold text-red-700">Sell Price: ${{ $weapon->price / 2 }}</p>
 
                                     {{-- --- ФОРМА ПРОДАЖУ ЗБРОЇ --- --}}
-                                    <form action="{{ route('shop.weapon.sell', $weapon->id) }}" method="POST" class="mt-3"> {{-- Змінено action --}}
+                                    <form action="{{ route('shop.weapon.sell', $weapon->id) }}" method="POST"
+                                          class="mt-3"> {{-- Змінено action --}}
                                         @csrf
                                         @method('DELETE') {{-- ДОДАНО: Для імітації DELETE запиту --}}
-                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600">Sell Weapon</x-primary-button>
+                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600">Sell Weapon
+                                        </x-primary-button>
                                     </form>
                                     {{-- --- КІНЕЦЬ ФОРМИ ПРОДАЖУ ЗБРОЇ --- --}}
                                 </div>
@@ -250,112 +268,132 @@
             </div>
         </div>
 
-            {{-- --- BUY RESOURCES SECTION --- --}}
-            <div id="buy-resources-section" class="main-shop-section hidden">
-                <h3 class="text-xl font-bold mb-4">Buy Resources</h3>
+        {{-- --- BUY RESOURCES SECTION --- --}}
+        <div id="buy-resources-section" class="main-shop-section hidden">
+            <h3 class="text-xl font-bold mb-4">Buy Resources</h3>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border-collapse">
-                        <thead>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border-collapse">
+                    <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Resource</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Available Qty</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Buy Price</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Your Cargo Space
+                        </th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Amount</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($cityResources as $cityResource)
                         <tr>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Resource</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Available Qty</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Buy Price</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Your Cargo Space</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Amount</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Action</th>
+                            <td class="py-2 px-4 border-b">{{ $cityResource->resource->name }}
+                                ({{ $cityResource->resource->unit }})
+                            </td>
+                            <td class="py-2 px-4 border-b">{{ $cityResource->quantity }}</td>
+                            <td class="py-2 px-4 border-b">
+                                ${{ number_format($cityResource->getCurrentBuyPrice(), 2) }}</td>
+                            <td class="py-2 px-4 border-b">
+                                <span class="text-green-600">{{ $availableCargoSpace }}</span> / <span
+                                    class="text-gray-500">{{ $totalCargoCapacity }}</span>
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                <input type="number" name="quantity" min="1"
+                                       max="{{ min($cityResource->quantity, $availableCargoSpace) }}"
+                                       class="w-24 form-input rounded-md border-gray-300 shadow-sm text-sm"
+                                       value="1" form="buy-resource-form-{{ $cityResource->id }}">
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                {{-- Форма для покупки ресурсу --}}
+                                <form id="buy-resource-form-{{ $cityResource->id }}"
+                                      action="{{ route('shop.resource.buy', $cityResource->resource->slug) }}"
+                                      method="POST">
+                                    @csrf
+                                    <input type="hidden" name="city_resource_id" value="{{ $cityResource->id }}">
+                                    <x-primary-button>Buy</x-primary-button>
+                                </form>
+                            </td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        @forelse($cityResources as $cityResource)
-                            <tr>
-                                <td class="py-2 px-4 border-b">{{ $cityResource->resource->name }} ({{ $cityResource->resource->unit }})</td>
-                                <td class="py-2 px-4 border-b">{{ $cityResource->quantity }}</td>
-                                <td class="py-2 px-4 border-b">${{ number_format($cityResource->getCurrentBuyPrice(), 2) }}</td>
-                                <td class="py-2 px-4 border-b">
-                                    <span class="text-green-600">{{ $availableCargoSpace }}</span> / <span class="text-gray-500">{{ $totalCargoCapacity }}</span>
-                                </td>
-                                <td class="py-2 px-4 border-b">
-                                    <input type="number" name="quantity" min="1" max="{{ min($cityResource->quantity, $availableCargoSpace) }}"
-                                           class="w-24 form-input rounded-md border-gray-300 shadow-sm text-sm"
-                                           value="1" form="buy-resource-form-{{ $cityResource->id }}">
-                                </td>
-                                <td class="py-2 px-4 border-b">
-                                    {{-- Форма для покупки ресурсу --}}
-                                    <form id="buy-resource-form-{{ $cityResource->id }}"
-                                          action="{{ route('shop.resource.buy', $cityResource->resource->slug) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="city_resource_id" value="{{ $cityResource->id }}">
-                                        <x-primary-button>Buy</x-primary-button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="py-4 px-4 text-center text-gray-500">No resources available for purchase in this city.</td>
-                            </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <p class="mt-4 text-sm text-gray-600">Current Money: ${{ number_format($player->money, 2) }}</p>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-4 px-4 text-center text-gray-500">No resources available for
+                                purchase in this city.
+                            </td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
             </div>
+            <p class="mt-4 text-sm text-gray-600">Current Money: ${{ number_format($player->money, 2) }}</p>
+        </div>
 
-            {{-- --- SELL RESOURCES SECTION --- --}}
-            <div id="sell-resources-section" class="main-shop-section hidden">
-                <h3 class="text-xl font-bold mb-4">Sell Resources</h3>
+        {{-- --- SELL RESOURCES SECTION --- --}}
+        <div id="sell-resources-section" class="main-shop-section hidden">
+            <h3 class="text-xl font-bold mb-4">Sell Resources</h3>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border-collapse">
-                        <thead>
-                        <tr>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Resource</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Your Qty</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Sell Price (in {{ $city->name }})</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Amount</th>
-                            <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @forelse($groupedPlayerCargoWagonResources as $wagonResource) {{-- Змінено колекцію на згруповану --}}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border-collapse">
+                    <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Resource</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Your Qty</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Sell Price
+                            (in {{ $city->name }})
+                        </th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Amount</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($groupedPlayerCargoWagonResources as $wagonResource)
+                        {{-- Змінено колекцію на згруповану --}}
                         @php
                             // Знаходимо відповідний CityResource для отримання ціни продажу
                             $cityResource = $city->resources->where('resource_id', $wagonResource->resource_id)->first();
                         @endphp
 
-                        @if($cityResource) {{-- Показуємо ресурс тільки якщо його можна продати в цьому місті --}}
+                        @if($cityResource)
+                            {{-- Показуємо ресурс тільки якщо його можна продати в цьому місті --}}
+                            <tr>
+                                <td class="py-2 px-4 border-b">{{ $wagonResource->resource->name }}
+                                    ({{ $wagonResource->resource->unit }})
+                                </td>
+                                <td class="py-2 px-4 border-b">{{ $wagonResource->quantity }}</td>
+                                <td class="py-2 px-4 border-b">
+                                    ${{ number_format($cityResource->getCurrentSellPrice(), 2) }}</td>
+                                <td class="py-2 px-4 border-b">
+                                    <input type="number" name="quantity" min="1" max="{{ $wagonResource->quantity }}"
+                                           class="w-24 form-input rounded-md border-gray-300 shadow-sm text-sm"
+                                           value="1"
+                                           form="sell-resource-form-{{ $wagonResource->resource_id }}"> {{-- Використовуємо resource_id для унікальності форми --}}
+                                </td>
+                                <td class="py-2 px-4 border-b">
+                                    {{-- Форма для продажу ресурсу --}}
+                                    <form id="sell-resource-form-{{ $wagonResource->resource_id }}"
+                                          action="{{ route('shop.resource.sell', $wagonResource->resource->slug) }}"
+                                          method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        {{-- Не потрібно передавати cargo_wagon_resource_id, оскільки продаємо "загальну" кількість --}}
+                                        {{-- Контролер сам знайде, з яких CargoWagonResource відняти --}}
+                                        <x-primary-button class="bg-red-500 hover:bg-red-600">Sell</x-primary-button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endif
+                    @empty
                         <tr>
-                            <td class="py-2 px-4 border-b">{{ $wagonResource->resource->name }} ({{ $wagonResource->resource->unit }})</td>
-                            <td class="py-2 px-4 border-b">{{ $wagonResource->quantity }}</td>
-                            <td class="py-2 px-4 border-b">${{ number_format($cityResource->getCurrentSellPrice(), 2) }}</td>
-                            <td class="py-2 px-4 border-b">
-                                <input type="number" name="quantity" min="1" max="{{ $wagonResource->quantity }}"
-                                       class="w-24 form-input rounded-md border-gray-300 shadow-sm text-sm"
-                                       value="1" form="sell-resource-form-{{ $wagonResource->resource_id }}"> {{-- Використовуємо resource_id для унікальності форми --}}
-                            </td>
-                            <td class="py-2 px-4 border-b">
-                                {{-- Форма для продажу ресурсу --}}
-                                <form id="sell-resource-form-{{ $wagonResource->resource_id }}"
-                                      action="{{ route('shop.resource.sell', $wagonResource->resource->slug) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    {{-- Не потрібно передавати cargo_wagon_resource_id, оскільки продаємо "загальну" кількість --}}
-                                    {{-- Контролер сам знайде, з яких CargoWagonResource відняти --}}
-                                    <x-primary-button class="bg-red-500 hover:bg-red-600">Sell</x-primary-button>
-                                </form>
+                            <td colspan="5" class="py-4 px-4 text-center text-gray-500">You don't have any resources to
+                                sell.
                             </td>
                         </tr>
-                        @endif
-                        @empty
-                            <tr>
-                                <td colspan="5" class="py-4 px-4 text-center text-gray-500">You don't have any resources to sell.</td>
-                            </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <p class="mt-4 text-sm text-gray-600">Current Money: ${{ number_format($player->money, 2) }}</p>
+                    @endforelse
+                    </tbody>
+                </table>
             </div>
+            <p class="mt-4 text-sm text-gray-600">Current Money: ${{ number_format($player->money, 2) }}</p>
+        </div>
     </div>
 
     <script>
@@ -407,5 +445,14 @@
                 switchCategory(initialSellCategory, 'sell');
             }
         });
+
+        function updateSellPrice(wagonId) {
+            let value = document.getElementById('dest_wagon_'+wagonId).value;
+            if (value === '') {
+                console.log('No wagon selected');
+            } else {
+                console.log(value);
+            }
+        }
     </script>
 </x-app-layout>

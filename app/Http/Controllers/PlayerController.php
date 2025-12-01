@@ -21,9 +21,6 @@ class PlayerController extends Controller
         $player = Auth::user()->player;
 
         if ($player) {
-            // Завантажуємо всі необхідні зв'язки.
-            // isTraveling() використовуватиме currentCityRoute
-            // inCity() використовуватиме city
             $player->load([
                 'train.locomotive',
                 'train.wagons.cargo_wagon.resources.resource',
@@ -66,10 +63,9 @@ class PlayerController extends Controller
         $player->max_exp = 100;
         $player->lvl = 1;
 
-        $startCity = City::first(); // Переконайтеся, що міста вже створені у сидерах
+        $startCity = City::first();
         if ($startCity) {
             $player->city_id = $startCity->id;
-            // $player->current_location_id = null; // Переконайтеся, що це поле встановлюється правильно
         } else {
             return back()->withErrors(['message' => 'No starting city available. Please seed cities first.']);
         }

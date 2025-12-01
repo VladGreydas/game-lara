@@ -34,6 +34,8 @@ class City extends Model
         return 'slug';
     }
 
+    // Relations
+
     public function outgoingRoutes(): HasMany
     {
         return $this->hasMany(CityRoute::class, 'from_city_id');

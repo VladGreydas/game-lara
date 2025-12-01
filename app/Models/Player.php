@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $money
  * @property string $nickname
  * @property int $lvl
- * @property int $experience
+ * @property int $exp
+ * @property int $max_exp
  * @property int $hp
  * @property int $max_hp
  * @property int $current_city_route_id
@@ -74,6 +75,29 @@ class Player extends Model
     public function canLevelUp(): bool
     {
         return $this->exp >= $this->max_exp;
+    }
+
+    // NEW: Helper method to process arrival
+    public function processArrival()
+    {
+        /** @var CityRoute $route */
+        $route = CityRoute::find($this->current_city_route_id);
+
+        if (!$route) {
+            // Handle error: route not found, maybe player state is corrupted
+            $this->current_city_route_id = null;
+            $this->travel_finishes_at = null;
+            $this->save();
+            return redirect()->route('player.index')->with('error', 'Travel state error. Please report this.');
+        }
+
+        $this->city_id = $route->to_city_id; // Set player's city to destination
+        $this->current_city_route_id = null; // Clear travel route
+        $this->travel_finishes_at = null; // Clear arrival time
+        $this->save();
+
+        // Redirect to the newly arrived city
+        return redirect()->route('city.show', $this->city)->with('success', 'You have arrived at ' . $route->toCity->name);
     }
 
     //Relations
