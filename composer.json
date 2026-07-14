@@ -13,6 +13,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "*",
+        "fruitcake/laravel-debugbar": "^3.16",
         "laravel/breeze": "*",
         "laravel/pint": "*",
         "laravel/sail": "*",

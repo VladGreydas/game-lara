@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-    use App\Models\CargoWagon;
-    use App\Models\CityResource;
-    use App\Models\Player;
-    use App\Models\Wagon;
-    use App\Models\Weapon;
-    use App\Models\WeaponWagon;
-    use Illuminate\Auth\Access\AuthorizationException;
-    use Illuminate\Support\Facades\DB;
-    use InvalidArgumentException; // Додайте цей імпорт для помилок аргументів
+use App\Models\CargoWagon;
+use App\Models\CityResource;
+use App\Models\Player;
+use App\Models\Wagon;
+use App\Models\Weapon;
+use App\Models\WeaponWagon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+use Throwable;
 
 class ShopSellService
 {
@@ -19,12 +20,10 @@ class ShopSellService
      *
      * @param Player $player Поточний гравець.
      * @param Wagon $wagon Вагон, який продається.
-     * @param string|null $destinationWeaponWagonUuid UUID WeaponWagon, куди перемістити зброю (якщо вагон типу 'weapon').
-     * @throws AuthorizationException Якщо вагон не належить гравцеві.
-     * @throws InvalidArgumentException Якщо виникають проблеми з переміщенням зброї або невідомий тип вагона.
-     * @throws \Exception У випадку непередбаченої помилки транзакції.
+     * @param string|null $destinationWagonId Вагон, у який переміститься зброя/вантажі
+     * @throws Throwable
      */
-    public function sellWagon(Player $player, Wagon $wagon, ?string $destinationWeaponWagonId = null): void
+    public function sellWagon(Player $player, Wagon $wagon, ?string $destinationWagonId = null): void
     {
         // Перевірка 1: Чи належить вагон гравцеві?
         // Це вже перевіряється в контролері, але повторна перевірка не зашкодить.
@@ -32,7 +31,7 @@ class ShopSellService
             throw new AuthorizationException('This wagon does not belong to your train.');
         }
 
-        DB::transaction(function () use ($player, $wagon, $destinationWeaponWagonId) {
+        DB::transaction(function () use ($player, $wagon, $destinationWagonId) {
             $moneyEarned = $wagon->price / 2; // Ціна продажу - половина початкової ціни вагона
 
             // Логіка для WeaponWagon (якщо вагон типу 'weapon')
@@ -46,9 +45,9 @@ class ShopSellService
                         $attachedWeapons = $weaponWagonData->weapons;
                         $numAttachedWeapons = $attachedWeapons->count();
 
-                        if ($destinationWeaponWagonId) { // Якщо вказано цільовий вагон для переміщення зброї
+                        if ($destinationWagonId) { // Якщо вказано цільовий вагон для переміщення зброї
                             /** @var WeaponWagon|null $destinationWagon */
-                            $destinationWagon = WeaponWagon::where('id', $destinationWeaponWagonId)->first();
+                            $destinationWagon = WeaponWagon::where('id', $destinationWagonId)->first();
 
                             if (!$destinationWagon) {
                                 throw new InvalidArgumentException('Destination weapon wagon not found.');
@@ -78,33 +77,66 @@ class ShopSellService
                     break;
                 }
                 case 'cargo': {
-                    /** @var CargoWagon|null $cargoWagonData */
-                    $cargoWagonData = $wagon->cargo_wagon; // Зв'язок має бути завантажений
+                    /** @var \App\Models\CargoWagon|null $cargoWagonData */
+                    $cargoWagonData = $wagon->cargo_wagon;
 
-                    // Перевіряємо, чи існує пов'язаний CargoWagon і чи на ньому є ресурси
                     if ($cargoWagonData && $cargoWagonData->resources->isNotEmpty()) {
-                        foreach ($cargoWagonData->resources as $cargoResource) {
-                            // Знаходимо відповідний CityResource, щоб отримати ціну продажу
-                            // Потрібно перевірити, чи місто гравця купує цей ресурс
-                            $cityResource = CityResource::where('city_id', $player->city->id)
-                                ->where('resource_id', $cargoResource->resource_id)
-                                ->first();
 
-                            if ($cityResource) {
-                                // Якщо ресурс можна продати в цьому місті, додаємо гроші
-                                $sellPricePerUnit = $cityResource->getCurrentSellPrice();
-                                $moneyEarned += $sellPricePerUnit * $cargoResource->quantity;
+                        // СЦЕНАРІЙ А: Гравець вибрав цільовий вагон для перенесення вантажу
+                        if (!empty($destinationWagonId)) {
+                            $targetWagon = Wagon::where('id', $destinationWagonId)->with('cargo_wagon')->first();
+                            $destinationCargo = $targetWagon?->cargo_wagon;
 
-                                // Збільшуємо кількість ресурсів у місті (зворотна операція до купівлі)
-                                $cityResource->increment('quantity', $cargoResource->quantity);
-                                // price_multiplier оновиться автоматично
-                            } else {
-                                // Якщо ресурс не можна продати в цьому місті, він просто "зникає"
-                                // Можна додати лог або повідомлення, якщо це неочікувана поведінка
-                                \Log::info("Resource {$cargoResource->resource->name} (ID: {$cargoResource->resource_id}) from cargo wagon {$wagon->id} was lost as it cannot be sold in city {$player->city->name}.");
+                            if (!$destinationCargo) {
+                                throw new InvalidArgumentException('Цільовий вантажний вагон не знайдено.');
                             }
-                            // Видаляємо запис ресурсу з вагона, незалежно від того, чи він був проданий
-                            $cargoResource->delete();
+                            if ($targetWagon->train->player_id !== $player->id) {
+                                throw new AuthorizationException('Цільовий вагон вам не належить.');
+                            }
+
+                            // Рахуємо об'єми
+                            $totalResourcesToMove = $cargoWagonData->resources->sum('quantity');
+                            $destinationCurrentLoad = $destinationCargo->resources()->sum('quantity');
+                            $destinationFreeSpace = $destinationCargo->capacity - $destinationCurrentLoad;
+
+                            if ($destinationFreeSpace < $totalResourcesToMove) {
+                                throw new InvalidArgumentException(
+                                    "Недостатньо місця у цільовому вагоні! Потрібно слотів: {$totalResourcesToMove}, вільно: {$destinationFreeSpace}."
+                                );
+                            }
+
+                            // Пересипаємо ресурси
+                            foreach ($cargoWagonData->resources as $cargoResource) {
+                                $existingResource = $destinationCargo->resources()
+                                    ->where('resource_id', $cargoResource->resource_id)
+                                    ->first();
+
+                                if ($existingResource) {
+                                    // Плюсуємо кількість, якщо такий ресурс вже є
+                                    $existingResource->increment('quantity', $cargoResource->quantity);
+                                    $cargoResource->delete();
+                                } else {
+                                    // Змінюємо прив'язку до вагона, якщо ресурсу ще немає
+                                    $cargoResource->cargo_wagon_id = $destinationCargo->id;
+                                    $cargoResource->save();
+                                }
+                            }
+                        } else {
+                            // СЦЕНАРІЙ Б: Цільовий вагон не вказано — стара логіка продажу місту
+                            foreach ($cargoWagonData->resources as $cargoResource) {
+                                $cityResource = CityResource::where('city_id', $player->city->id)
+                                    ->where('resource_id', $cargoResource->resource_id)
+                                    ->first();
+
+                                if ($cityResource) {
+                                    $sellPricePerUnit = $cityResource->getCurrentSellPrice();
+                                    $moneyEarned += $sellPricePerUnit * $cargoResource->quantity;
+                                    $cityResource->increment('quantity', $cargoResource->quantity);
+                                } else {
+                                    Log::info("Resource {$cargoResource->resource->name} (ID: {$cargoResource->resource_id}) from cargo wagon {$wagon->id} was lost as it cannot be sold in city {$player->city->name}.");
+                                }
+                                $cargoResource->delete();
+                            }
                         }
                     }
                     break;

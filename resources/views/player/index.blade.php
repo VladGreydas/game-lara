@@ -35,7 +35,7 @@
         <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg divide-y">
             {{-- Область для відображення повідомлень сесії --}}
             @if(session('success'))
-                <div class="text-green-600 font-semibold m-4">{{ session('success') }}</div>
+                <div class="text-green-600 font-semibold m-4 pt-4">{{ session('success') }}</div>
             @endif
             @if(session('error'))
                 <div class="text-red-600 font-semibold m-4">{{ session('error') }}</div>

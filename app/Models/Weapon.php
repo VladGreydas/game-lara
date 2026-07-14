@@ -35,6 +35,7 @@ class Weapon extends Model
     public static function types(): array
     {
         return [
+            'LMG' => 'Light Machine Gun',
             'HMG' => 'Heavy Machine Gun',
             'Cannon' => 'Cannon',
             'Mortar' => 'Mortar',
@@ -44,6 +45,9 @@ class Weapon extends Model
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function lvlUp(): bool
     {
         $player = $this->weapon_wagon->wagon->train->player;
@@ -53,12 +57,13 @@ class Weapon extends Model
         }
 
         $scaling = match ($this->type) {
+            'LMG' => ['damage' => 5],
             'HMG' => ['damage' => 10],
             'Cannon' => ['damage' => 25],
             'Mortar' => ['damage' => 40],
-            'Laser' => ['damage' => 20],
-            'Rocket' => ['damage' => 35],
+            'Rocket Launcher' => ['damage' => 35],
             'Flamethrower' => ['damage' => 15],
+            'Railgun' => ['damage' => 50],
             default => ['damage' => 10],
         };
 

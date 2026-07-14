@@ -23,7 +23,7 @@ class WagonShopFactory
             $wagon = Wagon::make([
                 'type' => 'cargo',
                 'name' => 'Cargo Wagon MK'.$i+1,
-                'weight' => 300 + $i * 100,
+                'weight' => 30 + $i * 10,
                 'armor' => 50 + $i * 10,
                 'max_armor' => 50 + $i * 10,
                 'price' => 500 + $i * 250,
@@ -47,7 +47,7 @@ class WagonShopFactory
             $wagon = Wagon::make([
                 'type' => 'weapon',
                 'name' => 'Weapon Wagon MK'.$i+1,
-                'weight' => 350 + $i * 100,
+                'weight' => 35 + $i * 10,
                 'armor' => 75 + $i * 10,
                 'max_armor' => 75 + $i * 10,
                 'price' => 600 + $i * 300,

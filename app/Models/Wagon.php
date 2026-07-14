@@ -104,6 +104,29 @@ class Wagon extends Model
         return true;
     }
 
+    public function getTotalWeightAttribute(): float
+    {
+        // 1. Базова вага самого вагона
+        $baseWeight = $this->weight;
+
+        // 2. Якщо це вантажний вагон, додаємо вагу ресурсів всередині
+        if ($this->type === 'cargo' && $this->cargo_wagon) {
+            $totalResourcesCount = $this->cargo_wagon->resources()->sum('quantity');
+
+            // Припустимо, 1 одиниця будь-якого ресурсу важить 0.05 тонни (50 кг)
+            $resourcesWeight = $totalResourcesCount * 0.05;
+
+            return $baseWeight + $resourcesWeight;
+        }
+
+        // Якщо це важкий зброярський вагон (наприклад, важить 25 тонн)
+//        if ($this->type === 'weapon') {
+//            return 25.0;
+//        }
+
+        return $baseWeight;
+    }
+
     //Relations
 
     public function train(): BelongsTo

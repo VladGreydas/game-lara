@@ -60,6 +60,11 @@ class CityController extends Controller
         $locomotive->fuel -= $route->fuel_cost;
         $locomotive->save();
 
+        // Process travel time
+        $travelTime = $route->travel_time;
+        $speedMultiplier = $player->train->getSpeedMultiplierAttribute();
+        $finalTravelTime = $travelTime / $speedMultiplier;
+
         // Initiate travel
         $player->city_id = null; // Player is no longer "in" a city
         $player->current_city_route_id = $route->id; // Mark the current route

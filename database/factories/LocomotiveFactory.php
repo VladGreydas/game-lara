@@ -19,9 +19,9 @@ class LocomotiveFactory extends Factory
     {
         return [
             'name' => 'Starter Engine',
-            'weight' => 350,
+            'weight' => 35,
             'type' => 'steam',
-            'power' => 2000,
+            'power' => 200,
             'armor' => 50,
             'max_armor' => 50,
             'fuel' => 10,
@@ -57,9 +57,9 @@ class LocomotiveFactory extends Factory
     {
         $startArray = [
             'name' => 'Elrick',
-            'weight' => 400,
+            'weight' => 40,
             'type' => 'Steam',
-            'power' => 3750,
+            'power' => 375,
             'armor' => 65,
             'max_armor' => 65,
             'fuel' => 25,
@@ -73,8 +73,8 @@ class LocomotiveFactory extends Factory
             case 'Diesel': {
                 $startArray['name'] = 'Mary';
                 $startArray['type'] = 'Diesel';
-                $startArray['weight'] = 600;
-                $startArray['power'] = 6000;
+                $startArray['weight'] = 60;
+                $startArray['power'] = 600;
                 $startArray['armor'] = 100;
                 $startArray['max_armor'] = 100;
                 $startArray['fuel'] = 50;
@@ -88,8 +88,8 @@ class LocomotiveFactory extends Factory
         for ($i = 0; $i < $count; $i++) {
             $result[] = $startArray;
             $startArray['name'] = $this->faker->firstName;
-            $startArray['weight'] += 250;
-            $startArray['power'] += 2500;
+            $startArray['weight'] += 25;
+            $startArray['power'] += 250;
             $startArray['armor'] += 50;
             $startArray['max_armor'] += 50;
             $startArray['fuel'] += 25;

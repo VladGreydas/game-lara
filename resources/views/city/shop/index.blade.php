@@ -158,6 +158,9 @@
                     @else
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                             @foreach($playerWagonsForSale as $wagon)
+                                @php
+                                    $price = $wagon->price / 2;
+                                @endphp
                                 <div class="rounded-xl border bg-white p-4 shadow">
                                     <h5 class="font-semibold capitalize text-lg">{{ $wagon->name }}</h5>
                                     <p>Weight: {{ $wagon->weight }}</p>
@@ -168,7 +171,6 @@
                                         @php
                                             $weaponWagonData = $wagon->weapon_wagon;
                                             $attachedWeapons = $weaponWagonData->weapons;
-                                            $price = $wagon->price / 2;
                                             $priceWithWeapons = $wagon->price / 2;
                                         @endphp
                                         <p>Weapon Slots: {{ $weaponWagonData->slots_available }} available
@@ -193,7 +195,7 @@
                                         <p>Cargo Capacity: {{ $cargoWagonData->capacity }}</p>
                                     @endif
 
-                                    <p class="font-bold text-red-700">Sell Price: <span id="sell-price-{{ $wagon->id }}">${{ $price }}</span></p>
+                                    <p class="font-bold text-red-700">Sell Price: $<span id="sell-price-{{ $wagon->id }}">{{ $price }}</span></p>
 
                                     {{-- --- ФОРМА ПРОДАЖУ ВАГОНА --- --}}
                                     <form action="{{ route('shop.wagon.sell', $wagon->id) }}" method="POST"
@@ -206,7 +208,7 @@
                                                    class="block font-medium text-sm text-gray-700">
                                                 Transfer attached weapons to another wagon or sell them:
                                             </label>
-                                            <select name="destination_weapon_wagon_id" id="dest_wagon_{{ $wagon->id }}"
+                                            <select name="destination_wagon_id" id="dest_wagon_{{ $wagon->id }}"
                                                     class="form-select w-full rounded-md border-gray-300 shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
                                                 <option value="">Sell weapons along with wagon</option>
                                                 @foreach($weaponWagonsForMounting->where('wagon_id', '!=', $wagon->id) as $destWagon)
@@ -218,7 +220,24 @@
                                             </select>
                                         @endif
 
-                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600">Sell Wagon
+                                        @if($wagon->type === 'cargo' && $wagon->cargo_wagon->isNotEmpty())
+                                            <label for="dest_wagon_{{ $wagon->id }}"
+                                                   class="block font-medium text-sm text-gray-700">
+                                                Transfer resources to another wagon or sell them:
+                                            </label>
+                                            <select name="destination_wagon_id" id="dest_wagon_{{ $wagon->id }}"
+                                                    class="form-select w-full rounded-md border-gray-300 shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
+                                                <option value="">Sell cargo along with wagon</option>
+                                                @foreach($playerWagonsForSale->where('type', 'cargo')->where('id', '!=', $wagon->id) as $destWagon)
+                                                    <option value="{{ $destWagon->id }}" id="dest_wagon_option_{{ $destWagon->id }}">
+                                                        #{{ $destWagon->id }} ({{ $destWagon->name }}) - Free
+                                                        Free space: {{ $destWagon->cargo_wagon->getRemainingCapacity() }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        @endif
+
+                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600" onclick="return confirm('Are you sure you want to sell the wagon')">Sell Wagon
                                         </x-primary-button>
                                     </form>
                                     {{-- --- КІНЕЦЬ ФОРМИ ПРОДАЖУ ВАГОНА --- --}}
@@ -244,7 +263,7 @@
                                     <p>Damage: {{ $weapon->damage }}</p>
                                     @if($weapon->weapon_wagon_id)
                                         <p class="text-red-600">Mounted
-                                            on: {{ $weapon->weaponWagon->wagon->name ?? 'Unknown Wagon' }}</p>
+                                            on: {{ $weapon->weapon_wagon->wagon->name ?? 'Unknown Wagon' }}</p>
                                     @else
                                         <p class="text-green-600">Status: Unmounted</p>
                                     @endif

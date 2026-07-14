@@ -18,18 +18,19 @@ class WeaponFactory extends Factory
     {
         return [
             'name' => 'Default',
-            'type' => 'HMG',
-            'damage' => 50,
+            'type' => 'LMG',
+            'damage' => 25,
             'weight' => 200,
-            'price' => 800,
+            'price' => 250,
             'lvl' => 1,
             'upgrade_cost' => 100,
         ];
     }
 
-    public function forShop(string $type = 'HMG', int $variant = 0): Factory
+    public function forShop(string $type = 'LMG', int $variant = 0): Factory
     {
         $baseStats = match ($type) {
+            'LMG' => ['damage' => 25, 'price' => 250],
             'HMG' => ['damage' => 50, 'price' => 500],
             'Cannon' => ['damage' => 100, 'price' => 1000],
             'Mortar' => ['damage' => 75, 'price' => 750],
@@ -53,7 +54,8 @@ class WeaponFactory extends Factory
 
     public static function generateShopWeapons(): Collection
     {
-        $types = ['HMG', 'Cannon', 'Mortar', 'Rocket Launcher', 'Flame Thrower', 'Laser'];
+        $types = array_keys(Weapon::types());
+        //$types = ['HMG', 'Cannon', 'Mortar', 'Rocket Launcher', 'Flame Thrower', 'Laser'];
         $collection = collect();
 
         foreach ($types as $type) {

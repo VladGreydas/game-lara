@@ -88,8 +88,6 @@ class ShopController extends Controller
         }
         $availableCargoSpace = $totalCargoCapacity - $currentCargoCapacity;
 
-        // Групуємо ресурси гравця за resource_id для відображення загальної кількості одного типу ресурсу
-        // Це потрібно для секції "Sell Resources"
         $groupedPlayerCargoWagonResources = $playerCargoWagonResources->groupBy('resource_id')->map(function ($items) {
             $firstItem = $items->first();
             // Повертаємо об'єкт, схожий на CargoWagonResource, але з агрегованою кількістю
@@ -97,10 +95,6 @@ class ShopController extends Controller
                 'resource_id' => $firstItem->resource_id,
                 'resource' => $firstItem->resource, // Залишаємо об'єкт Resource
                 'quantity' => $items->sum('quantity'), // Сумуємо кількості
-                // Можливо, тут знадобиться cargo_wagon_resource_id для форми продажу.
-                // Наразі залишаємо його без конкретного ID, оскільки продаватимемо "від загальної кількості"
-                // і потім розподілятимемо продаж між кількома CargoWagonResource, якщо необхідно.
-                // Для форми продажу краще передавати resource_id і вже в контролері шукати CargoWagonResource
             ];
         });
 
@@ -116,11 +110,11 @@ class ShopController extends Controller
             'weaponWagonsForMounting',
             'playerWagonsForSale',
             'playerWeaponsForSale',
-            'cityResources',                 // ДОДАНО: Ресурси для купівлі
-            'playerCargoWagonResources',     // ДОДАНО: Ресурси гравця для продажу (НЕ згрупована колекція CargoWagonResource)
-            'groupedPlayerCargoWagonResources', // ДОДАНО: Згруповані ресурси гравця для відображення
-            'availableCargoSpace',           // ДОДАНО: Доступний вантажний простір
-            'totalCargoCapacity'             // ДОДАНО: Загальна вантажна ємність
+            'cityResources',
+            'playerCargoWagonResources',
+            'groupedPlayerCargoWagonResources',
+            'availableCargoSpace',
+            'totalCargoCapacity'
         ));
     }
 
@@ -220,18 +214,14 @@ class ShopController extends Controller
         /** @var Player $player */
         $player = Auth::user()->player;
 
-        // Перевірка дозволу: чи належить цей вагон гравцеві
-        // Laravel автоматично видасть 404, якщо вагон не знайдено за ID,
-        // але ми повинні перевірити, чи він належить поточному гравцеві.
         if ($wagon->train->player->id !== $player->id) {
             throw new AuthorizationException('You do not own this wagon.');
         }
 
         try {
-            $destinationWeaponWagonId = $request->input('destination_weapon_wagon_id');
+            $destinationWagonId = $request->input('destination_wagon_id');
 
-            // Передаємо об'єкт Wagon напряму в сервіс
-            $this->shopSellService->sellWagon($player, $wagon, $destinationWeaponWagonId);
+            $this->shopSellService->sellWagon($player, $wagon, $destinationWagonId);
 
             return back()->with('success', 'Wagon sold successfully!');
 
@@ -303,10 +293,6 @@ class ShopController extends Controller
         }
 
         try {
-            // Валідації тут немає, оскільки ID зброї приходить через URL
-            // і інших параметрів поки не передбачається.
-
-            // Передаємо об'єкт Weapon напряму в сервіс
             $this->shopSellService->sellWeapon($player, $weapon);
 
             return back()->with('success', 'Weapon sold successfully!');
@@ -364,7 +350,7 @@ class ShopController extends Controller
             $player->train->load('wagons.cargo_wagon'); // Завантажуємо cargo_wagon для кожного вагона
             foreach ($player->train->wagons as $wagon) {
                 if ($wagon->isCargo() && $wagon->cargo_wagon) {
-                    $availableCargoSpace += $wagon->cargo_wagon->capacity - $wagon->cargo_wagon->getCurrentCapacity();
+                    $availableCargoSpace += $wagon->cargo_wagon->getRemainingCapacity();
                 }
             }
         }
@@ -390,7 +376,7 @@ class ShopController extends Controller
                 foreach ($player->train->wagons as $wagon) {
                     if ($wagon->isCargo() && $wagon->cargo_wagon && $remainingQuantity > 0) {
                         $cargoWagon = $wagon->cargo_wagon;
-                        $wagonFreeSpace = $cargoWagon->capacity - $cargoWagon->getCurrentCapacity();
+                        $wagonFreeSpace = $cargoWagon->getRemainingCapacity();
 
                         if ($wagonFreeSpace > 0) {
                             $quantityToAdd = min($remainingQuantity, $wagonFreeSpace);

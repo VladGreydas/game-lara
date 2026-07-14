@@ -46,7 +46,7 @@ class CargoWagon extends Model
      */
     public function getCurrentCapacity(): int
     {
-        return $this->resources->sum('quantity');
+        return $this->resources->sum('quantity') ?? 0;
     }
 
     /**
@@ -55,5 +55,13 @@ class CargoWagon extends Model
     public function getRemainingCapacity(): int
     {
         return $this->capacity - $this->getCurrentCapacity();
+    }
+
+    /**
+     * Check if the wagon is not empty.
+     */
+    public function isNotEmpty(): bool
+    {
+        return $this->getCurrentCapacity() > 0;
     }
 }
