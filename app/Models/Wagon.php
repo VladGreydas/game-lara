@@ -104,7 +104,7 @@ class Wagon extends Model
         return true;
     }
 
-    public function getTotalWeightAttribute(): float
+    public function getTotalWeight(): float
     {
         // 1. Базова вага самого вагона
         $baseWeight = $this->weight;

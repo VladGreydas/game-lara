@@ -24,7 +24,7 @@ class CityController extends Controller
             } else {
                 // Still traveling, redirect to a travel status page or show a message
                 $route = CityRoute::find($player->current_city_route_id);
-                return view('travel.on_route', compact('player', 'route')); // NEW: Create a travel status view
+                return view('city.on_route', compact('player', 'route')); // NEW: Create a travel status view
             }
         }
 
@@ -69,7 +69,7 @@ class CityController extends Controller
         $player->city_id = null; // Player is no longer "in" a city
         $player->current_city_route_id = $route->id; // Mark the current route
         $player->travel_starts_at = Carbon::now();
-        $player->travel_finishes_at = Carbon::now()->addHours($route->travel_time); // Calculate arrival time
+        $player->travel_finishes_at = Carbon::now()->addHours($finalTravelTime); // Calculate arrival time
         $player->save();
 
         return redirect()->route('player.index')->with('success', 'You have started your journey to ' . $route->toCity->name);

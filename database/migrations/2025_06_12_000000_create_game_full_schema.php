@@ -127,6 +127,8 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->string('unit')->default('unit');
+            $table->boolean('is_fuel')->default(false);
+            $table->unsignedInteger('fuel_value')->default(0);
             $table->timestamps();
         });
 

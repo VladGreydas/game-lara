@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -12,11 +14,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $slug
  * @property string|null $description
  * @property string $unit
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CargoWagonResource> $cargoWagons cargo wagons that have this resource
+ * @property bool $is_fuel
+ * @property int $fuel_value
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, CargoWagonResource> $cargoWagons cargo wagons that have this resource
  * @property-read int|null $cargo_wagons_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CityResource> $cities
+ * @property-read Collection<int, CityResource> $cities
  * @property-read int|null $cities_count
  */
 class Resource extends Model
@@ -33,6 +37,8 @@ class Resource extends Model
         'slug',
         'description',
         'unit',
+        'is_fuel',
+        'fuel_value'
     ];
 
     /**

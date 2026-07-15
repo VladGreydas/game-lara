@@ -30,6 +30,8 @@ class ResourceSeeder extends Seeder
                 'slug' => 'coal',
                 'description' => 'Essential fuel for locomotives and industrial processes.',
                 'unit' => 'unit',
+                'is_fuel' => '1',
+                'fuel_value' => '1'
             ],
             [
                 'name' => 'Grain',

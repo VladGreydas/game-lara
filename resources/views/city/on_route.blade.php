@@ -18,11 +18,12 @@
                     @endif
 
                     <p class="text-lg mb-2">Your train is currently traveling from {{ $route->fromCity->name }} to {{ $route->toCity->name }}.</p>
-                    <p class="text-lg mb-4">Estimated arrival time: <strong id="arrival-time">Loading...</strong></p>
+                    <p class="text-lg mb-4">Time remaining: <strong id="arrival-time" class="font-mono text-indigo-600">Loading...</strong></p>
 
                     <div class="relative pt-1">
-                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-indigo-200">
-                            <div id="travel-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500"></div>
+                        <div class="overflow-hidden h-3 mb-4 text-xs flex rounded bg-indigo-200">
+                            {{-- Додано transition-all duration-1000 для плавної зміни смуги --}}
+                            <div id="travel-progress" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 transition-all duration-1000 ease-linear"></div>
                         </div>
                     </div>
 
@@ -39,39 +40,55 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const travelFinishesAt = new Date("{{ $player->travel_finishes_at->toISOString() }}");
-                const travelStartsAt = new Date("{{ $player->travel_finishes_at->subHours($route->travel_time)->toISOString() }}");
-                const totalTravelDurationMs = travelFinishesAt.getTime() - travelStartsAt.getTime();
+                // Беремо ISO рядки прямо з Blade
+                const finishesStr = "{{ $player->travel_finishes_at->toISOString() }}";
+                // Безпечно копіюємо Carbon об'єкт перед відніманням годин
+                const startsStr = "{{ $player->travel_finishes_at->copy()->subHours($route->travel_time)->toISOString() }}";
+
+                const travelFinishesAt = new Date(finishesStr).getTime();
+                const travelStartsAt = new Date(startsStr).getTime();
+                const totalTravelDurationMs = travelFinishesAt - travelStartsAt;
+
+                const timerElement = document.getElementById('arrival-time');
+                const progressElement = document.getElementById('travel-progress');
 
                 function updateTravelStatus() {
-                    const now = new Date();
-                    const remainingTimeMs = travelFinishesAt.getTime() - now.getTime();
-                    const elapsedTravelDurationMs = now.getTime() - travelStartsAt.getTime();
+                    const now = new Date().getTime();
+                    const remainingTimeMs = travelFinishesAt - now;
+                    const elapsedTravelDurationMs = now - travelStartsAt;
 
                     if (remainingTimeMs <= 0) {
-                        document.getElementById('arrival-time').innerText = 'Arrived!';
-                        document.getElementById('travel-progress').style.width = '100%';
-                        // Optional: redirect after a short delay
+                        clearInterval(travelInterval); // Зупиняємо таймер
+                        timerElement.innerText = 'Arrived!';
+                        progressElement.style.width = '100%';
+
+                        // Затримка 1.5 секунди, щоб консольна команда Laravel встигла відпрацювати
                         setTimeout(() => {
-                            window.location.reload(); // Reload page to trigger processArrival logic
-                        }, 1000);
-                    } else {
-                        const totalSeconds = Math.floor(remainingTimeMs / 1000);
-                        const hours = Math.floor(totalSeconds / 3600);
-                        const minutes = Math.floor((totalSeconds % 3600) / 60);
-                        const seconds = totalSeconds % 60;
+                            window.location.reload();
+                        }, 1500);
+                        return;
+                    }
 
-                        document.getElementById('arrival-time').innerText =
-                            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    // Рахуємо залишок часу
+                    const totalSeconds = Math.floor(remainingTimeMs / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
 
+                    timerElement.innerText =
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                    // Розрахунок прогресу
+                    if (totalTravelDurationMs > 0) {
                         const progress = (elapsedTravelDurationMs / totalTravelDurationMs) * 100;
-                        document.getElementById('travel-progress').style.width = `${Math.min(100, progress)}%`;
-
-                        setTimeout(updateTravelStatus, 1000); // Update every second
+                        progressElement.style.width = `${Math.min(100, progress)}%`;
                     }
                 }
 
+                // Запускаємо один раз одразу, щоб уникнути "Loading..." на першу секунду
                 updateTravelStatus();
+                // Зберігаємо інтервал у змінну, щоб мати змогу його очистити
+                const travelInterval = setInterval(updateTravelStatus, 1000);
             });
         </script>
     @endpush

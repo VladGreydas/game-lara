@@ -1,6 +1,6 @@
 <x-app-layout>
     {{-- Перевіряємо, чи існує об'єкт $player --}}
-    <?php /** @var \App\Models\Player $player */?>
+    <?php /** @var \App\Models\Player $player */ ?>
     @if ($player)
         <x-slot name="header">
             <div class="flex justify-between">
@@ -11,8 +11,10 @@
                     <x-dropdown>
                         <x-slot name="trigger">
                             <button>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400"
+                                     viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
                                 </svg>
                             </button>
                         </x-slot>
@@ -23,7 +25,8 @@
                             <form method="post" action="{{ route('player.destroy', $player) }}">
                                 @csrf
                                 @method('DELETE')
-                                <x-dropdown-link :href="route('player.destroy', $player)" onclick="event.preventDefault();this.closest('form').submit();">
+                                <x-dropdown-link :href="route('player.destroy', $player)"
+                                                 onclick="event.preventDefault();this.closest('form').submit();">
                                     {{ __('Delete') }}
                                 </x-dropdown-link>
                             </form>
@@ -42,9 +45,9 @@
             @endif
             <div class="p-6 flex-col">
                 <p class="mt-4 text-lg text-gray-900">Nickname: {{ $player->nickname }}</p>
-                <p class="mt-4 text-lg text-gray-900">Level:    {{ $player->lvl }}</p>
-                <p class="mt-4 text-lg text-gray-900">Cash:     {{ $player->money }}</p>
-                <p class="mt-4 text-lg text-gray-900">EXP:      {{ $player->exp }} / {{ $player->max_exp }}</p>
+                <p class="mt-4 text-lg text-gray-900">Level: {{ $player->lvl }}</p>
+                <p class="mt-4 text-lg text-gray-900">Cash: {{ $player->money }}</p>
+                <p class="mt-4 text-lg text-gray-900">EXP: {{ $player->exp }} / {{ $player->max_exp }}</p>
 
                 @if($player->canLevelUp())
                     <div class="mt-6 shadow-sm rounded-lg divide-y">
@@ -64,64 +67,122 @@
                     {{-- Секція статусу подорожі --}}
                     @php
                         $route = $player->currentCityRoute;
-                        // Переконайтеся, що travel_starts_at та travel_finishes_at встановлені
-                        if ($player->travel_starts_at && $player->travel_finishes_at) {
-                            $travelDurationSeconds = $player->travel_finishes_at->diffInSeconds($player->travel_starts_at);
-                            $timeElapsedSeconds = now()->diffInSeconds($player->travel_starts_at);
-                            $timeLeftSeconds = ($travelDurationSeconds - $timeElapsedSeconds) * -1;
 
-                            $progress = ($timeElapsedSeconds / $travelDurationSeconds) * 100;
-                            // Обмеження прогресу, щоб не перевищував 100%
-                            $progress = min(100, $progress);
+                        // Безпечно беремо дати
+                        $startsAt = $player->travel_starts_at;
+                        $finishesAt = $player->travel_finishes_at;
 
-                            $timeLeftHours = floor($timeLeftSeconds / 3600);
-                            $timeLeftMinutes = floor(($timeLeftSeconds % 3600) / 60);
-                            $timeLeftSecondsRemainder = $timeLeftSeconds % 60;
-                        } else {
-                            echo 'Time not set';
-                            $progress = 0;
-                            $timeLeftHours = 0;
-                            $timeLeftMinutes = 0;
-                            $timeLeftSeconds = 0;
-                            $timeLeftSecondsRemainder = 0;
-                        }
+                        // Розрахунок початкового стану для першого рендеру (запобігає стрибкам при завантаженні)
+                        $totalDuration = $startsAt && $finishesAt ? $finishesAt->diffInSeconds($startsAt) : 0;
+                        $elapsed = $startsAt ? now()->diffInSeconds($startsAt, false) : 0;
+                        $progress = $totalDuration > 0 ? min(100, max(0, ($elapsed / $totalDuration) * 100)) : 0;
                     @endphp
 
                     <h3 class="text-xl font-semibold mb-4">Current Status: Traveling</h3>
                     <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert">
-                        <p class="font-bold">On the way!</p>
-                        <p>From: <strong>{{ $route->fromCity->name }}</strong> to <strong>{{ $route->toCity->name }}</strong></p>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $progress }}%"></div>
-                        </div>
-                        <p class="text-sm mt-1">Progress: {{ round($progress) }}%</p>
-                        @if ($timeLeftSeconds > 0)
-                            <p class="text-sm">Time left:
-                                @if ($timeLeftHours > 0){{ $timeLeftHours }}h @endif
-                                @if ($timeLeftMinutes > 0){{ $timeLeftMinutes }}m @endif
-                                {{ $timeLeftSecondsRemainder }}s
-                            </p>
-                        @else
-                            <p class="text-sm">Arriving soon!</p>
-                        @endif
-                        <p class="text-sm">Estimated arrival: {{ $player->travel_finishes_at ? $player->travel_finishes_at->format('H:i, M d') : 'N/A' }}</p>
-                    </div>
-                    <p class="mt-4">You will automatically arrive at your destination once the travel time is up.</p>
+                        <p class="font-bold text-blue-800">On the way!</p>
+                        <p class="mb-2">From: <strong>{{ $route->fromCity->name }}</strong> to
+                            <strong>{{ $route->toCity->name }}</strong></p>
 
+                        {{-- Прогрес-бар з плавним анімованим переходом --}}
+                        <div class="w-full bg-blue-200 rounded-full h-3 dark:bg-gray-700 mt-2 overflow-hidden">
+                            <div id="dashboard-progress"
+                                 class="bg-blue-600 h-3 rounded-full transition-all duration-1000 ease-linear"
+                                 style="width: {{ $progress }}%"
+                                 data-start="{{ $startsAt ? $startsAt->toISOString() : '' }}"
+                                 data-finish="{{ $finishesAt ? $finishesAt->toISOString() : '' }}">
+                            </div>
+                        </div>
+                        <p class="text-sm mt-1">Progress: <span
+                                id="dashboard-progress-text">{{ round($progress) }}</span>%</p>
+
+                        <p class="text-sm font-medium mt-1">
+                            Time left: <strong id="dashboard-timer"
+                                               class="font-mono text-blue-900">Calculating...</strong>
+                        </p>
+
+                        <p class="text-xs text-blue-600 mt-2">Estimated
+                            arrival: {{ $finishesAt ? $finishesAt->format('H:i, M d') : 'N/A' }}</p>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-500">You will automatically arrive at your destination once the
+                        travel time is up. This page will refresh when you arrive.</p>
+
+                    {{-- Скрипт працює тільки коли гравець подорожує --}}
+                    @push('scripts')
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const progressBar = document.getElementById('dashboard-progress');
+                                const timerText = document.getElementById('dashboard-timer');
+                                const progressText = document.getElementById('dashboard-progress-text');
+
+                                if (!progressBar || !timerText) return;
+
+                                const startsAt = new Date(progressBar.dataset.start).getTime();
+                                const finishesAt = new Date(progressBar.dataset.finish).getTime();
+                                const totalDuration = finishesAt - startsAt;
+
+                                function updateDashboardTravel() {
+                                    const now = new Date().getTime();
+                                    const remaining = finishesAt - now;
+                                    const elapsed = now - startsAt;
+
+                                    if (remaining <= 0) {
+                                        clearInterval(dashboardInterval);
+                                        timerText.innerText = 'Arrived!';
+                                        progressBar.style.width = '100%';
+                                        progressText.innerText = '100';
+
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                            window.location.reload();
+                                        }, 1500);
+                                        return;
+                                    }
+
+                                    // Розрахунок таймера
+                                    const totalSeconds = Math.floor(remaining / 1000);
+                                    const hours = Math.floor(totalSeconds / 3600);
+                                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                                    const seconds = totalSeconds % 60;
+
+                                    let timeString = '';
+                                    if (hours > 0) timeString += `${hours}h `;
+                                    if (minutes > 0 || hours > 0) timeString += `${minutes}m `;
+                                    timeString += `${seconds}s`;
+
+                                    timerText.innerText = timeString;
+
+                                    // Розрахунок та оновлення прогресу
+                                    if (totalDuration > 0) {
+                                        const progressPercent = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+                                        progressBar.style.width = `${progressPercent}%`;
+                                        progressText.innerText = Math.round(progressPercent);
+                                    }
+                                }
+
+                                updateDashboardTravel();
+                                const dashboardInterval = setInterval(updateDashboardTravel, 1000);
+                            });
+                        </script>
+                    @endpush
                 @elseif ($player->inCity())
                     {{-- Секція інформації про поточне місто та послуги --}}
                     <h3 class="text-xl font-semibold mb-4">Current Location:</h3>
-                    <p class="text-lg font-semibold text-gray-800">You are in: <a href="{{ route('city.show', $player->city) }}" class="text-blue-600 hover:underline">{{ $player->city->name }}</a></p>
+                    <p class="text-lg font-semibold text-gray-800">You are in: <a
+                            href="{{ route('city.show', $player->city) }}"
+                            class="text-blue-600 hover:underline">{{ $player->city->name }}</a></p>
 
                     <div class="mt-4 p-4 bg-gray-50 rounded-lg shadow-inner">
                         <h4 class="font-bold text-lg mb-2">City Services:</h4>
                         @if ($player->city->has_workshop)
-                            <p><a href="{{ route('workshop.index') }}" class="text-indigo-600 hover:underline">Go to Workshop</a> - Upgrade your train, wagons, and weapons.</p>
+                            <p><a href="{{ route('workshop.index') }}" class="text-indigo-600 hover:underline">Go to
+                                    Workshop</a> - Upgrade your train, wagons, and weapons.</p>
                         @else
                             <p class="text-gray-600">No Workshop in this city.</p>
                         @endif
                         @if ($player->city->has_shop)
-                            <p><a href="{{ route('shop.index') }}" class="text-indigo-600 hover:underline">Go to Shop</a> - Buy and sell train parts, weapons, and resources.</p>
+                            <p><a href="{{ route('shop.index') }}" class="text-indigo-600 hover:underline">Go to
+                                    Shop</a> - Buy and sell train parts, weapons, and resources.</p>
                         @else
                             <p class="text-gray-600">No Shop in this city.</p>
                         @endif
@@ -135,14 +196,15 @@
                     @if($player->train)
                         <div class="mb-4">
                             <h4 class="text-lg font-bold">Locomotive:</h4>
-                            <x-locomotive-card :locomotive="$player->train->locomotive" :upgrade="false" :rename="true" />
+                            <x-locomotive-card :locomotive="$player->train->locomotive" :upgrade="false"
+                                               :rename="true"/>
                         </div>
 
                         <div class="mb-4">
                             <h4 class="text-lg font-bold">Wagons:</h4>
                             @if($player->train->wagons->isNotEmpty())
                                 @foreach($player->train->wagons as $wagon)
-                                    <x-wagon-card :wagon="$wagon" :upgrade="false" :rename="true" />
+                                    <x-wagon-card :wagon="$wagon" :upgrade="false" :rename="true"/>
                                 @endforeach
                             @else
                                 <p>You have no wagons yet.</p>
@@ -178,7 +240,9 @@
         <div class="mt-6 shadow-sm rounded-lg divide-y">
             <form method="POST" action="{{route('player.store')}}">
                 @csrf
-                <input autocomplete="off" type="text" name="nickname" class="ml-10 h-12 w-4/5 border-gray-300 focus:border-indigo-300 focus:ring focus:ring-opacity-50 rounded-md shadow-sm" placeholder="Enter your nickname here...">
+                <input autocomplete="off" type="text" name="nickname"
+                       class="ml-10 h-12 w-4/5 border-gray-300 focus:border-indigo-300 focus:ring focus:ring-opacity-50 rounded-md shadow-sm"
+                       placeholder="Enter your nickname here...">
                 <x-primary-button class="ml-1 h-12">{{ __('Create New Player') }}</x-primary-button>
             </form>
         </div>
