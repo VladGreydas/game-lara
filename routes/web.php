@@ -73,6 +73,11 @@ Route::prefix('player')->group(function () {
     Route::delete('/{player}', [PlayerController::class, 'destroy'])->name('player.destroy');
 });
 
+Route::post('/locale/{locale}', function ($locale) {
+    session()->put('locale', $locale);
+    return back();
+})->name('locale.set');
+
 Route::controller(LocomotiveController::class)->prefix('locomotive')->group(function () {
     Route::post('/{locomotive}/upgrade', 'upgrade')->name('locomotive.upgrade');
     Route::post('/{locomotive}/repair', 'repair')->name('locomotive.repair');
