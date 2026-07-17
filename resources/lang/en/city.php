@@ -27,4 +27,6 @@ return [
     'tavern' => 'Tavern',
     'rest_place' => 'A quiet place to rest. Future: contracts & quests.',
     'visit_tavern' => 'Visit Tavern',
+    'all_rights_reserved' => 'All rights reserved.',
+    'designed_in_the_spirit' => 'Designed in the spirit of the Victorian era.',
 ];

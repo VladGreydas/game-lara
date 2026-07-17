@@ -148,6 +148,7 @@
             <!-- Page Content -->
             <main>
                 {{ $slot }}
+                <x-victorian-footer />
             </main>
         </div>
     </body>
