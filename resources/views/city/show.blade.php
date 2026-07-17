@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-serif text-3xl text-[#5d3a1a]">
-            {{ __('Current City: ') . $city->name }}
+            {{ __('city.current_city') . ' ' . $city->name }}
         </h2>
-        <p class="font-serif text-[#8b5a2b] italic">"Progress, but with dignity."</p>
+        <p class="font-serif text-[#8b5a2b] italic">"{{ __('city.progress_but_with_dignity') }}"</p>
         <x-player-info/>
     </x-slot>
 
@@ -11,49 +11,49 @@
         <!-- Main Header Card -->
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
-                <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">Welcome to {{ $city->name }}!</h3>
-                <p class="text-gray-700 italic">You may refuel your locomotive here and plan a trip to other cities.</p>
+                <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">{{ __('city.welcome_to') . ' ' . $city->name . '!' }}</h3>
+                <p class="text-gray-700 italic">{{ __('city.refuel_locomotive') }}</p>
             </div>
 
             <div class="p-6">
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- City Level -->
                     <div class="p-4 bg-white border border-[#d4b483] rounded">
-                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">City Level</h4>
+                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('city.city_level') }}</h4>
                         <p class="text-gray-800 mb-2">
                             {{ $city->level }} / {{ $city->max_level }}
                         </p>
-                        <p class="text-sm text-gray-600 mb-4">Upgrade cost: ${{ $city->getUpgradeCost() }}</p>
+                        <p class="text-sm text-gray-600 mb-4">{{ __('city.upgrade_cost') }} ${{ $city->getUpgradeCost() }}</p>
 
                         @if($city->level < $city->max_level)
                             <form action="{{ route('city.upgrade') }}" method="POST" class="inline">
                                 @csrf
                                 <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                                    Upgrade City
+                                    {{ __('city.upgrade_city') }}
                                 </button>
                             </form>
                         @else
-                            <p class="text-gray-600 mt-2 italic">City is at max level.</p>
+                            <p class="text-gray-600 mt-2 italic">{{ __('city.city_is_at_max_level') }}</p>
                         @endif
                     </div>
 
                     <!-- Refuel -->
                     <div class="p-4 bg-white border border-[#d4b483] rounded">
-                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">Locomotive Fuel</h4>
+                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('city.locomotive_fuel') }}</h4>
                         <p class="text-gray-800 mb-2">
                             {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}
                         </p>
-                        <p class="text-sm text-gray-600 mb-4">Refueling cost: ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
+                        <p class="text-sm text-gray-600 mb-4">{{ __('city.refueling_cost') }} ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
 
                         @if($player->train->locomotive->fuel < $player->train->locomotive->max_fuel)
                             <form action="{{ route('city.refuel') }}" method="POST" class="inline">
                                 @csrf
                                 <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                                    Refuel
+                                    {{ __('city.refuel') }}
                                 </button>
                             </form>
                         @else
-                            <p class="text-gray-600 mt-2 italic">Your fuel tank is full.</p>
+                            <p class="text-gray-600 mt-2 italic">{{ __('city.fuel_tank_is_full') }}</p>
                         @endif
                     </div>
                 </div>
@@ -63,7 +63,7 @@
         <!-- Outgoing Routes -->
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
-                <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">Outgoing Routes</h3>
+                <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">{{ __('city.outgoing_routes') }}</h3>
             </div>
             <div class="p-6">
                 @if($city->outgoingRoutes->count())
@@ -72,19 +72,19 @@
                             <li class="p-4 bg-white border border-[#d4b483] rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between">
                                 <div class="mb-2 md:mb-0">
                                     <span class="font-bold text-[#5d3a1a] text-lg">→ {{ $route->toCity->name }}</span>
-                                    <span class="ml-2 text-gray-600 text-sm italic">({{ $route->fuel_cost }} fuel, {{ $route->travel_time }}h)</span>
+                                    <span class="ml-2 text-gray-600 text-sm italic">({{ __('city.fuel') }} {{ $route->fuel_cost }}, {{ __('city.time') }} {{ $route->travel_time }}h)</span>
                                 </div>
                                 <form method="POST" action="{{ route('city.travel', $route) }}" class="inline">
                                     @csrf
                                     <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                                        Travel
+                                        {{ __('city.travel') }}
                                     </button>
                                 </form>
                             </li>
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-gray-600 mt-2 italic">No outgoing routes from this city.</p>
+                    <p class="text-gray-600 mt-2 italic">{{ __('city.no_outgoing_routes') }}</p>
                 @endif
             </div>
         </div>
@@ -94,12 +94,12 @@
             @if ($player->city->has_workshop)
                 <div class="victorian-card">
                     <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
-                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">Workshop</h3>
+                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">{{ __('city.workshop') }}</h3>
                     </div>
                     <div class="p-6">
-                        <p class="text-gray-700 mb-4">Here you can upgrade your train, wagons, and weapons.</p>
+                        <p class="text-gray-700 mb-4">{{ __('city.upgrade_train') }}</p>
                         <a href="{{ route('workshop.index') }}" class="victorian-btn inline-block w-full text-center py-2 px-4 rounded text-sm">
-                            Go to Workshop
+                            {{ __('city.go_to_workshop') }}
                         </a>
                     </div>
                 </div>
@@ -108,12 +108,12 @@
             @if ($player->city->has_shop)
                 <div class="victorian-card">
                     <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
-                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">Shop</h3>
+                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">{{ __('city.shop') }}</h3>
                     </div>
                     <div class="p-6">
-                        <p class="text-gray-700 mb-4">Here you can buy and sell locomotives, wagons, weapons and more.</p>
+                        <p class="text-gray-700 mb-4">{{ __('city.buy_sell_locomotives') }}</p>
                         <a href="{{ route('shop.index') }}" class="victorian-btn inline-block w-full text-center py-2 px-4 rounded text-sm">
-                            Go to Shop
+                            {{ __('city.go_to_shop') }}
                         </a>
                     </div>
                 </div>
@@ -122,12 +122,12 @@
             @if ($player->city->hasSaloon())
                 <div class="victorian-card">
                     <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
-                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">Tavern</h3>
+                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">{{ __('city.tavern') }}</h3>
                     </div>
                     <div class="p-6">
-                        <p class="text-gray-700 mb-4">A quiet place to rest. Future: contracts & quests.</p>
+                        <p class="text-gray-700 mb-4">{{ __('city.rest_place') }}</p>
                         <a href="{{ route('city.saloon.show', $player->city) }}" class="victorian-btn inline-block w-full text-center py-2 px-4 rounded text-sm">
-                            Visit Tavern
+                            {{ __('city.visit_tavern') }}
                         </a>
                     </div>
                 </div>
