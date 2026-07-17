@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
  * @property $max_level Max city level
  * @property $outgoingRoutes Outgoing routes
  * @property $players Players
- * @property $has_worksop Does the city have worksop?
+ * @property $has_workshop Does the city have workshop?
  * @property $has_shop Does the city have a shop?
  * @property-read Collection<int, CityResource> $resources
  * @property-read int|null $resources_count
@@ -24,6 +24,8 @@ class City extends Model
         'name',
         'level',
         'max_level',
+        'has_workshop',
+        'has_shop',
     ];
 
     protected static function booted()
@@ -84,21 +86,32 @@ class City extends Model
 
     /**
      * Calculate upgrade cost based on current level.
+     * Applies discount if city has workshop.
      *
      * @return int
      */
     public function getUpgradeCost(): int
     {
-        return 1000 * $this->level;
+        $baseCost = 1000 * $this->level;
+        if ($this->has_workshop) {
+            // 20% discount for cities with workshop
+            return (int) round($baseCost * 0.8);
+        }
+        return $baseCost;
     }
 
     /**
      * Refresh base quantities for all city resources based on city level.
+     * Only allows resource improvement if city has a shop.
      *
      * @return void
      */
     protected function refreshResourcesCaps(): void
     {
+        if (!$this->has_shop) {
+            return;
+        }
+
         $this->resources()->update([
             'base_quantity' => 1000 + $this->level * 500,
         ]);
