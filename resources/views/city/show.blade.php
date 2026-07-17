@@ -1,121 +1,168 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-serif text-3xl text-[#5d3a1a]">
             {{ __('Current City: ') . $city->name }}
         </h2>
+        <p class="font-serif text-[#8b5a2b] italic">"Progress, but with dignity."</p>
         <x-player-info/>
     </x-slot>
 
-    <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg p-6 space-y-4">
-        <div>
-            <p class="text-lg font-semibold text-gray-800">Welcome to {{ $city->name }}!</p>
-            <p class="text-gray-700 mt-2">You can refuel your locomotive here and plan a trip to other cities.</p>
-        </div>
-
-        @if(session('success'))
-            <div class="text-green-600 font-semibold">{{ session('success') }}</div>
-        @endif
-        @if(session('error'))
-            <div class="text-red-600 font-semibold">{{ session('error') }}</div>
-        @endif
-
-        <div class="mt-6 p-4 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-2">City Level: {{ $city->level }} / {{ $city->max_level }}</h2>
-            <p class="text-gray-600 mb-2">Upgrade cost: ${{ $city->getUpgradeCost() }}</p>
-
-            @if($city->level < $city->max_level)
-                <form action="{{ route('city.upgrade') }}" method="POST">
-                    @csrf
-                    <x-primary-button>Upgrade City</x-primary-button>
-                </form>
-            @else
-                <p class="text-gray-600 mt-2">City is at max level.</p>
-            @endif
-        </div>
-
-        <div class="mt-6 p-4 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-4">Refuel Locomotive</h2>
-            <p>Fuel: {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}</p>
-            <p>Refueling Cost: ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
-
-            @if($player->train->locomotive->fuel < $player->train->locomotive->max_fuel)
-                <form action="{{ route('city.refuel') }}" method="POST" class="mt-4">
-                    @csrf
-                    <x-primary-button>Refuel</x-primary-button>
-                </form>
-            @else
-                <p class="text-gray-600 mt-2">Your fuel tank is full.</p>
-            @endif
-        </div>
-
-        <div class="mt-6 p-4 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-2">Outgoing Routes</h2>
-            @if($city->outgoingRoutes->count())
-                <ul class="list-disc ml-6">
-                    @foreach($city->outgoingRoutes as $route)
-                        <li class="m-2">
-                            Travel to <strong>{{ $route->toCity->name }}</strong>
-                            (Fuel Cost: {{ $route->fuel_cost }}, Travel Time: {{ $route->travel_time }} hours) {{-- Додано час подорожі --}}
-                            <form method="POST" action="{{ route('city.travel', $route) }}" class="inline ml-2"> {{-- Оновлено назву маршруту --}}
-                                @csrf
-                                <x-primary-button class="h-8 px-2 text-sm">Travel</x-primary-button>
-                            </form>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="text-gray-600 mt-2">No outgoing routes from this city.</p>
-            @endif
-        </div>
-
-        @if ($player->city->has_workshop)
-            <div class="mt-6 p-4 border rounded bg-gray-50">
-                <h2 class="font-bold text-xl mb-2">Workshop</h2>
-                <p>Here you can upgrade your train, wagons, and weapons.</p>
-                <a href="{{ route('workshop.index') }}" class="inline-block mt-2 px-4 py-2 bg-gray-800 text-white rounded font-semibold">Go to Workshop</a>
+    <div class="mt-6 mx-auto max-w-7xl space-y-8">
+        <!-- Main Header Card -->
+        <div class="victorian-card">
+            <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
+                <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">Welcome to {{ $city->name }}!</h3>
+                <p class="text-gray-700 italic">You may refuel your locomotive here and plan a trip to other cities.</p>
             </div>
-        @endif
 
-        @if ($player->city->has_shop)
-            <div class="mt-6 p-4 bg-white shadow-md rounded">
-                <h2 class="text-xl font-semibold mb-4">City Resources</h2>
-                @if($city->resources->count())
-                    @foreach($city->resources as $resource)
-                        <div class="mt-4 p-3 bg-gray-50 rounded">
-                            <h3 class="font-semibold">{{ $resource->resource->name }}</h3>
-                            <p>Level: {{ $resource->level }} | Base Qty: {{ $resource->base_quantity }}</p>
-                            <p>Buy: ${{ $resource->getCurrentBuyPrice() }} | Sell: ${{ $resource->getCurrentSellPrice() }}</p>
+            <div class="p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- City Level -->
+                    <div class="p-4 bg-white border border-[#d4b483] rounded">
+                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">City Level</h4>
+                        <p class="text-gray-800 mb-2">
+                            {{ $city->level }} / {{ $city->max_level }}
+                        </p>
+                        <p class="text-sm text-gray-600 mb-4">Upgrade cost: ${{ $city->getUpgradeCost() }}</p>
 
-                            @if($resource->level < 10)
-                                <form action="{{ route('city.resource.upgrade', $resource) }}" method="POST" class="mt-2">
+                        @if($city->level < $city->max_level)
+                            <form action="{{ route('city.upgrade') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                                    Upgrade City
+                                </button>
+                            </form>
+                        @else
+                            <p class="text-gray-600 mt-2 italic">City is at max level.</p>
+                        @endif
+                    </div>
+
+                    <!-- Refuel -->
+                    <div class="p-4 bg-white border border-[#d4b483] rounded">
+                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">Locomotive Fuel</h4>
+                        <p class="text-gray-800 mb-2">
+                            {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}
+                        </p>
+                        <p class="text-sm text-gray-600 mb-4">Refueling cost: ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
+
+                        @if($player->train->locomotive->fuel < $player->train->locomotive->max_fuel)
+                            <form action="{{ route('city.refuel') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                                    Refuel
+                                </button>
+                            </form>
+                        @else
+                            <p class="text-gray-600 mt-2 italic">Your fuel tank is full.</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outgoing Routes -->
+        <div class="victorian-card">
+            <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
+                <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">Outgoing Routes</h3>
+            </div>
+            <div class="p-6">
+                @if($city->outgoingRoutes->count())
+                    <ul class="space-y-4">
+                        @foreach($city->outgoingRoutes as $route)
+                            <li class="p-4 bg-white border border-[#d4b483] rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="mb-2 md:mb-0">
+                                    <span class="font-bold text-[#5d3a1a] text-lg">→ {{ $route->toCity->name }}</span>
+                                    <span class="ml-2 text-gray-600 text-sm italic">({{ $route->fuel_cost }} fuel, {{ $route->travel_time }}h)</span>
+                                </div>
+                                <form method="POST" action="{{ route('city.travel', $route) }}" class="inline">
                                     @csrf
-                                    <x-primary-button class="text-xs">Upgrade Resource (${{ $resource->getUpgradeCost() }})</x-primary-button>
+                                    <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                                        Travel
+                                    </button>
                                 </form>
-                            @else
-                                <p class="text-xs text-gray-500">Max level reached.</p>
-                            @endif
-                        </div>
-                    @endforeach
+                            </li>
+                        @endforeach
+                    </ul>
                 @else
-                    <p class="text-gray-600 mt-2">No resources available in this city.</p>
+                    <p class="text-gray-600 mt-2 italic">No outgoing routes from this city.</p>
                 @endif
             </div>
-            <div class="mt-6 p-4 border rounded bg-gray-50">
-                <h2 class="font-bold text-xl mb-2">Shop</h2>
-                <p>Here you can buy and sell locomotives, wagons, weapons and more.</p>
-                <a href="{{ route('shop.index') }}" class="inline-block mt-2 px-4 py-2 bg-gray-800 text-white rounded font-semibold">Go to Shop</a>
+        </div>
+
+        <!-- Services -->
+        <div class="grid md:grid-cols-3 gap-6 mt-8">
+            @if ($player->city->has_workshop)
+                <div class="victorian-card">
+                    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
+                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">Workshop</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-700 mb-4">Here you can upgrade your train, wagons, and weapons.</p>
+                        <a href="{{ route('workshop.index') }}" class="victorian-btn inline-block w-full text-center py-2 px-4 rounded text-sm">
+                            Go to Workshop
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            @if ($player->city->has_shop)
+                <div class="victorian-card">
+                    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
+                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">Shop</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-700 mb-4">Here you can buy and sell locomotives, wagons, weapons and more.</p>
+                        <a href="{{ route('shop.index') }}" class="victorian-btn inline-block w-full text-center py-2 px-4 rounded text-sm">
+                            Go to Shop
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            @if ($player->city->hasSaloon())
+                <div class="victorian-card">
+                    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
+                        <h3 class="text-xl font-bold text-[#5d3a1a] font-serif">Tavern</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-700 mb-4">A quiet place to rest. Future: contracts & quests.</p>
+                        <a href="{{ route('city.saloon.show', $player->city) }}" class="victorian-btn inline-block w-full text-center py-2 px-4 rounded text-sm">
+                            Visit Tavern
+                        </a>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- Session Messages -->
+        @if(session('success'))
+            <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded text-green-800 font-semibold">
+                {{ session('success') }}
             </div>
         @endif
-
-        @if ($player->city->hasSaloon())
-            <div class="mt-6 p-4 border rounded bg-yellow-50">
-                <h2 class="font-bold text-xl mb-2">Saloon 🥃</h2>
-                <p class="text-gray-700">A cozy place to rest. Future: contracts & quests.</p>
-                <a href="{{ route('city.saloon.show', $player->city) }}" class="inline-block mt-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded font-semibold">
-                    Go to Saloon
-                </a>
+        @if(session('error'))
+            <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded text-red-800 font-semibold">
+                {{ session('error') }}
             </div>
         @endif
-
     </div>
+
+    <style>
+        .victorian-card {
+            background: #fff8e7;
+            border: 2px solid #c5a059;
+            box-shadow: 4px 4px 12px rgba(93, 58, 26, 0.15);
+        }
+        .victorian-btn {
+            background: #8b5a2b;
+            color: #fff8e7;
+            border: 2px solid #c5a059;
+            transition: all 0.2s ease;
+        }
+        .victorian-btn:hover {
+            background: #6d4a24;
+            transform: translateY(-1px);
+            box-shadow: 2px 2px 6px rgba(93, 58, 26, 0.2);
+        }
+    </style>
 </x-app-layout>
