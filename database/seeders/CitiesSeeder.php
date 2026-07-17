@@ -35,6 +35,8 @@ class CitiesSeeder extends Seeder
                 'name' => $name,
                 'has_workshop' => rand(0, 1) === 1,
                 'has_shop' => rand(0, 1) === 1,
+                'level' => 1,
+                'max_level' => 10
             ]);
 
             // Тепер, для кожного щойно створеного або знайденого міста,

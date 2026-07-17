@@ -30,8 +30,8 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->boolean('has_workshop')->default(false);
             $table->boolean('has_shop')->default(false);
-            $table->unsignedTinyInteger('level')->default(1)->after('has_shop');
-            $table->unsignedTinyInteger('max_level')->default(10)->after('level');
+            $table->unsignedSmallInteger('level')->default(1);
+            $table->unsignedSmallInteger('max_level')->default(10);
             $table->timestamps();
         });
 
@@ -154,7 +154,7 @@ return new class extends Migration
             $table->float('price_multiplier')->default(1.0);
             $table->float('buy_price')->default(0);
             $table->float('sell_price')->default(0);
-            $table->unsignedTinyInteger('level')->default(1)->after('sell_price');
+            $table->unsignedSmallInteger('level')->default(1);
             $table->timestamps();
             $table->unique(['city_id', 'resource_id']);
         });
@@ -222,18 +222,8 @@ return new class extends Migration
             }
         });
 
-        // Drop columns from cities table
-        Schema::table('cities', function (Blueprint $table) {
-            $table->dropColumn(['level', 'max_level']);
-        });
         Schema::dropIfExists('cities');
-
-        // Drop columns from city_resources table
-        Schema::table('city_resources', function (Blueprint $table) {
-            $table->dropColumn('level');
-        });
         Schema::dropIfExists('city_resources');
-
         Schema::dropIfExists('city_routes'); // Drop after current_city_route_id is dropped from players
         Schema::dropIfExists('weapons');
         Schema::dropIfExists('weapon_wagons');

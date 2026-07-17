@@ -122,9 +122,9 @@ class CityResource extends Model
      *
      * @return int
      */
-    protected function getUpgradeCost(): int
+    public function getUpgradeCost(): int
     {
-        return 500 * $this->level * $this->resource_id;
+        return 500 * $this->level;// * $this->resource_id;
     }
 
     /**
