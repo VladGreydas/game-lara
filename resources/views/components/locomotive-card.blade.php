@@ -1,46 +1,38 @@
-<div class="mt-4 p-4 border rounded-lg shadow bg-gray-50">
-    <?php
-    use App\Models\Locomotive;
-    /** @var Locomotive $locomotive */
-    /** @var bool $upgrade */
+<div class="victorian-card">
+    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
+        <h4 class="text-lg font-bold text-[#5d3a1a] font-serif">
+            {{ $locomotive->name }} <span class="text-sm text-gray-600">({{ $locomotive->type }})</span>
+        </h4>
+    </div>
+    <div class="p-4">
+        <div class="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>{{ __('city.level') }}:</strong> {{ $locomotive->lvl }}</div>
+            <div><strong>{{ __('city.power') }}:</strong> {{ $locomotive->power }}</div>
+            <div><strong>{{ __('city.armor') }}:</strong> {{ $locomotive->armor }}</div>
+            <div><strong>{{ __('city.fuel') }}:</strong> {{ $locomotive->fuel }} / {{ $locomotive->max_fuel }}</div>
+        </div>
 
-    $new_lvl = null;
-    $add_weight = null;
-    $add_power = null;
-    $add_armor = null;
-    $add_fuel = null;
-    if($upgrade) {
-        $new_lvl = '->' . $locomotive->lvl+1;
-        $add_weight = '+' . 50 * ($locomotive->lvl+1);
-        $add_power = '+' . 500 * ($locomotive->lvl+1);
-        $add_armor = '+' . 100 * ($locomotive->lvl+1);
-        $add_fuel = '+' . 5 * ($locomotive->lvl+1);
-    }
-
-    ?>
-    <div class="flex flex-row pb-1">
-        <h3 class="text-lg font-bold m-1 mt-0">Locomotive: {{ $locomotive->name }}</h3>
         @if($rename)
-            <x-rename type="locomotive" id="{{$locomotive->id}}" name="{{$locomotive->name}}"/>
+            <form method="POST" action="{{ route('locomotive.rename', $locomotive) }}" class="mt-4">
+                @csrf
+                <div class="flex gap-2">
+                    <input type="text" name="name" value="{{ $locomotive->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]">
+                    <button type="submit" class="victorian-btn py-1 px-3 rounded text-xs">
+                        {{ __('city.rename') }}
+                    </button>
+                </div>
+            </form>
+        @endif
+
+        @if($upgrade)
+            <div class="mt-4">
+                <form method="POST" action="{{ route('locomotive.upgrade', $locomotive) }}">
+                    @csrf
+                    <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                        {{ __('city.upgrade') }} ({{ $locomotive->getUpgradeCost() }})
+                    </button>
+                </form>
+            </div>
         @endif
     </div>
-
-    <p><strong>Weight:</strong> {{ $locomotive->weight }}<span class="text-green-500">  {{ $add_weight }}</span></p>
-    <p><strong>Power:</strong> {{ $locomotive->power }}<span class="text-green-500">  {{ $add_power }}</span></p>
-    <p><strong>Armor:</strong> {{ $locomotive->armor }} / {{ $locomotive->max_armor }}<span class="text-green-500">  {{ $add_armor }}</span></p>
-    @if($upgrade && $locomotive->armor < $locomotive->max_armor)
-        <form action="{{ route('locomotive.repair', $locomotive) }}" method="POST">
-            @csrf
-            <x-primary-button>Repair</x-primary-button>
-        </form>
-    @endif
-    <p><strong>Fuel:</strong> {{ $locomotive->fuel }} / {{ $locomotive->max_fuel }}<span class="text-green-500">  {{ $add_fuel }}</span></p>
-    <p><strong>Level:</strong> {{ $locomotive->lvl }}<span class="text-green-500">  {{ $new_lvl }}</span></p>
-    @if($upgrade)
-        <p><strong>Upgrade cost:</strong> {{ $locomotive->upgrade_cost }}</p>
-        <form action="{{ route('locomotive.upgrade', $locomotive) }}" method="POST" class="mt-2">
-            @csrf
-            <x-primary-button>Upgrade Locomotive</x-primary-button>
-        </form>
-    @endif
 </div>

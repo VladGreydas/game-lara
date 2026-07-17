@@ -1,23 +1,38 @@
-<?php
-use App\Models\Weapon;
-/** @var Weapon $weapon */
-?>
-<div class="border rounded-lg shadow p-4 bg-white">
-    <div class="flex flex-row pb-1">
-        <h4 class="text-md font-bold text-gray-900 m-1">{{ $weapon->name }}</h4>
+<div class="victorian-card">
+    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
+        <h4 class="text-lg font-bold text-[#5d3a1a] font-serif">
+            {{ $weapon->name }} <span class="text-sm text-gray-600">({{ $weapon->type }})</span>
+        </h4>
+    </div>
+    <div class="p-4">
+        <div class="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>{{ __('city.level') }}:</strong> {{ $weapon->lvl }}</div>
+            <div><strong>{{ __('city.damage') }}:</strong> {{ $weapon->damage }}</div>
+            <div><strong>{{ __('city.durability') }}:</strong> {{ $weapon->durability }} / {{ $weapon->max_durability }}</div>
+            <div><strong>{{ __('city.weight') }}:</strong> {{ $weapon->weight }}</div>
+        </div>
+
         @if($rename)
-            <x-rename type="weapon" id="{{$weapon->id}}" name="{{$weapon->name}}"/>
+            <form method="POST" action="{{ route('weapon.rename', $weapon) }}" class="mt-4">
+                @csrf
+                <div class="flex gap-2">
+                    <input type="text" name="name" value="{{ $weapon->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]">
+                    <button type="submit" class="victorian-btn py-1 px-3 rounded text-xs">
+                        {{ __('city.rename') }}
+                    </button>
+                </div>
+            </form>
+        @endif
+
+        @if($upgrade)
+            <div class="mt-4">
+                <form method="POST" action="{{ route('weapon.upgrade', $weapon) }}">
+                    @csrf
+                    <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                        {{ __('city.upgrade') }} ({{ $weapon->getUpgradeCost() }})
+                    </button>
+                </form>
+            </div>
         @endif
     </div>
-    <p class="text-sm text-gray-700"><span class="font-semibold">DMG:</span> {{ $weapon->damage }}</p>
-    <p class="text-sm text-gray-700"><span class="font-semibold">Type:</span> {{ $weapon->type }}</p>
-    <p class="text-sm text-gray-700"><span class="font-semibold">Level:</span> {{ $weapon->lvl }}</p>
-    @if($upgrade)
-        <p class="text-sm text-gray-700"><span class="font-semibold">Upgrade cost:</span> {{ $weapon->upgrade_cost }}
-        </p>
-        <form action="{{ route('weapon.upgrade', $weapon->id) }}" method="POST">
-            @csrf
-            <x-primary-button>Upgrade {{ $weapon->name }}</x-primary-button>
-        </form>
-    @endif
 </div>

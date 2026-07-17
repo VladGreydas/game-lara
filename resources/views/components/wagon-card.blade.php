@@ -1,65 +1,38 @@
-<div class="my-4 p-2 border rounded-lg shadow bg-gray-50">
-    <div class="flex flex-row">
-        <p class="text-lg font-bold m-1 mt-0"><strong>Wagon: {{ $wagon->name }}</strong></p>
-        @if($rename)
-            <x-rename type="wagon" id="{{$wagon->id}}" name="{{$wagon->name}}"/>
-        @endif
+<div class="victorian-card">
+    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
+        <h4 class="text-lg font-bold text-[#5d3a1a] font-serif">
+            {{ $wagon->name }} <span class="text-sm text-gray-600">({{ $wagon->isWeapon() ? __('city.weapon') : __('city.cargo') }})</span>
+        </h4>
     </div>
-    <ul class="list-disc ml-6">
-        <li>Armor: {{ $wagon->armor }} / {{ $wagon->max_armor }}</li>
-        @if($upgrade && $wagon->armor < $wagon->max_armor)
-            <form action="{{ route('wagon.repair', $wagon) }}" method="POST">
+    <div class="p-4">
+        <div class="grid grid-cols-2 gap-2 text-sm">
+            <div><strong>{{ __('city.level') }}:</strong> {{ $wagon->lvl }}</div>
+            <div><strong>{{ __('city.capacity') }}:</strong> {{ $wagon->isWeapon() ? __('city.n_a') : $wagon->getCurrentCapacity() }}</div>
+            <div><strong>{{ __('city.weight') }}:</strong> {{ $wagon->getTotalWeight() }} / {{ $wagon->max_weight }}</div>
+            <div><strong>{{ __('city.durability') }}:</strong> {{ $wagon->durability }} / {{ $wagon->max_durability }}</div>
+        </div>
+
+        @if($rename)
+            <form method="POST" action="{{ route('wagon.rename', $wagon) }}" class="mt-4">
                 @csrf
-                <x-primary-button>Repair</x-primary-button>
-            </form>
-        @endif
-        <li>Level: {{ $wagon->lvl }}</li>
-        <li>Weight: {{ $wagon->weight }}</li>
-
-        @if($wagon->cargo_wagon)
-            <li>Type: <span class="text-indigo-600">Cargo</span></li>
-            <li>Capacity: {{ $wagon->cargo_wagon->capacity }}</li>
-
-            {{-- New: Display resources in CargoWagon --}}
-            @if($wagon->cargo_wagon->resources->count())
-                <div class="mt-2">
-                    <h4 class="text-md font-semibold text-gray-700 mb-1">Resources:</h4>
-                    <ul class="list-disc ml-4">
-                        @foreach($wagon->cargo_wagon->resources as $cargoResource)
-                            <li>{{ $cargoResource->resource->name }}: {{ $cargoResource->quantity }} {{ $cargoResource->resource->unit }}</li>
-                        @endforeach
-                    </ul>
+                <div class="flex gap-2">
+                    <input type="text" name="name" value="{{ $wagon->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]">
+                    <button type="submit" class="victorian-btn py-1 px-3 rounded text-xs">
+                        {{ __('city.rename') }}
+                    </button>
                 </div>
-            @else
-                <p class="text-sm text-gray-500 mt-1">No resources in this cargo wagon.</p>
-            @endif
-            {{-- End New --}}
-
-        @endif
-
-        @if($wagon->weapon_wagon)
-            <li>Type: <span class="text-red-600">Weapon</span></li>
+            </form>
         @endif
 
         @if($upgrade)
-            <li><strong>Upgrade cost:</strong> {{ $wagon->upgrade_cost }}</li>
-            <form action="{{ route('wagon.upgrade', $wagon) }}" method="POST" class="mt-2">
-                @csrf
-                <x-primary-button>Upgrade {{ucfirst($wagon->type)}} Wagon</x-primary-button>
-            </form>
+            <div class="mt-4">
+                <form method="POST" action="{{ route('wagon.upgrade', $wagon) }}">
+                    @csrf
+                    <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                        {{ __('city.upgrade') }} ({{ $wagon->getUpgradeCost() }})
+                    </button>
+                </form>
+            </div>
         @endif
-
-        @if($wagon->weapon_wagon)
-            @if($wagon->weapon_wagon->weapons->count())
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Weapons:</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        @foreach($wagon->weapon_wagon->weapons as $weapon)
-                            <x-weapon-card :weapon='$weapon' :rename="$rename" :upgrade="$upgrade" />
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-        @endif
-    </ul>
+    </div>
 </div>
