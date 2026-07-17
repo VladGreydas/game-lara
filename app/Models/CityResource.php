@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property float $price_multiplier
  * @property float $buy_price
  * @property float $sell_price
+ * @property int $level
  * @property-read City $city
  * @property-read Resource $resource
  */
@@ -32,6 +33,7 @@ class CityResource extends Model
         'price_multiplier',
         'buy_price',
         'sell_price',
+        'level',
     ];
 
     /**
@@ -45,7 +47,7 @@ class CityResource extends Model
     }
 
     /**
-     * Calculate and update the price_multiplier based on quantity and base_quantity.
+     * Calculate and update the price_multiplier based on quantity, base_quantity, and level.
      * This method will be called automatically before saving the model.
      */
     public function updatePriceMultiplier(): void
@@ -57,19 +59,15 @@ class CityResource extends Model
         }
 
         // Обчислюємо відхилення від базової кількості у відсотках
-        // Наприклад: (500 - 1000) / 1000 = -0.5 (дефіцит 50%)
-        //           (1500 - 1000) / 1000 = 0.5 (профіцит 50%)
         $deviation = ($this->quantity - $this->base_quantity) / $this->base_quantity;
 
-        // Визначаємо максимальний/мінімальний множник, щоб ціни не були абсурдними
-        $maxMultiplier = 2.0; // Макс. ціна в 2 рази вище базової
-        $minMultiplier = 0.5; // Мін. ціна в 2 рази нижче базової
+        // Визначаємо максимальний/мінімальний множник
+        $maxMultiplier = 2.0;
+        $minMultiplier = 0.5;
 
-        // Налаштовуємо чутливість: наприклад, -1.0 відхилення -> 1.5 множник, 1.0 відхилення -> 0.5 множник
-        // Множник змінюється обернено пропорційно до відхилення:
-        // Якщо відхилення -0.5, хочемо множник > 1.0 (дорожче)
-        // Якщо відхилення 0.5, хочемо множник < 1.0 (дешевше)
-        $calculatedMultiplier = 1.0 - ($deviation * 0.5); // 0.5 - це коефіцієнт чутливості
+        // Рівень ресурсу зменшує чутливість цін до дефіциту/профіциту
+        $levelFactor = 1.0 - ($this->level * 0.05); // кожен рівень зменшує чутливість на 5%
+        $calculatedMultiplier = 1.0 - ($deviation * 0.5 * $levelFactor);
 
         // Обмежуємо множник, щоб він не виходив за встановлені межі
         $this->price_multiplier = max($minMultiplier, min($maxMultiplier, $calculatedMultiplier));
@@ -93,6 +91,40 @@ class CityResource extends Model
     public function getCurrentSellPrice(): float
     {
         return round($this->sell_price * $this->price_multiplier, 2);
+    }
+
+    /**
+     * Upgrade the resource level if player can afford it.
+     *
+     * @return bool
+     */
+    public function upgrade(): bool
+    {
+        $cost = $this->getUpgradeCost();
+        $player = $this->city->players()->first();
+
+        if (!$player || !$player->checkIfEnough($cost)) {
+            return false;
+        }
+
+        $player->addMoney(-$cost);
+        if ($this->level < 10) {
+            $this->level++;
+            $this->save();
+            $this->updatePriceMultiplier();
+        }
+
+        return true;
+    }
+
+    /**
+     * Calculate upgrade cost based on current level and resource ID.
+     *
+     * @return int
+     */
+    protected function getUpgradeCost(): int
+    {
+        return 500 * $this->level * $this->resource_id;
     }
 
     /**

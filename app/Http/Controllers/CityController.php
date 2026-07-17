@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CityRoute;
 use App\Models\Locomotive;
 use App\Models\Player;
+use App\Models\CityResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon; // Додаємо Carbon для роботи з часом
@@ -109,5 +110,32 @@ class CityController extends Controller
         $locomotive->update(['fuel' => $locomotive->max_fuel]);
 
         return back()->with('success', 'Locomotive refueled!');
+    }
+
+    public function upgradeCity(Request $request)
+    {
+        $player = Auth::user()->player;
+        $city = $player->city;
+
+        if (!$city->upgrade()) {
+            return back()->with('error', 'Not enough money or city is max level.');
+        }
+
+        return back()->with('success', 'City upgraded to level ' . $city->level . '!');
+    }
+
+    public function upgradeResource(Request $request, CityResource $cityResource)
+    {
+        $player = Auth::user()->player;
+
+        if ($cityResource->city_id !== $player->city_id) {
+            abort(403, 'You can only upgrade resources in your current city.');
+        }
+
+        if (!$cityResource->upgrade()) {
+            return back()->with('error', 'Not enough money or resource is max level.');
+        }
+
+        return back()->with('success', 'Resource upgraded to level ' . $cityResource->level . '!');
     }
 }

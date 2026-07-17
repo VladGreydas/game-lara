@@ -20,6 +20,20 @@
         @endif
 
         <div class="mt-6 p-4 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-2">City Level: {{ $city->level }} / {{ $city->max_level }}</h2>
+            <p class="text-gray-600 mb-2">Upgrade cost: ${{ $city->getUpgradeCost() }}</p>
+
+            @if($city->level < $city->max_level)
+                <form action="{{ route('city.upgrade') }}" method="POST">
+                    @csrf
+                    <x-primary-button>Upgrade City</x-primary-button>
+                </form>
+            @else
+                <p class="text-gray-600 mt-2">City is at max level.</p>
+            @endif
+        </div>
+
+        <div class="mt-6 p-4 bg-white shadow-md rounded">
             <h2 class="text-xl font-semibold mb-4">Refuel Locomotive</h2>
             <p>Fuel: {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}</p>
             <p>Refueling Cost: ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
@@ -51,6 +65,30 @@
                 </ul>
             @else
                 <p class="text-gray-600 mt-2">No outgoing routes from this city.</p>
+            @endif
+        </div>
+
+        <div class="mt-6 p-4 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-4">City Resources</h2>
+            @if($city->resources->count())
+                @foreach($city->resources as $resource)
+                    <div class="mt-4 p-3 bg-gray-50 rounded">
+                        <h3 class="font-semibold">{{ $resource->resource->name }}</h3>
+                        <p>Level: {{ $resource->level }} | Base Qty: {{ $resource->base_quantity }}</p>
+                        <p>Buy: ${{ $resource->getCurrentBuyPrice() }} | Sell: ${{ $resource->getCurrentSellPrice() }}</p>
+
+                        @if($resource->level < 10)
+                            <form action="{{ route('city.resource.upgrade', $resource) }}" method="POST" class="mt-2">
+                                @csrf
+                                <x-primary-button class="text-xs">Upgrade Resource (${{ $resource->getUpgradeCost() }})</x-primary-button>
+                            </form>
+                        @else
+                            <p class="text-xs text-gray-500">Max level reached.</p>
+                        @endif
+                    </div>
+                @endforeach
+            @else
+                <p class="text-gray-600 mt-2">No resources available in this city.</p>
             @endif
         </div>
 
