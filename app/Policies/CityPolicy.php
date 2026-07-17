@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\City;
 use App\Models\Player;
+use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class CityPolicy
@@ -28,6 +29,20 @@ class CityPolicy
         }
 
         return true;
+    }
+
+    /**
+     * Determine if the user can upgrade the city.
+     * Це перевантаження для використання в контролері через authorize()
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\City  $city
+     * @return bool
+     */
+    public function upgradeForUser(User $user, City $city): bool
+    {
+        $player = $user->player;
+        return $player && $this->upgrade($player, $city);
     }
 
     /**

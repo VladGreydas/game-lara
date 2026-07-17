@@ -117,6 +117,8 @@ class CityController extends Controller
         $player = Auth::user()->player;
         $city = $player->city;
 
+        $this->authorize('upgradeForUser', $city);
+
         if (!$city->upgrade()) {
             return back()->with('error', 'Not enough money or city is max level.');
         }
@@ -131,6 +133,8 @@ class CityController extends Controller
         if ($cityResource->city_id !== $player->city_id) {
             abort(403, 'You can only upgrade resources in your current city.');
         }
+
+        $this->authorize('manageResources', $cityResource->city);
 
         if (!$cityResource->upgrade()) {
             return back()->with('error', 'Not enough money or resource is max level.');
