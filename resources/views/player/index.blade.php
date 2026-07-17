@@ -103,9 +103,29 @@
                                     <p class="text-gray-600 italic">{{ __('city.you_have_no_wagons_yet') }}</p>
                                 @endif
                             </div>
+                            <div class="mb-4">
+                                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('Weapons') }}:</h5>
+                                @php
+                                    $allWeapons = collect();
+                                    foreach($player->train->wagons as $wagon) {
+                                        if($wagon->isWeapon()) {
+                                            $allWeapons->push($wagon);
+                                        } else {
+                                            $allWeapons = $allWeapons->merge($wagon->weaponWagon->weapons ?? collect());
+                                        }
+                                    }
+                                @endphp
+                                @if($allWeapons->isNotEmpty())
+                                    @foreach($allWeapons as $weapon)
+                                        <x-weapon-card :weapon="$weapon" :upgrade="false" :rename="true"/>
+                                    @endforeach
+                                @else
+                                    <p class="text-gray-600 italic">{{ __('You have no weapons yet.') }}</p>
+                                @endif
+                            </div>
                         @else
                             <p class="text-gray-600 italic">{{ __('city.you_dont_have_a_train_yet') }}</p>
-                        @endif
+                        </endif
                     </div>
                 </div>
             </div>

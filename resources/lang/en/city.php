@@ -48,6 +48,8 @@ return [
     'wagons' => 'Wagons',
     'you_have_no_wagons_yet' => 'You have no wagons yet.',
     'you_dont_have_a_train_yet' => 'You don\'t have a train yet!',
+    'you_have_no_weapons_yet' => 'You have no weapons yet.',
+    'weapons' => 'Weapons',
     'create_new_player' => 'Create New Player',
     'enter_your_nickname_here' => 'Enter your nickname here...',
     'level_up' => 'LEVEL UP!',
