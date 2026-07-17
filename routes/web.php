@@ -97,6 +97,9 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
         // Маршрут travel тепер запускає подорож і оновлює статус гравця
         Route::post('/travel/{route}', 'travel')->name('city.travel');
         Route::post('/city/refuel', 'refuel')->name('city.refuel');
+        // ✅ Нові маршрути для покращення
+        Route::post('/city/upgrade', 'upgradeCity')->name('city.upgrade');
+        Route::post('/city/resource/{cityResource}/upgrade', 'upgradeResource')->name('city.resource.upgrade');
     });
 
     // Майстерня
