@@ -27,7 +27,7 @@
                                 <li><strong>{{ __('city.exp') }}:</strong> {{ $player->exp }} / {{ $player->max_exp }}</li>
                             </ul>
 
-                            @if($player->canLevelUp())
+                            @if ($player->canLevelUp())
                                 <div class="mt-6">
                                     <form method="POST" action="{{ route('player.levelup', $player) }}">
                                         @csrf
@@ -125,7 +125,7 @@
                             </div>
                         @else
                             <p class="text-gray-600 italic">{{ __('city.you_dont_have_a_train_yet') }}</p>
-                        </endif
+                        @endif
                     </div>
                 </div>
             </div>
