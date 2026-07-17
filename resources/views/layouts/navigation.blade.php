@@ -36,6 +36,16 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Language Switcher -->
+                <div class="mr-3">
+                    <form action="{{ route('locale.set', app()->getLocale() === 'en' ? 'uk' : 'en') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                            {{ app()->getLocale() === 'en' ? '🇺🇦 UA' : '🇬🇧 EN' }}
+                        </button>
+                    </form>
+                </div>
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -102,6 +112,16 @@
                 </x-nav-link>
             @endif
 
+        </div>
+
+        <!-- Language Switcher (Mobile) -->
+        <div class="px-4 pt-2 pb-2">
+            <form action="{{ route('locale.set', app()->getLocale() === 'en' ? 'uk' : 'en') }}" method="POST">
+                @csrf
+                <button type="submit" class="w-full text-left px-3 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition ease-in-out duration-150">
+                    {{ app()->getLocale() === 'en' ? '🇺🇦 UA' : '🇬🇧 EN' }}
+                </button>
+            </form>
         </div>
 
         <!-- Responsive Settings Options -->
