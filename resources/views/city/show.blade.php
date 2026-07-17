@@ -108,5 +108,15 @@
             </div>
         @endif
 
+        @if ($player->city->hasSaloon())
+            <div class="mt-6 p-4 border rounded bg-yellow-50">
+                <h2 class="font-bold text-xl mb-2">Saloon 🥃</h2>
+                <p class="text-gray-700">A cozy place to rest. Future: contracts & quests.</p>
+                <a href="{{ route('city.saloon.show', $player->city) }}" class="inline-block mt-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded font-semibold">
+                    Go to Saloon
+                </a>
+            </div>
+        @endif
+
     </div>
 </x-app-layout>

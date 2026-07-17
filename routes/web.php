@@ -9,6 +9,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WagonController;
 use App\Http\Controllers\WeaponController;
 use App\Http\Controllers\WorkshopController;
+use App\Http\Controllers\SaloonController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // Не забудьте додати цей use
 
@@ -100,6 +101,7 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
         // ✅ Нові маршрути для покращення
         Route::post('/city/upgrade', 'upgradeCity')->name('city.upgrade');
         Route::post('/city/resource/{cityResource}/upgrade', 'upgradeResource')->name('city.resource.upgrade');
+        Route::get('/city/{city}/saloon', [SaloonController::class, 'show'])->name('city.saloon.show');
     });
 
     // Майстерня

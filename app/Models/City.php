@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
  * @property $players Players
  * @property $has_workshop Does the city have workshop?
  * @property $has_shop Does the city have a shop?
+ * @property $has_saloon Does the city have a saloon?
  * @property-read Collection<int, CityResource> $resources
  * @property-read int|null $resources_count
  */
@@ -26,6 +27,7 @@ class City extends Model
         'max_level',
         'has_workshop',
         'has_shop',
+        'has_saloon',
     ];
 
     protected static function booted()
@@ -141,5 +143,15 @@ class City extends Model
     public function getShopDiscount(): float
     {
         return ($this->level - 1) * 0.05;
+    }
+
+    /**
+     * Check if the city has a saloon.
+     *
+     * @return bool
+     */
+    public function hasSaloon(): bool
+    {
+        return (bool) $this->has_saloon;
     }
 }

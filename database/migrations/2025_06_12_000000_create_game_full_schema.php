@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->boolean('has_workshop')->default(false);
             $table->boolean('has_shop')->default(false);
+            $table->boolean('has_saloon')->default(false);
             $table->unsignedSmallInteger('level')->default(1);
             $table->unsignedSmallInteger('max_level')->default(10);
             $table->timestamps();
