@@ -55,7 +55,7 @@
                                 </div>
                             @elseif ($player->inCity())
                                 <p class="text-gray-700 mb-2">
-                                    {{ __('city.you_are_in') . ' <a href="' . route('city.show', $player->city) . '" class="text-[#8b5a2b] underline">' . $player->city->name . '</a>' }}
+                                    {{ __('city.you_are_in') }} <a href="{{route('city.show', $player->city)}}" class="text-[#8b5a2b] underline">{{$player->city->name}}</a>
                                 </p>
                             @elseif ($player->currentLocation)
                                 <p class="text-gray-700 mb-2">
