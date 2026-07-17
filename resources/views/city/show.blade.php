@@ -68,30 +68,6 @@
             @endif
         </div>
 
-        <div class="mt-6 p-4 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-4">City Resources</h2>
-            @if($city->resources->count())
-                @foreach($city->resources as $resource)
-                    <div class="mt-4 p-3 bg-gray-50 rounded">
-                        <h3 class="font-semibold">{{ $resource->resource->name }}</h3>
-                        <p>Level: {{ $resource->level }} | Base Qty: {{ $resource->base_quantity }}</p>
-                        <p>Buy: ${{ $resource->getCurrentBuyPrice() }} | Sell: ${{ $resource->getCurrentSellPrice() }}</p>
-
-                        @if($resource->level < 10)
-                            <form action="{{ route('city.resource.upgrade', $resource) }}" method="POST" class="mt-2">
-                                @csrf
-                                <x-primary-button class="text-xs">Upgrade Resource (${{ $resource->getUpgradeCost() }})</x-primary-button>
-                            </form>
-                        @else
-                            <p class="text-xs text-gray-500">Max level reached.</p>
-                        @endif
-                    </div>
-                @endforeach
-            @else
-                <p class="text-gray-600 mt-2">No resources available in this city.</p>
-            @endif
-        </div>
-
         @if ($player->city->has_workshop)
             <div class="mt-6 p-4 border rounded bg-gray-50">
                 <h2 class="font-bold text-xl mb-2">Workshop</h2>
@@ -101,6 +77,29 @@
         @endif
 
         @if ($player->city->has_shop)
+            <div class="mt-6 p-4 bg-white shadow-md rounded">
+                <h2 class="text-xl font-semibold mb-4">City Resources</h2>
+                @if($city->resources->count())
+                    @foreach($city->resources as $resource)
+                        <div class="mt-4 p-3 bg-gray-50 rounded">
+                            <h3 class="font-semibold">{{ $resource->resource->name }}</h3>
+                            <p>Level: {{ $resource->level }} | Base Qty: {{ $resource->base_quantity }}</p>
+                            <p>Buy: ${{ $resource->getCurrentBuyPrice() }} | Sell: ${{ $resource->getCurrentSellPrice() }}</p>
+
+                            @if($resource->level < 10)
+                                <form action="{{ route('city.resource.upgrade', $resource) }}" method="POST" class="mt-2">
+                                    @csrf
+                                    <x-primary-button class="text-xs">Upgrade Resource (${{ $resource->getUpgradeCost() }})</x-primary-button>
+                                </form>
+                            @else
+                                <p class="text-xs text-gray-500">Max level reached.</p>
+                            @endif
+                        </div>
+                    @endforeach
+                @else
+                    <p class="text-gray-600 mt-2">No resources available in this city.</p>
+                @endif
+            </div>
             <div class="mt-6 p-4 border rounded bg-gray-50">
                 <h2 class="font-bold text-xl mb-2">Shop</h2>
                 <p>Here you can buy and sell locomotives, wagons, weapons and more.</p>

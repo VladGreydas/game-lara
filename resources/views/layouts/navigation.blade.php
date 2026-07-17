@@ -41,7 +41,7 @@
                     <form action="{{ route('locale.set', app()->getLocale() === 'en' ? 'uk' : 'en') }}" method="POST">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            {{ app()->getLocale() === 'en' ? '🇺🇦 UA' : '🇬🇧 EN' }}
+                            {{ app()->getLocale() === 'en' ? '🇬🇧 EN' : '🇺🇦 UA' }}
                         </button>
                     </form>
                 </div>

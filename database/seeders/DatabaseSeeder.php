@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ResourceSeeder::class);
         $this->call(CitiesSeeder::class);
         $this->call(CityRouteSeeder::class);
+        $this->call(UserSeeder::class);
 
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',
