@@ -145,9 +145,6 @@
                 {{ session('error') }}
             </div>
         @endif
-
-        <!-- Footer -->
-        <x-victorian-footer />
     </div>
 
     <style>
