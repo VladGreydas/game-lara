@@ -116,4 +116,37 @@ class City extends Model
             'base_quantity' => 1000 + $this->level * 500,
         ]);
     }
+
+    /**
+     * Get discount rate for repairs (Workshop).
+     * 20% discount if city has workshop.
+     *
+     * @return float
+     */
+    public function getRepairDiscount(): float
+    {
+        return $this->has_workshop ? 0.8 : 1.0;
+    }
+
+    /**
+     * Get discount rate for upgrades (Locomotive/Wagon level up).
+     * 20% discount if city has workshop.
+     *
+     * @return float
+     */
+    public function getUpgradeDiscount(): float
+    {
+        return $this->has_workshop ? 0.8 : 1.0;
+    }
+
+    /**
+     * Get discount rate for purchases in Shop (Resources, Wagons, Locomotives, Weapons).
+     * 10% discount if city has shop.
+     *
+     * @return float
+     */
+    public function getShopDiscount(): float
+    {
+        return $this->has_shop ? 0.9 : 1.0;
+    }
 }
