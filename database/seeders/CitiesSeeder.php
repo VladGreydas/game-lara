@@ -40,22 +40,36 @@ class CitiesSeeder extends Seeder
                 'max_level' => 10
             ]);
 
+            $resourceAmountPerCity = 3;
+            $counter = 0;
+
+            $allResources = $allResources->shuffle();
+
             // Тепер, для кожного щойно створеного або знайденого міста,
             // додаємо зв'язки з ресурсами
             foreach ($allResources as $resource) {
+                if ($counter >= $resourceAmountPerCity) break;
                 // Встановлюємо початкові значення для кожного ресурсу в цьому місті
                 // Можете варіювати quantity/base_quantity для створення початкового дефіциту/профіциту
                 // Це також може бути визначено через фабрики або складнішу логіку
+                switch ($counter) {
+                    case 0: {$is_surplus = true; $is_deficit = false; break;}
+                    case 1: {$is_surplus = false; $is_deficit = true; break;}
+                    case 2: {$is_surplus = false; $is_deficit = false; break;}
+                }
                 $city->resources()->firstOrCreate(
                     ['resource_id' => $resource->id],
                     [
-                        'quantity' =>           rand(800, 1200),    // Початкова кількість (може бути випадковою)
-                        'base_quantity' =>      1000,               // Базова кількість
-                        'buy_price' =>          rand(10, 20),       // Базова ціна купівлі (буде коригуватися множником)
-                        'sell_price' =>         rand(8, 18),        // Базова ціна продажу
-                        'price_multiplier' =>   1.0,                // Початковий множник ціни
+                        'quantity' =>           $is_surplus ? 1500 : ($is_deficit ? 500 : 1000),    // Початкова кількість (може бути випадковою)
+                        'base_quantity' =>      1000,                       // Базова кількість
+                        'buy_price' =>          $resource->base_price,      // Базова ціна купівлі (буде коригуватися множником)
+                        'sell_price' =>         $resource->base_price,      // Базова ціна продажу
+                        'price_multiplier' =>   1.0,                        // Початковий множник ціни
+                        'is_surplus' =>         $is_surplus,                // Чи цього ресурсу в достатку
+                        'is_deficit' =>         $is_deficit,                // Чи є дефіцит цього ресурсу
                     ]
                 );
+                $counter++;
             }
         }
 

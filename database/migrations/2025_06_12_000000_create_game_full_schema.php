@@ -134,6 +134,7 @@ return new class extends Migration
             $table->string('unit')->default('unit');
             $table->boolean('is_fuel')->default(false);
             $table->unsignedInteger('fuel_value')->default(0);
+            $table->integer('base_price')->nullable(false)->default(10);
             $table->timestamps();
         });
 
@@ -157,6 +158,8 @@ return new class extends Migration
             $table->float('price_multiplier')->default(1.0);
             $table->float('buy_price')->default(0);
             $table->float('sell_price')->default(0);
+            $table->boolean('is_surplus')->default(false);
+            $table->boolean('is_deficit')->default(false);
             $table->unsignedSmallInteger('level')->default(1);
             $table->timestamps();
             $table->unique(['city_id', 'resource_id']);

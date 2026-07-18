@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property string $unit
  * @property bool $is_fuel
  * @property int $fuel_value
+ * @property int $base_price
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, CargoWagonResource> $cargoWagons cargo wagons that have this resource
@@ -38,7 +39,8 @@ class Resource extends Model
         'description',
         'unit',
         'is_fuel',
-        'fuel_value'
+        'fuel_value',
+        'base_price'
     ];
 
     /**
