@@ -74,6 +74,26 @@ class CityResource extends Model
     }
 
     /**
+     * Check if the resource is in surplus in this city.
+     *
+     * @return bool
+     */
+    public function isSurplus(): bool
+    {
+        return $this->price_multiplier > 1.0;
+    }
+
+    /**
+     * Check if the resource is in deficit in this city.
+     *
+     * @return bool
+     */
+    public function isDeficit(): bool
+    {
+        return $this->price_multiplier < 1.0;
+    }
+
+    /**
      * Get the current buy price of the resource in this city.
      *
      * @return float

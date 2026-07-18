@@ -60,6 +60,47 @@
             </div>
         </div>
 
+        <!-- Resource Market -->
+        <div class="victorian-card">
+            <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
+                <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">{{ __('city.resource_market') }}</h3>
+            </div>
+            <div class="p-6">
+                @if($city->resources->count())
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($city->resources as $resourceEntry)
+                            <div class="p-4 bg-white border border-[#d4b483] rounded shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-[#5d3a1a] text-lg">{{ $resourceEntry->resource->name }}</span>
+                                    <span class="text-sm font-semibold px-2 py-1 rounded
+                                        {{ $resourceEntry->isSurplus() ? 'bg-green-100 text-green-800' : '' }}
+                                        {{ $resourceEntry->isDeficit() ? 'bg-red-100 text-red-800' : '' }}
+                                        {{ (!$resourceEntry->isSurplus() && !$resourceEntry->isDeficit()) ? 'bg-gray-100 text-gray-800' : '' }}
+                                    ">
+                                        @if($resourceEntry->isSurplus())
+                                            {{ __('city.surplus') }}
+                                        @elseif($resourceEntry->isDeficit())
+                                            {{ __('city.deficit') }}
+                                        @else
+                                            {{ __('city.equilibrium') }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-700 space-y-1">
+                                    <div>{{ __('city.quantity') }}: {{ $resourceEntry->quantity }} {{ $resourceEntry->resource->unit }}</div>
+                                    <div>{{ __('city.base_quantity') }}: {{ $resourceEntry->base_quantity }} {{ $resourceEntry->resource->unit }}</div>
+                                    <div>{{ __('city.buy_price') }}: ${{ $resourceEntry->getCurrentBuyPrice() }}</div>
+                                    <div>{{ __('city.sell_price') }}: ${{ $resourceEntry->getCurrentSellPrice() }}</div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-gray-600 mt-2 italic">{{ __('city.no_resources_available') }}</p>
+                @endif
+            </div>
+        </div>
+
         <!-- Outgoing Routes -->
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
