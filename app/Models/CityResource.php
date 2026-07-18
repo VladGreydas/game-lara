@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property float $price_multiplier
  * @property float $buy_price
  * @property float $sell_price
+ * @property bool $is_surplus
+ * @property bool $is_deficit
  * @property int $level
  * @property-read City $city
  * @property-read Resource $resource
@@ -33,6 +35,8 @@ class CityResource extends Model
         'price_multiplier',
         'buy_price',
         'sell_price',
+        'is_surplus',
+        'is_deficit',
         'level',
     ];
 
