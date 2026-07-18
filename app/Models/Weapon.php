@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property $lvl Weapon level
  * @property $type Weapon type
  * @property $upgrade_cost Weapon upgrade cost
+ * @property $durability Weapon durability
+ * @property $max_durability Weapon max durability
  * @property WeaponWagon $weapon_wagon Weapon Wagon
  */
 class Weapon extends Model
@@ -29,7 +31,9 @@ class Weapon extends Model
         'type',
         'price',
         'lvl',
-        'upgrade_cost'
+        'upgrade_cost',
+        'durability',
+        'max_durability'
     ];
 
     public static function types(): array

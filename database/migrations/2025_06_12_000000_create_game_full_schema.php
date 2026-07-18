@@ -108,6 +108,8 @@ return new class extends Migration
             $table->integer('price')->nullable(false);
             $table->integer('lvl')->nullable(false);
             $table->integer('upgrade_cost')->nullable(false);
+            $table->integer('durability')->nullable(false)->default(100);
+            $table->integer('max_durability')->nullable(false)->default(100);
             $table->timestamps();
         });
 
