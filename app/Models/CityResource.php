@@ -57,24 +57,23 @@ class CityResource extends Model
     public function updatePriceMultiplier(): void
     {
         if ($this->base_quantity <= 0) {
-            // Уникаємо ділення на нуль, якщо базова кількість не встановлена або 0
             $this->price_multiplier = 1.0;
+            $this->is_surplus = false;
+            $this->is_deficit = false;
             return;
         }
 
-        // Обчислюємо відхилення від базової кількості у відсотках
         $deviation = ($this->quantity - $this->base_quantity) / $this->base_quantity;
-
-        // Визначаємо максимальний/мінімальний множник
         $maxMultiplier = 2.0;
         $minMultiplier = 0.5;
-
-        // Рівень ресурсу зменшує чутливість цін до дефіциту/профіциту
-        $levelFactor = 1.0 - ($this->level * 0.05); // кожен рівень зменшує чутливість на 5%
+        $levelFactor = 1.0 - ($this->level * 0.05);
         $calculatedMultiplier = 1.0 - ($deviation * 0.5 * $levelFactor);
 
-        // Обмежуємо множник, щоб він не виходив за встановлені межі
         $this->price_multiplier = max($minMultiplier, min($maxMultiplier, $calculatedMultiplier));
+
+        // ✅ Оновлено: визначаємо surplus/deficit на основі множника
+        $this->is_surplus = $this->price_multiplier > 1.0;
+        $this->is_deficit = $this->price_multiplier < 1.0;
     }
 
     /**
