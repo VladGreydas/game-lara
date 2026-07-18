@@ -22,6 +22,8 @@ class WeaponFactory extends Factory
             'damage' => 25,
             'weight' => 200,
             'price' => 250,
+            'durability' => 100,
+            'max_durability' => 100,
             'lvl' => 1,
             'upgrade_cost' => 100,
         ];
@@ -46,6 +48,8 @@ class WeaponFactory extends Factory
                 'type' => $type,
                 'damage' => $baseStats['damage'] + $variant * 15,
                 'price' => $baseStats['price'] + $variant * 250,
+                'durability' => $baseStats['durability'] + $variant * 100,
+                'max_durability' => $baseStats['max_durability'] + $variant * 100,
                 'lvl' => 1,
                 'upgrade_cost' => 100,
             ];

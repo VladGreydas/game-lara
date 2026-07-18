@@ -14,5 +14,5 @@ return [
     'contracts_system' => 'Contracts System',
     'open_contract_board' => 'Open Contract Board',
     'back_to' => 'Back to',
-    'footer' => '© :year The Blue Ram Tavern. All rights reserved.',
+    'footer' => '© The Blue Ram Tavern. All rights reserved.',
 ];

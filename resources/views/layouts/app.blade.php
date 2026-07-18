@@ -32,6 +32,7 @@
                 {{ $slot }}
             </main>
         </div>
+        <x-victorian-footer />
     </body>
     @stack('scripts')
 </html>

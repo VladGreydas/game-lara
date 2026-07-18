@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-serif text-3xl text-[#5d3a1a]">
-            {{ __('My Player') }}
+            {{ __('city.player') }}
         </h2>
         <p class="font-serif text-[#8b5a2b] italic">"{{ __('city.progress_but_with_dignity') }}"</p>
     </x-slot>
@@ -101,27 +101,6 @@
                                     @endforeach
                                 @else
                                     <p class="text-gray-600 italic">{{ __('city.you_have_no_wagons_yet') }}</p>
-                                @endif
-                            </div>
-                            <div class="mb-4">
-                                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('city.weapons') }}:</h5>
-                                @php
-                                    $allWeapons = collect();
-                                    foreach($player->train->wagons as $wagon) {
-                                        if($wagon->isWeapon()) {
-                                            $allWeapons->push($wagon->weaponWagon->weapons->first() ?? null);
-                                        } else {
-                                            $allWeapons = $allWeapons->merge($wagon->weaponWagon->weapons ?? collect());
-                                        }
-                                    }
-                                    $allWeapons = $allWeapons->filter();
-                                @endphp
-                                @if($allWeapons->isNotEmpty())
-                                    @foreach($allWeapons as $weapon)
-                                        <x-weapon-card :weapon="$weapon" :upgrade="false" :rename="true"/>
-                                    @endforeach
-                                @else
-                                    <p class="text-gray-600 italic">{{ __('city.you_have_no_weapons_yet') }}</p>
                                 @endif
                             </div>
                         @else

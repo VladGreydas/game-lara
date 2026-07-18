@@ -52,6 +52,7 @@ return [
     'weapons' => 'Weapons',
     'create_new_player' => 'Create New Player',
     'enter_your_nickname_here' => 'Enter your nickname here...',
+    'player' => 'Player',
     'level_up' => 'LEVEL UP!',
     'rename' => 'Rename',
     'upgrade' => 'Upgrade',
@@ -65,4 +66,7 @@ return [
     'weapon' => 'Weapon',
     'cargo' => 'Cargo',
     'n_a' => 'N/A',
+    'ton' => 't',
+    'back_to_city' => 'Back to City',
+    'train_equipment' => 'Train Equipment',
 ];

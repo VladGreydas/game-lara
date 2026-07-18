@@ -1,4 +1,4 @@
-<div class="victorian-card">
+<div class="victorian-card mb-4">
     <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
         <h4 class="text-lg font-bold text-[#5d3a1a] font-serif">
             {{ $wagon->name }} <span class="text-sm text-gray-600">({{ $wagon->isWeapon() ? __('city.weapon') : __('city.cargo') }})</span>
@@ -7,11 +7,12 @@
     <div class="p-4">
         <div class="grid grid-cols-2 gap-2 text-sm">
             <div><strong>{{ __('city.level') }}:</strong> {{ $wagon->lvl }}</div>
-            <div><strong>{{ __('city.capacity') }}:</strong> {{ $wagon->isWeapon() ? __('city.n_a') : $wagon->getCurrentCapacity() }}</div>
-            <div><strong>{{ __('city.weight') }}:</strong> {{ $wagon->getTotalWeight() }} / {{ $wagon->max_weight }}</div>
-            <div><strong>{{ __('city.durability') }}:</strong> {{ $wagon->durability }} / {{ $wagon->max_durability }}</div>
+            @if($wagon->isCargo())
+                <div><strong>{{ __('city.capacity') }}:</strong> {{ $wagon->cargo_wagon->getCurrentCapacity() }} / {{$wagon->cargo_wagon->capacity}}</div>
+            @endif
+            <div><strong>{{ __('city.weight') }}:</strong> {{ $wagon->getTotalWeight() .' '. __('city.ton')}} </div>
+            <div><strong>{{ __('city.durability') }}:</strong> {{ $wagon->armor }} / {{ $wagon->max_armor }}</div>
         </div>
-
         @if($rename)
             <form method="POST" action="{{ route('wagon.rename', $wagon) }}" class="mt-4">
                 @csrf
@@ -23,15 +24,26 @@
                 </div>
             </form>
         @endif
-
         @if($upgrade)
             <div class="mt-4">
                 <form method="POST" action="{{ route('wagon.upgrade', $wagon) }}">
                     @csrf
                     <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                        {{ __('city.upgrade') }} ({{ $wagon->getUpgradeCost() }})
+                        {{ __('city.upgrade') }} ({{ $wagon->upgrade_cost }})
                     </button>
                 </form>
+            </div>
+        @endif
+        @if($wagon->isWeapon())
+            <div class="mb-4">
+                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('city.weapons') }}:</h5>
+                @if($wagon->weapon_wagon->weapons->isNotEmpty())
+                    @foreach($wagon->weapon_wagon->weapons as $weapon)
+                        <x-weapon-card :weapon="$weapon" :upgrade="$upgrade" :rename="true"/>
+                    @endforeach
+                @else
+                    <p class="text-gray-600 italic">{{ __('city.you_have_no_weapons_yet') }}</p>
+                @endif
             </div>
         @endif
     </div>

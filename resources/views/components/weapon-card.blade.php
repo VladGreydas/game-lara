@@ -29,7 +29,7 @@
                 <form method="POST" action="{{ route('weapon.upgrade', $weapon) }}">
                     @csrf
                     <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                        {{ __('city.upgrade') }} ({{ $weapon->getUpgradeCost() }})
+                        {{ __('city.upgrade') }} ({{ $weapon->upgrade_cost }})
                     </button>
                 </form>
             </div>

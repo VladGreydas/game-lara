@@ -29,7 +29,7 @@
                 <form method="POST" action="{{ route('locomotive.upgrade', $locomotive) }}">
                     @csrf
                     <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                        {{ __('city.upgrade') }} ({{ $locomotive->getUpgradeCost() }})
+                        {{ __('city.upgrade') }} ({{ $locomotive->upgrade_cost }})
                     </button>
                 </form>
             </div>

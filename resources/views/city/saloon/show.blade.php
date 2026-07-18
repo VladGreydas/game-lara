@@ -11,7 +11,6 @@
                 <!-- Header -->
                 <div class="bg-[#8b5a2b] text-white px-6 py-4 flex items-center justify-between">
                     <h3 class="text-2xl font-bold tracking-wide">{{ __('tavern.the_blue_ram_tavern') }}</h3>
-                    <span class="text-[#eecfa1] text-sm font-mono">{{ __('tavern.established') }} {{ now()->year - rand(5, 20) }}</span>
                 </div>
 
                 <!-- Main Content -->
