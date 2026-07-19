@@ -41,8 +41,8 @@ class CityRouteSeeder extends Seeder
         ];
 
         foreach ($routes as $routeData) {
-            $fromCityId = $routeData['from'];
-            $toCityId = $routeData['to'];
+            $fromId = $routeData['from'];
+            $toId = $routeData['to'];
             $fuelCost = $routeData['fuel_cost'];
 
             // Calculate travel_time based on fuel_cost, minimum 1 hour
@@ -51,8 +51,9 @@ class CityRouteSeeder extends Seeder
             // Create route from A to B
             CityRoute::firstOrCreate(
                 [
-                    'from_city_id' => $fromCityId,
-                    'to_city_id' => $toCityId,
+                    'from_id' => $fromId,
+                    'to_id' => $toId,
+                    'type' => 'city_to_city'
                 ],
                 [
                     'fuel_cost' => $fuelCost,
@@ -64,8 +65,9 @@ class CityRouteSeeder extends Seeder
             if (isset($routeData['bidirectional']) && $routeData['bidirectional']) {
                 CityRoute::firstOrCreate(
                     [
-                        'from_city_id' => $toCityId,
-                        'to_city_id' => $fromCityId,
+                        'from_id' => $toId,
+                        'to_id' => $fromId,
+                        'type' => 'city_to_city'
                     ],
                     [
                         'fuel_cost' => $fuelCost,
