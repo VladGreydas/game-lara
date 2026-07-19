@@ -25,6 +25,21 @@ class CityRoute extends Model
         'travel_time',
     ];
 
+    public function isCityToCity()
+    {
+        return $this->type === 'city_to_city';
+    }
+
+    public function isLocationToCity()
+    {
+        return $this->type === 'location_to_city';
+    }
+
+    public function isCityToLocation()
+    {
+        return $this->type === 'city_to_location';
+    }
+
     public function fromCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'from_id');

@@ -23,7 +23,7 @@ class CityController extends Controller
             // Check if travel has finished
             if ($player->travel_finishes_at->isPast()) {
                 // Travel has finished, process arrival
-                return $this->processArrival($player);
+                return $player->processArrival($player);
             } else {
                 // Still traveling, redirect to a travel status page or show a message
                 $route = CityRoute::find($player->current_city_route_id);
@@ -52,9 +52,20 @@ class CityController extends Controller
                 abort(403, 'Маршрут недоступний.');
             }
 
+            /** @var Locomotive $locomotive */
+            $locomotive = $player->train->locomotive;
+
+            if ($locomotive->fuel < $destination->fuel_cost) {
+                return back()->with('error', 'Not enough fuel to start the journey.');
+            }
+
+            // Consume fuel
+            $locomotive->fuel -= $destination->fuel_cost;
+            $locomotive->save();
+
             $player->current_city_route_id = $destination->id;
             $player->travel_starts_at = now();
-            $player->travel_finishes_at = now()->addMinutes($destination->travel_time);
+            $player->travel_finishes_at = now()->addMinutes($destination->travel_time * 10);
             $player->current_location_id = null; // Якщо подорож починається з локації — гравець залишає її
         } elseif ($destination instanceof Location) {
             // Подорож до локації

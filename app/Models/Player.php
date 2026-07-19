@@ -92,7 +92,7 @@ class Player extends Model
         if ($route->isCityToCity() || $route->isLocationToCity()) {
             $this->city_id = $route->toCity->id;
             $this->current_location_id = null;
-        } elseif ($route->isCityToLocation() || $route->isLocationToLocation()) {
+        } elseif ($route->isCityToLocation()) {
             $this->current_location_id = $route->toLocation->id;
             $this->city_id = null;
         }

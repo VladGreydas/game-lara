@@ -37,13 +37,13 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('destination', function ($value) {
             // Спробуємо знайти як CityRoute (за id або slug)
-            $route = CityRoute::where('id', $value)->orWhere('slug', $value)->first();
+            $route = CityRoute::where('id', $value)->first();
             if ($route) {
                 return $route;
             }
 
             // Спробуємо знайти як Location (за id або slug)
-            $location = Location::where('id', $value)->orWhere('slug', $value)->first();
+            $location = Location::where('id', $value)->first();
             if ($location) {
                 return $location;
             }
