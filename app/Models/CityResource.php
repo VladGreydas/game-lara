@@ -72,8 +72,8 @@ class CityResource extends Model
         $this->price_multiplier = max($minMultiplier, min($maxMultiplier, $calculatedMultiplier));
 
         // ✅ Оновлено: визначаємо surplus/deficit на основі множника
-        $this->is_surplus = $this->price_multiplier < 0.75;
-        $this->is_deficit = $this->price_multiplier > 1.5;
+        $this->is_surplus = $this->price_multiplier <= 0.75;
+        $this->is_deficit = $this->price_multiplier >= 1.25;
     }
 
     /**

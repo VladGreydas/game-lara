@@ -78,19 +78,18 @@
                                         {{ (!$resourceEntry->isSurplus() && !$resourceEntry->isDeficit()) ? 'bg-gray-100 text-gray-800' : '' }}
                                     ">
                                         @if($resourceEntry->isSurplus())
-                                            {{ __('city.surplus') }}
+                                            {{ __('common.surplus') }}
                                         @elseif($resourceEntry->isDeficit())
-                                            {{ __('city.deficit') }}
+                                            {{ __('common.deficit') }}
                                         @else
-                                            {{ __('city.equilibrium') }}
+                                            {{ __('common.equilibrium') }}
                                         @endif
                                     </span>
                                 </div>
                                 <div class="text-sm text-gray-700 space-y-1">
-                                    <div>{{ __('city.quantity') }}: {{ $resourceEntry->quantity }} {{ $resourceEntry->resource->unit }}</div>
-                                    <div>{{ __('city.base_quantity') }}: {{ $resourceEntry->base_quantity }} {{ $resourceEntry->resource->unit }}</div>
-                                    <div>{{ __('city.buy_price') }}: ${{ $resourceEntry->getCurrentBuyPrice() }}</div>
-                                    <div>{{ __('city.sell_price') }}: ${{ $resourceEntry->getCurrentSellPrice() }}</div>
+                                    <div>{{ __('common.quantity') }}: {{ $resourceEntry->quantity }} {{ $resourceEntry->resource->unit }}</div>
+                                    <div>{{ __('common.buy_price') }}: ${{ $resourceEntry->getCurrentBuyPrice() }}</div>
+                                    <div>{{ __('common.sell_price') }}: ${{ $resourceEntry->getCurrentSellPrice() }}</div>
                                 </div>
                             </div>
                         @endforeach

@@ -69,4 +69,8 @@ return [
     'ton' => 't',
     'back_to_city' => 'Back to City',
     'train_equipment' => 'Train Equipment',
+    'resource_market' => 'Resource Market',
+    'nearby_locations' => 'Nearby Locations',
+    'visit_location' => 'Visit Location',
+    'travel_cost' => 'Travel Cost',
 ];

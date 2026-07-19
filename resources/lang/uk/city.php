@@ -69,4 +69,8 @@ return [
     'ton' => 'тон',
     'back_to_city' => 'Повернутися в місто',
     'train_equipment' => 'Обладнання потягу',
+    'resource_market' => 'Ринок ресурсів',
+    'nearby_locations' => 'Найближчі локації',
+    'visit_location' => 'Відвідати локацію',
+    'travel_cost' => 'Ціна подорожі'
 ];
