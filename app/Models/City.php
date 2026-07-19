@@ -46,7 +46,8 @@ class City extends Model
 
     public function outgoingRoutes(): HasMany
     {
-        return $this->hasMany(CityRoute::class, 'from_id');
+        return $this->hasMany(CityRoute::class, 'from_id')
+            ->where('type', 'city_to_city');
     }
 
     public function players(): HasMany

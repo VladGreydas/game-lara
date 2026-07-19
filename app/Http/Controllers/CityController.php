@@ -32,7 +32,9 @@ class CityController extends Controller
         }
 
         // If not traveling, load city data as usual
-        $city = $player->city->load('outgoingRoutes.toCity');
+        $city = $player->city->load(['outgoingRoutes' => function ($query) {
+            $query->where('type', 'city_to_city')->with(['toCity', 'toLocation']);
+        }]);
 
         return view('city.show', compact('city', 'player'));
     }
