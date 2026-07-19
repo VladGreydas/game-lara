@@ -116,13 +116,17 @@ return new class extends Migration
         // 2025_06_04_194809_create_city_routes_table.php
         Schema::create('city_routes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('from_city_id')->constrained('cities')->cascadeOnDelete();
-            $table->foreignId('to_city_id')->constrained('cities')->cascadeOnDelete();
+            $table->foreignId('from_city_id')->nullable()->constrained('cities')->cascadeOnDelete();
+            $table->foreignId('to_city_id')->nullable()->constrained('cities')->cascadeOnDelete();
+            $table->foreignId('from_location_id')->nullable()->constrained('locations')->cascadeOnDelete();
+            $table->foreignId('to_location_id')->nullable()->constrained('locations')->cascadeOnDelete();
             $table->unsignedInteger('fuel_cost');
-            // NEW: Add travel_time to city_routes
             $table->unsignedInteger('travel_time')->default(1);
             $table->timestamps();
-            $table->unique(['from_city_id', 'to_city_id']);
+            $table->unique([
+                'from_city_id', 'to_city_id',
+                'from_location_id', 'to_location_id',
+            ]);
         });
 
         // 2025_06_11_195924_create_resources_table.php
