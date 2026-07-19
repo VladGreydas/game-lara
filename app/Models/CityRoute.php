@@ -4,26 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
- * @property int $from_city_id
- * @property int $to_city_id
+ * @property int|null $from_city_id
+ * @property int|null $to_city_id
+ * @property int|null $from_location_id
+ * @property int|null $to_location_id
  * @property int $fuel_cost
- * @property int $travel_time // NEW: Add this property
+ * @property int $travel_time
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\City $fromCity
- * @property-read \App\Models\City $toCity
+ * @property-read \App\Models\City|null $fromCity
+ * @property-read \App\Models\City|null $toCity
+ * @property-read \App\Models\Location|null $fromLocation
+ * @property-read \App\Models\Location|null $toLocation
  */
 class CityRoute extends Model
 {
     protected $fillable = [
         'from_city_id',
         'to_city_id',
+        'from_location_id',
+        'to_location_id',
         'fuel_cost',
-        'travel_time', // NEW: Add this
+        'travel_time',
     ];
 
     public function fromCity(): BelongsTo
@@ -36,8 +41,22 @@ class CityRoute extends Model
         return $this->belongsTo(City::class, 'to_city_id');
     }
 
-    public function isAvailableFrom(int $cityId): bool
+    public function fromLocation(): BelongsTo
     {
-        return $this->from_city_id === $cityId;
+        return $this->belongsTo(Location::class, 'from_location_id');
+    }
+
+    public function toLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'to_location_id');
+    }
+
+    public function isAvailableFrom(int $fromId, ?string $fromType = 'city'): bool
+    {
+        return match ($fromType) {
+            'city' => $this->from_city_id === $fromId,
+            'location' => $this->from_location_id === $fromId,
+            default => false,
+        };
     }
 }

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\CityRoute;
+use App\Models\Location;
 use App\Models\Locomotive;
 use App\Models\Player;
 use App\Models\CityResource;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Carbon; // Додаємо Carbon для роботи з часом
+use Illuminate\Support\Carbon;
 
 class CityController extends Controller
 {
@@ -35,45 +37,33 @@ class CityController extends Controller
         return view('city.show', compact('city', 'player'));
     }
 
-    public function travel(CityRoute $route)
+    public function travel(Request $request, $destination): RedirectResponse
     {
-        /** @var Player $player */
-        $player = Auth::user()->player;
+        $player = $request->user()->player;
 
-        // NEW: Prevent travel if already traveling
-        if ($player->isTraveling()) {
-            return back()->with('error', 'You are already traveling!');
+        if ($destination instanceof CityRoute) {
+            // Подорож між містами або містом ↔ локацією
+            $fromType = $player->current_location_id ? 'location' : 'city';
+            $fromId = $player->current_location_id ?? $player->city_id;
+
+            if (!$destination->isAvailableFrom($fromId, $fromType)) {
+                abort(403, 'Маршрут недоступний.');
+            }
+
+            $player->current_city_route_id = $destination->id;
+            $player->travel_starts_at = now();
+            $player->travel_finishes_at = now()->addMinutes($destination->travel_time);
+            $player->current_location_id = null; // Якщо подорож починається з локації — гравець залишає її
+        } elseif ($destination instanceof Location) {
+            // Подорож до локації
+            $player->current_location_id = $destination->id;
+            $player->current_city_route_id = null;
+            $player->travel_starts_at = now();
+            $player->travel_finishes_at = now()->addMinutes($destination->travel_time);
         }
 
-        // Перевірка пального, валідності маршруту тощо
-        if (!$route->isAvailableFrom($player->city_id)) {
-            abort(403, 'Invalid route');
-        }
-
-        /** @var Locomotive $locomotive */
-        $locomotive = $player->train->locomotive;
-
-        if ($locomotive->fuel < $route->fuel_cost) {
-            return back()->with('error', 'Not enough fuel to start the journey.');
-        }
-
-        // Consume fuel
-        $locomotive->fuel -= $route->fuel_cost;
-        $locomotive->save();
-
-        // Process travel time
-        $travelTime = $route->travel_time;
-        $speedMultiplier = $player->train->getSpeedMultiplierAttribute();
-        $finalTravelTime = $travelTime / $speedMultiplier;
-
-        // Initiate travel
-        $player->city_id = null; // Player is no longer "in" a city
-        $player->current_city_route_id = $route->id; // Mark the current route
-        $player->travel_starts_at = Carbon::now();
-        $player->travel_finishes_at = Carbon::now()->addHours($finalTravelTime); // Calculate arrival time
         $player->save();
-
-        return redirect()->route('player.index')->with('success', 'You have started your journey to ' . $route->toCity->name);
+        return redirect()->back()->with('success', 'Подорож розпочалася.');
     }
 
     public function refuel(Request $request)
