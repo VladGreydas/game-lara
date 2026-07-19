@@ -101,7 +101,7 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
     Route::controller(CityController::class)->group(function () {
         Route::get('/city/{city?}', 'show')->name('city.show');
         // Маршрут travel тепер запускає подорож і оновлює статус гравця
-        Route::post('/travel/{route}', 'travel')->name('city.travel');
+        Route::post('/travel/{destination}', 'travel')->name('city.travel');
         Route::post('/city/refuel', 'refuel')->name('city.refuel');
         // ✅ Нові маршрути для покращення
         Route::post('/city/upgrade', 'upgradeCity')->name('city.upgrade');

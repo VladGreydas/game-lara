@@ -80,24 +80,32 @@ class Player extends Model
     // NEW: Helper method to process arrival
     public function processArrival()
     {
-        /** @var CityRoute $route */
-        $route = CityRoute::find($this->current_city_route_id);
+        $route = $this->currentCityRoute;
 
         if (!$route) {
-            // Handle error: route not found, maybe player state is corrupted
             $this->current_city_route_id = null;
             $this->travel_finishes_at = null;
             $this->save();
-            return redirect()->route('player.index')->with('error', 'Travel state error. Please report this.');
+            return redirect()->route('player.index')->with('error', 'Travel state error.');
         }
 
-        $this->city_id = $route->to_city_id; // Set player's city to destination
-        $this->current_city_route_id = null; // Clear travel route
-        $this->travel_finishes_at = null; // Clear arrival time
+        if ($route->isCityToCity() || $route->isLocationToCity()) {
+            $this->city_id = $route->toCity->id;
+            $this->current_location_id = null;
+        } elseif ($route->isCityToLocation() || $route->isLocationToLocation()) {
+            $this->current_location_id = $route->toLocation->id;
+            $this->city_id = null;
+        }
+
+        $this->current_city_route_id = null;
+        $this->travel_finishes_at = null;
         $this->save();
 
-        // Redirect to the newly arrived city
-        return redirect()->route('city.show', $this->city)->with('success', 'You have arrived at ' . $route->toCity->name);
+        if ($this->city_id) {
+            return redirect()->route('city.show', $this->city)->with('success', 'You have arrived at ' . $this->city->name);
+        } else {
+            return redirect()->route('location.show', $this->currentLocation)->with('success', 'You have arrived at ' . $this->currentLocation->name);
+        }
     }
 
     //Relations

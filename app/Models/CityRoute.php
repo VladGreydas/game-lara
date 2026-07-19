@@ -53,10 +53,6 @@ class CityRoute extends Model
 
     public function isAvailableFrom(int $fromId, ?string $fromType = 'city'): bool
     {
-        return match ($fromType) {
-            'city' => $this->from_city_id === $fromId,
-            'location' => $this->from_location_id === $fromId,
-            default => false,
-        };
+        return $this->from_id === $fromId && str_starts_with($this->type, $fromType . '_');
     }
 }

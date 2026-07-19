@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\City;
+use App\Models\CityRoute;
+use App\Models\Location;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -31,6 +33,22 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('city', function ($value) {
             return City::where('slug', $value)->firstOrFail();
+        });
+
+        Route::bind('destination', function ($value) {
+            // Спробуємо знайти як CityRoute (за id або slug)
+            $route = CityRoute::where('id', $value)->orWhere('slug', $value)->first();
+            if ($route) {
+                return $route;
+            }
+
+            // Спробуємо знайти як Location (за id або slug)
+            $location = Location::where('id', $value)->orWhere('slug', $value)->first();
+            if ($location) {
+                return $location;
+            }
+
+            abort(404, 'Destination not found.');
         });
 
         $this->routes(function () {
