@@ -166,32 +166,6 @@ return new class extends Migration
             $table->unique(['city_id', 'resource_id']);
         });
 
-        // 2025_06_12_182347_create_locations_table.php
-        Schema::create('locations', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->string('type');
-            $table->unsignedInteger('travel_time')->default(1);
-            $table->unsignedBigInteger('travel_cost')->default(100);
-            $table->timestamps();
-        });
-
-        // 2025_06_12_182358_create_location_resources_table.php
-        Schema::create('location_resources', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('location_id')->constrained()->onDelete('cascade');
-            $table->foreignId('resource_id')->constrained()->onDelete('cascade');
-            $table->unsignedInteger('initial_quantity')->default(0);
-            $table->unsignedInteger('current_quantity')->default(0);
-            $table->unsignedInteger('regeneration_rate')->default(1);
-            $table->unsignedInteger('regeneration_interval')->default(60);
-            $table->timestamp('last_regenerated_at')->nullable();
-            $table->timestamps();
-            $table->unique(['location_id', 'resource_id']);
-        });
-
         // Add new columns to 'players' table related to location and travel
         Schema::table('players', function (Blueprint $table) {
             $table->foreignId('current_location_id')->nullable()->after('city_id')->constrained('locations')->onDelete('set null');

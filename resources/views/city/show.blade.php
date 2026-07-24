@@ -43,7 +43,24 @@
                         <p class="text-gray-800 mb-2">
                             {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}
                         </p>
-                        <p class="text-sm text-gray-600 mb-4">{{ __('city.refueling_cost') }} ${{ 2 * ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) }}</p>
+                        @php
+                            $locomotive = $player->train->locomotive;
+                            $fuelType = $locomotive->getFuelType();
+                            $refuelPrice = 2;
+                            if ($city->resources->count()) {
+                                $resources = $city->resources;
+                                foreach ($resources as $resource) {
+                                    if ($resource->resource->slug === $fuelType) {
+                                        $refuelPrice = $resource->buy_price;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
+                                $refuelPrice = $refuelResource->base_price;
+                            }
+                        @endphp
+                        <p class="text-sm text-gray-600 mb-4">{{ __('city.refueling_cost') . ($locomotive->max_fuel-$locomotive->fuel)*$refuelPrice }}</p>
 
                         @if($player->train->locomotive->fuel < $player->train->locomotive->max_fuel)
                             <form action="{{ route('city.refuel') }}" method="POST" class="inline">

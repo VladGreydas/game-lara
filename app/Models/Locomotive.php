@@ -43,11 +43,6 @@ class Locomotive extends Model
         'upgrade_cost'
     ];
 
-    public function getWagonCap(): int
-    {
-        return floor($this->power / 1000);
-    }
-
     public function repair(): bool
     {
         return $this->repairWith(
@@ -72,6 +67,15 @@ class Locomotive extends Model
             ],
             10
         );
+    }
+
+    public function getFuelType()
+    {
+        return match ($this->type) {
+            'steam' => 'coal',
+            'diesel' => 'diesel',
+            'electric' => 'battery',
+        };
     }
 
     public function train(): BelongsTo
