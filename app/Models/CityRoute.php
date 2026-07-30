@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $from_id
  * @property int $to_id
  * @property string $type
- * @property int $fuel_cost
- * @property int $travel_time
+ * @property int $distance_km
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -21,8 +20,13 @@ class CityRoute extends Model
         'from_id',
         'to_id',
         'type',
-        'fuel_cost',
-        'travel_time',
+        'distance_km',
+    ];
+
+    protected $types= [
+        'city_to_city',
+        'city_to_location',
+        'location_to_city',
     ];
 
     public function isCityToCity()
@@ -60,8 +64,8 @@ class CityRoute extends Model
         return $this->belongsTo(Location::class, 'to_id');
     }
 
-    public function isAvailableFrom(int $fromId, ?string $fromType = 'city'): bool
+    public function isAvailableFrom(int $fromId, ?string $fromType = 'city_to_city'): bool
     {
-        return $this->from_id === $fromId && str_starts_with($this->type, $fromType . '_');
+        return $this->from_id === $fromId && in_array($fromType, $this->types);
     }
 }

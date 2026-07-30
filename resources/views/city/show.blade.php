@@ -46,17 +46,24 @@
                         @php
                             $locomotive = $player->train->locomotive;
                             $fuelType = $locomotive->getFuelType();
-                            $refuelPrice = 2;
+                            $refuelPrice = 0;
                             if ($city->resources->count()) {
                                 $resources = $city->resources;
                                 foreach ($resources as $resource) {
-                                    if ($resource->resource->slug === $fuelType) {
-                                        $refuelPrice = $resource->buy_price;
+                                    if ($resource->resource->slug == $fuelType) {
+                                        Debugbar::info('true');
+                                        $refuelPrice = $resource->getCurrentBuyPrice();
                                         break;
                                     }
                                 }
+                                if ($refuelPrice == 0) {
+                                    $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
+                                    Debugbar::info($refuelResource);
+                                    $refuelPrice = $refuelResource->base_price;
+                                }
                             } else {
                                 $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
+                                Debugbar::info($refuelResource);
                                 $refuelPrice = $refuelResource->base_price;
                             }
                         @endphp
@@ -129,7 +136,7 @@
                             <li class="p-4 bg-white border border-[#d4b483] rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between">
                                 <div class="mb-2 md:mb-0">
                                     <span class="font-bold text-[#5d3a1a] text-lg">→ {{ $route->toCity->name }}</span>
-                                    <span class="ml-2 text-gray-600 text-sm italic">({{ __('city.fuel') }} {{ $route->fuel_cost }}, {{ __('city.time') }} {{ $route->travel_time * 10 }}m)</span>
+                                    <span class="ml-2 text-gray-600 text-sm italic">({{ __('city.fuel') }} {{ $player->train->locomotive->getFuelCost($route) }}, {{ __('city.time') }} {{ $player->train->locomotive->getTravelTime($route) }}h)</span>
                                 </div>
                                 <form method="POST" action="{{ route('city.travel', $route) }}" class="inline">
                                     @csrf

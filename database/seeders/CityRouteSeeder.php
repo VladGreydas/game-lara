@@ -26,27 +26,24 @@ class CityRouteSeeder extends Seeder
         $routes = [
             // Двосторонні маршрути
             // ['from' => ID міста 1, 'to' => ID міста 2, 'fuel_cost' => вартість пального, 'travel_time' => час подорожі (год), 'bidirectional' => чи двосторонній]
-            ['from' => 1, 'to' => 2,  'fuel_cost' => 10, 'bidirectional' => true], // Ironforge <-> Silverbrook
-            ['from' => 3, 'to' => 4,  'fuel_cost' => 15, 'bidirectional' => true], // Ashenvale <-> Rivermoor
-            ['from' => 5, 'to' => 6,  'fuel_cost' => 20, 'bidirectional' => true], // Stormhelm <-> Frostgate
-            ['from' => 8, 'to' => 9,  'fuel_cost' => 5,  'bidirectional' => true], // Ebonreach <-> Thornhall
+            ['from' => 1, 'to' => 2,  'distance_km' => 200, 'bidirectional' => true], // Ironforge <-> Silverbrook
+            ['from' => 3, 'to' => 4,  'distance_km' => 300, 'bidirectional' => true], // Ashenvale <-> Rivermoor
+            ['from' => 5, 'to' => 6,  'distance_km' => 400, 'bidirectional' => true], // Stormhelm <-> Frostgate
+            ['from' => 8, 'to' => 9,  'distance_km' => 100, 'bidirectional' => true], // Ebonreach <-> Thornhall
 
             // Односторонні маршрути
-            ['from' => 2, 'to' => 3,  'fuel_cost' => 5],  // Silverbrook -> Ashenvale
-            ['from' => 4, 'to' => 5,  'fuel_cost' => 10], // Rivermoor -> Stormhelm
-            ['from' => 6, 'to' => 7,  'fuel_cost' => 15], // Frostgate -> Dreadmoor
-            ['from' => 7, 'to' => 8,  'fuel_cost' => 5],  // Dreadmoor -> Ebonreach
-            ['from' => 10, 'to' => 1, 'fuel_cost' => 20], // Sunspire -> Ironforge
-            ['from' => 9, 'to' => 10, 'fuel_cost' => 10], // Thornhall -> Sunspire
+            ['from' => 2, 'to' => 3,  'distance_km' => 100], // Silverbrook -> Ashenvale
+            ['from' => 4, 'to' => 5,  'distance_km' => 200], // Rivermoor -> Stormhelm
+            ['from' => 6, 'to' => 7,  'distance_km' => 300], // Frostgate -> Dreadmoor
+            ['from' => 7, 'to' => 8,  'distance_km' => 100], // Dreadmoor -> Ebonreach
+            ['from' => 10, 'to' => 1, 'distance_km' => 400], // Sunspire -> Ironforge
+            ['from' => 9, 'to' => 10, 'distance_km' => 200], // Thornhall -> Sunspire
         ];
 
         foreach ($routes as $routeData) {
             $fromId = $routeData['from'];
             $toId = $routeData['to'];
-            $fuelCost = $routeData['fuel_cost'];
-
-            // Calculate travel_time based on fuel_cost, minimum 1 hour
-            $travelTime = max(1, (int) ceil($fuelCost / 5)); // Changed this line
+            $distanceKm = $routeData['distance_km'];
 
             // Create route from A to B
             CityRoute::firstOrCreate(
@@ -56,8 +53,7 @@ class CityRouteSeeder extends Seeder
                     'type' => 'city_to_city'
                 ],
                 [
-                    'fuel_cost' => $fuelCost,
-                    'travel_time' => $travelTime, // Added travel_time here
+                    'distance_km' => $distanceKm,
                 ]
             );
 
@@ -70,8 +66,7 @@ class CityRouteSeeder extends Seeder
                         'type' => 'city_to_city'
                     ],
                     [
-                        'fuel_cost' => $fuelCost,
-                        'travel_time' => $travelTime, // Added travel_time here
+                        'distance_km' => $distanceKm,
                     ]
                 );
             }

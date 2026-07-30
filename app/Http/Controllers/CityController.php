@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\Locomotive;
 use App\Models\Player;
 use App\Models\CityResource;
+use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -45,8 +46,8 @@ class CityController extends Controller
 
         if ($destination instanceof CityRoute) {
             // Подорож між містами або містом ↔ локацією
-            $fromType = $player->current_location_id ? 'location' : 'city';
-            $fromId = $player->current_location_id ?? $player->city_id;
+            $fromType = $destination->type;
+            $fromId = $destination->from_id;
 
             if (!$destination->isAvailableFrom($fromId, $fromType)) {
                 abort(403, 'Маршрут недоступний.');
@@ -55,24 +56,21 @@ class CityController extends Controller
             /** @var Locomotive $locomotive */
             $locomotive = $player->train->locomotive;
 
-            if ($locomotive->fuel < $destination->fuel_cost) {
+            if ($locomotive->fuel < $locomotive->getFuelCost($destination)) {
                 return back()->with('error', 'Not enough fuel to start the journey.');
             }
 
             // Consume fuel
-            $locomotive->fuel -= $destination->fuel_cost;
+            $locomotive->fuel -= $locomotive->getFuelCost($destination);
             $locomotive->save();
+
+            // Get travel time
+            $travel_time = $locomotive->getTravelTime($destination);
 
             $player->current_city_route_id = $destination->id;
             $player->travel_starts_at = now();
-            $player->travel_finishes_at = now()->addMinutes($destination->travel_time * 10);
+            $player->travel_finishes_at = now()->addHours($travel_time);
             $player->current_location_id = null; // Якщо подорож починається з локації — гравець залишає її
-        } elseif ($destination instanceof Location) {
-            // Подорож до локації
-            $player->current_location_id = $destination->id;
-            $player->current_city_route_id = null;
-            $player->travel_starts_at = now();
-            $player->travel_finishes_at = now()->addMinutes($destination->travel_time);
         }
 
         $player->save();
@@ -102,14 +100,37 @@ class CityController extends Controller
         }
 
         // Assume fuel price is fixed for now, e.g., 2 money per unit
-        $cost = $missingFuel * 2;
+        $fuelType = $locomotive->getFuelType();
+        $refuelPrice = 0;
+        $city = $player->city;
+        if ($city->resources->count()) {
+            $resources = $city->resources;
+            foreach ($resources as $resource) {
+                if ($resource->resource->slug == $fuelType) {
+                    Debugbar::info('true');
+                    $refuelPrice = $resource->getCurrentBuyPrice();
+                    break;
+                }
+            }
+            if ($refuelPrice == 0) {
+                /* @var Resource $refuelResource */
+                $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
+                Debugbar::info($refuelResource);
+                $refuelPrice = $refuelResource->base_price;
+            }
+        } else {
+            /* @var Resource $refuelResource */
+            $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
+            Debugbar::info($refuelResource);
+            $refuelPrice = $refuelResource->base_price;
+        }
 
-        if ($player->money < $cost) {
+        if ($player->money < $refuelPrice) {
             return back()->with('error', 'Not enough money to refuel.');
         }
 
         // Update player and locomotive
-        $player->decrement('money', $cost);
+        $player->decrement('money', $refuelPrice);
         $locomotive->update(['fuel' => $locomotive->max_fuel]);
 
         return back()->with('success', 'Locomotive refueled!');

@@ -61,7 +61,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const finishesStr = "{{ $player->travel_finishes_at->toISOString() }}";
-                const startsStr = "{{ $player->travel_finishes_at->copy()->subHours($route->travel_time)->toISOString() }}";
+                const startsStr = "{{ $player->travel_finishes_at->copy()->subHours($player->train->locomotive->getTravelTime($route))->toISOString() }}";
 
                 const travelFinishesAt = new Date(finishesStr).getTime();
                 const travelStartsAt = new Date(startsStr).getTime();

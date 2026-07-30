@@ -19,7 +19,7 @@ class TravelService
             if ($route->isCityToCity() || $route->isLocationToCity()) {
                 $player->city_id = $route->toCity->id;
                 $player->current_location_id = null;
-            } elseif ($route->isCityToLocation() || $route->isLocationToLocation()) {
+            } elseif ($route->isCityToLocation()) {
                 $player->current_location_id = $route->toLocation->id;
                 $player->city_id = null;
             }

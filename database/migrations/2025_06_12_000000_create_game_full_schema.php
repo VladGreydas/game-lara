@@ -57,10 +57,12 @@ return new class extends Migration
             $table->integer('weight')->nullable(false)->default(350);
             $table->string('type')->nullable(false)->default('Steam');
             $table->integer('power')->nullable(false)->default(2500);
+            $table->integer('speed')->nullable(false)->default(100);
             $table->integer('armor')->nullable(false)->default(500);
             $table->integer('max_armor')->nullable(false)->default(500);
             $table->integer('fuel')->nullable(false)->default(10);
             $table->integer('max_fuel')->nullable(false)->default(10);
+            $table->integer('fuel_per_hundred_km')->nullable(false)->default(10);
             $table->integer('price')->nullable(false)->default(500);
             $table->integer('lvl')->nullable(false)->default(1);
             $table->integer('upgrade_cost')->nullable(false)->default(100);
@@ -118,9 +120,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('from_id');
             $table->unsignedBigInteger('to_id');
-            $table->string('type'); // 'city_to_city', 'city_to_location', 'location_to_city', 'location_to_location'
-            $table->unsignedInteger('fuel_cost');
-            $table->unsignedInteger('travel_time')->default(1);
+            $table->string('type'); // 'city_to_city', 'city_to_location', 'location_to_city'
+            $table->unsignedInteger('distance_km')->nullable(false)->default(100);
             $table->timestamps();
 
             $table->unique(['from_id', 'to_id', 'type']);
@@ -164,6 +165,28 @@ return new class extends Migration
             $table->unsignedSmallInteger('level')->default(1);
             $table->timestamps();
             $table->unique(['city_id', 'resource_id']);
+        });
+
+        // Locations
+        Schema::create('locations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('city_id')->constrained()->onDelete('cascade');
+            $table->string('name')->unique();
+            $table->string('slug')->unique();
+            $table->string('type');
+            $table->timestamps();
+        });
+
+        // Location resources
+        Schema::create('location_resources', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('location_id')->constrained()->onDelete('cascade');
+            $table->foreignId('resource_id')->constrained()->onDelete('cascade');
+            $table->decimal('production_rate_per_hour', 10, 2)->default(0);
+            $table->integer('max_capacity')->default(0);
+            $table->integer('current_amount')->default(0);
+            $table->timestamp('last_produced_at')->nullable();
+            $table->timestamps();
         });
 
         // Add new columns to 'players' table related to location and travel

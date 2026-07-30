@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $weight Locomotive's weight
  * @property string $type Locomotive's type - steam, diesel, electric, etc.
  * @property int $power Locomotive's power
+ * @property int $speed Locomotive's speed (km/h)
  * @property int $armor Locomotive's armor
  * @property int $max_armor Locomotive's max armor
  * @property int $fuel Locomotive's fuel
  * @property int $max_fuel Locomotive's max fuel
+ * @property int $fuel_per_hundred_km Fuel usage per 100km
  * @property int $price Locomotive's price
  * @property int $lvl Current locomotive level
  * @property int $upgrade_cost Locomotive's upgrade cost
@@ -34,10 +36,12 @@ class Locomotive extends Model
         'weight',
         'type',
         'power',
+        'speed',
         'armor',
         'max_armor',
         'fuel',
         'max_fuel',
+        'fuel_per_hundred_km',
         'price',
         'lvl',
         'upgrade_cost'
@@ -60,9 +64,9 @@ class Locomotive extends Model
             [
                 'weight' => 50,
                 'power' => 500,
+                'speed' => 20,
                 'armor' => 100,
                 'max_armor' => 100,
-                'fuel' => 5,
                 'max_fuel' => 5,
             ],
             10
@@ -71,11 +75,27 @@ class Locomotive extends Model
 
     public function getFuelType()
     {
-        return match ($this->type) {
+        return match (strtolower($this->type)) {
             'steam' => 'coal',
             'diesel' => 'diesel',
             'electric' => 'battery',
         };
+    }
+
+    public function getTravelTime(CityRoute $route)
+    {
+        $baseTime = 1;
+        // Add logic for time calculation
+        $speed = $this->speed * $this->train->getSpeedMultiplierAttribute();
+        $travelTime = $baseTime;
+        $distance = $route->distance_km; //100km
+        $travelTime = round($distance / $speed, 2);
+        return $travelTime;
+    }
+
+    public function getFuelCost(CityRoute $route)
+    {
+        return ($route->distance_km / 100) * $this->fuel_per_hundred_km;
     }
 
     public function train(): BelongsTo
