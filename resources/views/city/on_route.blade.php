@@ -12,15 +12,15 @@
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
                 <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">
-                    {{ __('On Route to :city', ['city' => $route->toCity->name]) }}
+                    {{ __('On Route to :city', ['city' => $route->toCity->name ?? $route->toLocation->name]) }}
                 </h3>
             </div>
 
             <div class="p-6">
                 <p class="text-gray-800 mb-4">
                     {{ __('Your train is currently traveling from :from to :to.', [
-                        'from' => $route->fromCity->name,
-                        'to' => $route->toCity->name
+                        'from' => $route->fromCity->name ?? $route->fromLocation->name,
+                        'to' => $route->toCity->name ?? $route->toLocation->name
                     ]) }}
                 </p>
 

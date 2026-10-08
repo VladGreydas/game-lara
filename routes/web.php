@@ -10,6 +10,7 @@ use App\Http\Controllers\WagonController;
 use App\Http\Controllers\WeaponController;
 use App\Http\Controllers\WorkshopController;
 use App\Http\Controllers\SaloonController;
+use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // Не забудьте додати цей use
 
@@ -107,6 +108,13 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
         Route::post('/city/upgrade', 'upgradeCity')->name('city.upgrade');
         Route::post('/city/resource/{cityResource}/upgrade', 'upgradeResource')->name('city.resource.upgrade');
         Route::get('/city/{city}/saloon', [SaloonController::class, 'show'])->name('city.saloon.show');
+    });
+
+    // Локації
+    Route::controller(LocationController::class)->group(function () {
+        Route::get('/locations/{location}', 'show')->name('locations.show');
+        Route::post('/locations/{location}/collect', 'collect')->name('locations.collect');
+        Route::post('/locations/{location}/refuel', 'refuel')->name('locations.refuel');
     });
 
     // Майстерня

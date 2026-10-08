@@ -47,7 +47,7 @@
                                 <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
                                     <p class="font-bold text-blue-800 mb-2">{{ __('city.on_the_way') }}</p>
                                     <p class="text-gray-700">
-                                        {{ __('city.from') }} {{ $player->currentCityRoute->fromCity->name }} → {{ $player->currentCityRoute->toCity->name }}
+                                        {{ __('city.from') }} {{ $player->currentCityRoute->fromCity ? $player->currentCityRoute->fromCity->name : $player->currentCityRoute->fromLocation->name }} → {{ $player->currentCityRoute->toCity->name ?? $player->currentCityRoute->toLocation->name }}
                                     </p>
                                     <p class="text-sm text-gray-600 mt-1">
                                         {{ __('city.arrival') }} {{ $player->travel_finishes_at->format('H:i, M d') }}
@@ -59,29 +59,32 @@
                                 </p>
                             @elseif ($player->currentLocation)
                                 <p class="text-gray-700 mb-2">
-                                    {{ __('city.you_are_at') . ' ' . $player->currentLocation->name }}
+                                    {{ __('city.you_are_at') }} <a href="{{route('locations.show', $player->currentLocation)}}" class="text-[#8b5a2b] underline">{{$player->currentLocation->name}}</a>
                                 </p>
                                 <p class="text-gray-600 italic">{{ $player->currentLocation->description }}</p>
                             @endif
 
-                            <div class="mt-4 p-4 bg-[#f5e6c8] border border-[#d4b483] rounded">
-                                <h5 class="font-bold text-[#5d3a1a] mb-2">{{ __('city.city_services') }}</h5>
-                                <ul class="space-y-1 text-sm text-gray-700">
-                                    @if ($player->city->has_workshop)
-                                        <li><a href="{{ route('workshop.index') }}" class="text-[#8b5a2b] underline">{{ __('city.go_to_workshop') }}</a> — {{ __('city.upgrade_train') }}</li>
-                                    @else
-                                        <li class="text-gray-500 italic">{{ __('city.no_workshop') }}</li>
-                                    @endif
-                                    @if ($player->city->has_shop)
-                                        <li><a href="{{ route('shop.index') }}" class="text-[#8b5a2b] underline">{{ __('city.go_to_shop') }}</a> — {{ __('city.buy_sell_locomotives') }}</li>
-                                    @else
-                                        <li class="text-gray-500 italic">{{ __('city.no_shop') }}</li>
-                                    @endif
-                                    @if ($player->city->hasSaloon())
-                                        <li><a href="{{ route('city.saloon.show', $player->city) }}" class="text-[#8b5a2b] underline">{{ __('city.visit_tavern') }}</a> — {{ __('city.rest_place') }}</li>
-                                    @endif
-                                </ul>
-                            </div>
+                            @if($player->city)
+                                <div class="mt-4 p-4 bg-[#f5e6c8] border border-[#d4b483] rounded">
+                                    <h5 class="font-bold text-[#5d3a1a] mb-2">{{ __('city.city_services') }}</h5>
+                                    <ul class="space-y-1 text-sm text-gray-700">
+                                        @if ($player->city->has_workshop)
+                                            <li><a href="{{ route('workshop.index') }}" class="text-[#8b5a2b] underline">{{ __('city.go_to_workshop') }}</a> — {{ __('city.upgrade_train') }}</li>
+                                        @else
+                                            <li class="text-gray-500 italic">{{ __('city.no_workshop') }}</li>
+                                        @endif
+                                        @if ($player->city->has_shop)
+                                            <li><a href="{{ route('shop.index') }}" class="text-[#8b5a2b] underline">{{ __('city.go_to_shop') }}</a> — {{ __('city.buy_sell_locomotives') }}</li>
+                                        @else
+                                            <li class="text-gray-500 italic">{{ __('city.no_shop') }}</li>
+                                        @endif
+                                        @if ($player->city->hasSaloon())
+                                            <li><a href="{{ route('city.saloon.show', $player->city) }}" class="text-[#8b5a2b] underline">{{ __('city.visit_tavern') }}</a> — {{ __('city.rest_place') }}</li>
+                                        @endif
+                                    </ul>
+                                </div>
+                            @endif
+
                         </div>
                     </div>
 

@@ -6,4 +6,9 @@ return [
     'surplus' => 'Surplus',
     'deficit' => 'Deficit',
     'equilibrium' => 'Equilibrium',
+    'unit' => 'unit',
+    'location' => [
+        'collect_success' => 'Collect Success',
+        'refuel_success' => 'Refund Success',
+    ],
 ];

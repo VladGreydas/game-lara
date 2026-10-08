@@ -13,13 +13,13 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('menu.dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('chirps.index')" :active="request()->routeIs('chirps.index')">
-                        {{ __('Chirps') }}
+                        {{ __('menu.chirps') }}
                     </x-nav-link>
                     <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
-                        {{ __('Player') }}
+                        {{ __('menu.player') }}
                     </x-nav-link>
                     @php
                         $player = auth()->user()?->player;
@@ -27,7 +27,11 @@
 
                     @if ($player && $player->city)
                         <x-nav-link :href="route('city.show', $player->city)" :active="request()->routeIs('city.show')">
-                            {{ __('City') }}
+                            {{ __('menu.city') }}
+                        </x-nav-link>
+                    @elseif ($player && $player->currentLocation)
+                        <x-nav-link :href="route('locations.show', $player->currentLocation)" :active="request()->routeIs('locations.show')">
+                            {{ __('menu.location') }}
                         </x-nav-link>
                     @endif
 
@@ -94,13 +98,13 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('menu.dashboard') }}
             </x-responsive-nav-link>
             <x-nav-link :href="route('chirps.index')" :active="request()->routeIs('chirps.index')">
-                {{ __('Chirps') }}
+                {{ __('menu.chirps') }}
             </x-nav-link>
             <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
-                {{ __('Player') }}
+                {{ __('menu.player') }}
             </x-nav-link>
             @php
                 $player = auth()->user()?->player;
@@ -108,7 +112,11 @@
 
             @if ($player && $player->city)
                 <x-nav-link :href="route('city.show', $player->city)" :active="request()->routeIs('city.show')">
-                    {{ __('City') }}
+                    {{ __('menu.city') }}
+                </x-nav-link>
+            @elseif ($player && $player->currentLocation)
+                <x-nav-link :href="route('locations.show', $player->currentLocation)" :active="request()->routeIs('locations.show')">
+                    {{ __('menu.location') }}
                 </x-nav-link>
             @endif
 

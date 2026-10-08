@@ -47,7 +47,9 @@ class CityController extends Controller
         if ($destination instanceof CityRoute) {
             // Подорож між містами або містом ↔ локацією
             $fromType = $destination->type;
-            $fromId = $destination->from_id;
+            $from = $destination->getFrom();
+
+            $fromId = $destination->{'from_'.$from.'_id'};
 
             if (!$destination->isAvailableFrom($fromId, $fromType)) {
                 abort(403, 'Маршрут недоступний.');
@@ -70,7 +72,19 @@ class CityController extends Controller
             $player->current_city_route_id = $destination->id;
             $player->travel_starts_at = now();
             $player->travel_finishes_at = now()->addHours($travel_time);
-            $player->current_location_id = null; // Якщо подорож починається з локації — гравець залишає її
+
+            // Оновлюємо локацію/місто відразу під час подорожі
+            if ($destination->isCityToLocation()) {
+                $player->current_location_id = $destination->toLocation->id;
+                $player->city_id = null;
+            } elseif ($destination->isLocationToCity()) {
+                $player->city_id = $destination->toCity->id;
+                $player->current_location_id = null;
+            } else {
+                // city_to_city або інші випадки
+                $player->city_id = $destination->toCity->id;
+                $player->current_location_id = null;
+            }
         }
 
         $player->save();
@@ -107,7 +121,6 @@ class CityController extends Controller
             $resources = $city->resources;
             foreach ($resources as $resource) {
                 if ($resource->resource->slug == $fuelType) {
-                    Debugbar::info('true');
                     $refuelPrice = $resource->getCurrentBuyPrice();
                     break;
                 }

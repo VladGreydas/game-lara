@@ -61,12 +61,12 @@ class CitiesSeeder extends Seeder
                     ['resource_id' => $resource->id],
                     [
                         'quantity' =>           $is_surplus ? 1500 : ($is_deficit ? 500 : 1000),    // Початкова кількість (може бути випадковою)
-                        'base_quantity' =>      1000,                       // Базова кількість
-                        'buy_price' =>          $resource->base_price,      // Базова ціна купівлі (буде коригуватися множником)
-                        'sell_price' =>         $resource->base_price / 1.5,      // Базова ціна продажу
-                        'price_multiplier' =>   1.0,                        // Початковий множник ціни
-                        'is_surplus' =>         $is_surplus,                // Чи цього ресурсу в достатку
-                        'is_deficit' =>         $is_deficit,                // Чи є дефіцит цього ресурсу
+                        'base_quantity' =>      1000,                           // Базова кількість
+                        'buy_price' =>          $resource->base_price,          // Базова ціна купівлі (буде коригуватися множником)
+                        'sell_price' =>         $resource->base_price / 1.5,    // Базова ціна продажу
+                        'price_multiplier' =>   1.0,                            // Початковий множник ціни
+                        'is_surplus' =>         $is_surplus,                    // Чи цього ресурсу в достатку
+                        'is_deficit' =>         $is_deficit,                    // Чи є дефіцит цього ресурсу
                     ]
                 );
                 $counter++;

@@ -115,18 +115,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2025_06_04_194809_create_city_routes_table.php (Updated for polymorphic-like routing)
-        Schema::create('city_routes', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('from_id');
-            $table->unsignedBigInteger('to_id');
-            $table->string('type'); // 'city_to_city', 'city_to_location', 'location_to_city'
-            $table->unsignedInteger('distance_km')->nullable(false)->default(100);
-            $table->timestamps();
-
-            $table->unique(['from_id', 'to_id', 'type']);
-        });
-
         // 2025_06_11_195924_create_resources_table.php
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
@@ -187,6 +175,22 @@ return new class extends Migration
             $table->integer('current_amount')->default(0);
             $table->timestamp('last_produced_at')->nullable();
             $table->timestamps();
+        });
+
+        // 2025_06_04_194809_create_city_routes_table.php (Updated for polymorphic-like routing)
+        Schema::create('city_routes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('from_city_id')->nullable()->constrained('cities')->nullOnDelete();
+            $table->foreignId('from_location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->foreignId('to_city_id')->nullable()->constrained('cities')->nullOnDelete();
+            $table->foreignId('to_location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->string('type'); // 'city_to_city', 'city_to_location', 'location_to_city'
+            $table->unsignedInteger('distance_km')->nullable(false)->default(100);
+            $table->timestamps();
+
+            $table->unique(['from_city_id', 'to_city_id', 'type']);
+            $table->unique(['from_location_id', 'to_city_id', 'type']);
+            $table->unique(['from_city_id', 'to_location_id', 'type']);
         });
 
         // Add new columns to 'players' table related to location and travel

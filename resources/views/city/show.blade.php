@@ -51,20 +51,17 @@
                                 $resources = $city->resources;
                                 foreach ($resources as $resource) {
                                     if ($resource->resource->slug == $fuelType) {
-                                        Debugbar::info('true');
                                         $refuelPrice = $resource->getCurrentBuyPrice();
                                         break;
                                     }
                                 }
                                 if ($refuelPrice == 0) {
-                                    $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
-                                    Debugbar::info($refuelResource);
-                                    $refuelPrice = $refuelResource->base_price;
+                                    $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first();
+                                    if ($refuelResource) $refuelPrice = $refuelResource->base_price;
                                 }
                             } else {
-                                $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
-                                Debugbar::info($refuelResource);
-                                $refuelPrice = $refuelResource->base_price;
+                                $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first();
+                                if ($refuelResource) $refuelPrice = $refuelResource->base_price;
                             }
                         @endphp
                         <p class="text-sm text-gray-600 mb-4">{{ __('city.refueling_cost') . ($locomotive->max_fuel-$locomotive->fuel)*$refuelPrice }}</p>
@@ -130,12 +127,12 @@
                 <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">{{ __('city.outgoing_routes') }}</h3>
             </div>
             <div class="p-6">
-                @if($city->outgoingRoutes->count())
+                @if($city->getOutgoingRoutes()->count())
                     <ul class="space-y-4">
-                        @foreach($city->outgoingRoutes as $route)
+                        @foreach($city->getOutgoingRoutes() as $route)
                             <li class="p-4 bg-white border border-[#d4b483] rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between">
                                 <div class="mb-2 md:mb-0">
-                                    <span class="font-bold text-[#5d3a1a] text-lg">→ {{ $route->toCity->name }}</span>
+                                    <span class="font-bold text-[#5d3a1a] text-lg">→ {{ $route->toCity->name ?? $route->toLocation->name }}</span>
                                     <span class="ml-2 text-gray-600 text-sm italic">({{ __('city.fuel') }} {{ $player->train->locomotive->getFuelCost($route) }}, {{ __('city.time') }} {{ $player->train->locomotive->getTravelTime($route) }}h)</span>
                                 </div>
                                 <form method="POST" action="{{ route('city.travel', $route) }}" class="inline">

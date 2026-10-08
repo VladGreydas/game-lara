@@ -48,8 +48,8 @@ class CityRouteSeeder extends Seeder
             // Create route from A to B
             CityRoute::firstOrCreate(
                 [
-                    'from_id' => $fromId,
-                    'to_id' => $toId,
+                    'from_city_id' => $fromId,
+                    'to_city_id' => $toId,
                     'type' => 'city_to_city'
                 ],
                 [
@@ -61,8 +61,8 @@ class CityRouteSeeder extends Seeder
             if (isset($routeData['bidirectional']) && $routeData['bidirectional']) {
                 CityRoute::firstOrCreate(
                     [
-                        'from_id' => $toId,
-                        'to_id' => $fromId,
+                        'from_city_id' => $toId,
+                        'to_city_id' => $fromId,
                         'type' => 'city_to_city'
                     ],
                     [

@@ -104,7 +104,7 @@ class Player extends Model
         if ($this->city_id) {
             return redirect()->route('city.show', $this->city)->with('success', 'You have arrived at ' . $this->city->name);
         } else {
-            return redirect()->route('location.show', $this->currentLocation)->with('success', 'You have arrived at ' . $this->currentLocation->name);
+            return redirect()->route('locations.show', $this->currentLocation)->with('success', 'You have arrived at ' . $this->currentLocation->name);
         }
     }
 
@@ -151,8 +151,6 @@ class Player extends Model
      */
     public function inCity(): bool
     {
-        // Гравець у місті, якщо немає активного маршруту подорожі
-        // і він має city_id (тобто не в "ніде")
         return $this->city_id !== null && !$this->isTraveling();
     }
 

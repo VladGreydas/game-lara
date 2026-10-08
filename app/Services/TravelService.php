@@ -16,12 +16,15 @@ class TravelService
 
         foreach ($arrivedPlayers as $player) {
             $route = $player->currentCityRoute;
-            if ($route->isCityToCity() || $route->isLocationToCity()) {
+            if ($route->isCityToCity()) {
                 $player->city_id = $route->toCity->id;
                 $player->current_location_id = null;
             } elseif ($route->isCityToLocation()) {
                 $player->current_location_id = $route->toLocation->id;
                 $player->city_id = null;
+            } elseif ($route->isLocationToCity()) {
+                $player->city_id = $route->toCity->id;
+                $player->current_location_id = null;
             }
 
             $player->current_city_route_id = null;

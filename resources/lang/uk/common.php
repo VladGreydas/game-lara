@@ -5,5 +5,10 @@ return [
     'sell_price' => 'Ціна продажу',
     'surplus' => 'Профіцит',
     'deficit' => 'Дефіцит',
-    'equilibrium' => 'Стандарт'
+    'equilibrium' => 'Стандарт',
+    'unit' => 'одиниць',
+    'location' => [
+        'collect_success' => 'Ресурси успішно зібрано.',
+        'refuel_success' => 'Локомотив успішно заправлено.',
+    ],
 ];
