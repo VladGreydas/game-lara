@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-serif text-3xl text-[#5d3a1a]">
-            {{ __('Traveling') }}
+            {{ __('route.traveling') }}
         </h2>
         <p class="font-serif text-[#8b5a2b] italic">
-            "{{ __('city.progress_but_with_dignity') }}"
+            "{{ __('common.progress_but_with_dignity') }}"
         </p>
     </x-slot>
 
@@ -12,13 +12,13 @@
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
                 <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">
-                    {{ __('On Route to :city', ['city' => $route->toCity->name ?? $route->toLocation->name]) }}
+                    {{ __('route.on_route_to', ['city' => $route->toCity->name ?? $route->toLocation->name]) }}
                 </h3>
             </div>
 
             <div class="p-6">
                 <p class="text-gray-800 mb-4">
-                    {{ __('Your train is currently traveling from :from to :to.', [
+                    {{ __('route.traveling_from_to', [
                         'from' => $route->fromCity->name ?? $route->fromLocation->name,
                         'to' => $route->toCity->name ?? $route->toLocation->name
                     ]) }}
@@ -32,7 +32,7 @@
 
                 <div class="mb-6">
                     <div class="flex justify-between items-end mb-2">
-                        <span class="font-serif text-[#5d3a1a]">{{ __('Time remaining:') }}</span>
+                        <span class="font-serif text-[#5d3a1a]">{{ __('route.time_remaining') }}</span>
                         <strong id="arrival-time" class="font-mono text-[#bf360c] text-lg">Loading...</strong>
                     </div>
 
@@ -44,13 +44,13 @@
                 </div>
 
                 <p class="text-gray-700 italic mb-6">
-                    {{ __('You cannot perform most actions while traveling. Please wait for your train to arrive.') }}
+                    {{ __('route.travel_restriction') }}
                 </p>
 
                 <div class="flex justify-end">
                     <a href="{{ route('player.index') }}"
                        class="victorian-btn py-2 px-4 rounded text-sm">
-                        {{ __('Go to Dashboard') }}
+                        {{ __('common.go_to_dashboard') }}
                     </a>
                 </div>
             </div>
@@ -77,7 +77,7 @@
 
                     if (remainingTimeMs <= 0) {
                         clearInterval(travelInterval);
-                        timerElement.innerText = '{{ __('Arrived!') }}';
+                        timerElement.innerText = '{{ __('route.arrived') }}';
                         progressElement.style.width = '100%';
 
                         setTimeout(() => {

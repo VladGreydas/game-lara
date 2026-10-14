@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Http\RedirectResponse;
 
 /**
  * @property int $id
@@ -19,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $lvl
  * @property int $exp
  * @property int $max_exp
+ * @property int $stamina
+ * @property int $max_stamina
+ * @property Carbon|null $last_stamina_regenerated_at
  * @property int $hp
  * @property int $max_hp
  * @property int $current_city_route_id
@@ -33,12 +37,24 @@ class Player extends Model
 {
     use HasFactory;
 
+    public const SCOUT_STAMINA_COST = 5;
+    public const STAMINA_RECOVERY_INTERVAL_SECONDS = 60;
+
+    protected $attributes = [
+        'stamina' => 100,
+        'max_stamina' => 100,
+    ];
+
     protected $fillable = [
+        'user_id',
         'nickname',
         'money',
         'exp',
         'max_exp',
         'lvl',
+        'stamina',
+        'max_stamina',
+        'last_stamina_regenerated_at',
         'city_id',
         'current_city_route_id', // Додайте це поле, якщо воно буде використовуватися для подорожей
         'travel_starts_at',      // Час початку подорожі
@@ -49,15 +65,80 @@ class Player extends Model
     protected $casts = [
         'travel_starts_at' => 'datetime',
         'travel_finishes_at' => 'datetime',
+        'last_stamina_regenerated_at' => 'datetime',
     ];
 
     //Methods
 
     protected static function booted(): void
     {
+        static::creating(function (Player $player) {
+            if ($player->last_stamina_regenerated_at === null) {
+                $player->last_stamina_regenerated_at = now();
+            }
+        });
+
         static::created(function (Player $player) {
             app(PlayerSetupService::class)->setupInitialAssets($player);
         });
+    }
+
+    public function regenerateStamina(): void
+    {
+        if ($this->stamina >= $this->max_stamina) {
+            if ($this->stamina > $this->max_stamina) {
+                $this->stamina = $this->max_stamina;
+                $this->save();
+            }
+            return;
+        }
+
+        $lastRegen = $this->last_stamina_regenerated_at
+            ? Carbon::parse($this->last_stamina_regenerated_at)
+            : ($this->created_at ? Carbon::parse($this->created_at) : now());
+
+        $secondsPassed = $lastRegen->diffInSeconds(now());
+        $recoveryInterval = self::STAMINA_RECOVERY_INTERVAL_SECONDS;
+        $pointsToRegen = (int) floor($secondsPassed / $recoveryInterval);
+
+        if ($pointsToRegen > 0) {
+            $this->stamina = min($this->max_stamina, $this->stamina + $pointsToRegen);
+
+            if ($this->stamina >= $this->max_stamina) {
+                $this->last_stamina_regenerated_at = now();
+            } else {
+                $this->last_stamina_regenerated_at = $lastRegen->copy()->addSeconds($pointsToRegen * $recoveryInterval);
+            }
+
+            $this->save();
+        }
+    }
+
+    public function hasEnoughStamina(int $amount = self::SCOUT_STAMINA_COST): bool
+    {
+        $this->regenerateStamina();
+
+        return $this->stamina >= $amount;
+    }
+
+    public function consumeStamina(int $amount): bool
+    {
+        $this->regenerateStamina();
+
+        if ($this->stamina < $amount) {
+            return false;
+        }
+
+        $wasFull = ($this->stamina >= $this->max_stamina);
+        $this->stamina -= $amount;
+
+        if ($wasFull || $this->last_stamina_regenerated_at === null) {
+            $this->last_stamina_regenerated_at = now();
+        }
+
+        $this->save();
+
+        return true;
     }
 
     public function checkIfEnough($cost)
@@ -77,8 +158,112 @@ class Player extends Model
         return $this->exp >= $this->max_exp;
     }
 
+    /**
+     * Get the proficient resource for the player's current city or location.
+     */
+    public function getProficientResource(): ?Resource
+    {
+        if ($this->city) {
+            $cityResource = $this->city->relationLoaded('resources')
+                ? ($this->city->resources->firstWhere('is_surplus', true) ?? $this->city->resources->first())
+                : ($this->city->resources()->where('is_surplus', true)->first() ?? $this->city->resources()->first());
+
+            return $cityResource?->resource;
+        }
+
+        if ($this->currentLocation) {
+            $locationResource = $this->currentLocation->relationLoaded('location_resource')
+                ? $this->currentLocation->location_resource
+                : $this->currentLocation->location_resource()->first();
+
+            return $locationResource?->resource;
+        }
+
+        return null;
+    }
+
+    /**
+     * Scout for resources and put them into player's available cargo wagons.
+     *
+     * @param int|null $amount
+     * @return bool
+     */
+    public function scout(?int $amount = null): bool
+    {
+        $this->regenerateStamina();
+
+        if ($this->stamina < self::SCOUT_STAMINA_COST) {
+            return false;
+        }
+
+        $resource = $this->getProficientResource();
+
+        if (!$resource) {
+            return false;
+        }
+
+        if (!$this->train) {
+            return false;
+        }
+
+        $cargoWagons = $this->train->wagons()
+            ->where('type', 'cargo')
+            ->with(['cargo_wagon.resources'])
+            ->get();
+
+        if ($cargoWagons->isEmpty()) {
+            return false;
+        }
+
+        $totalFreeSpace = $cargoWagons->sum(function ($wagon) {
+            return $wagon->cargo_wagon ? $wagon->cargo_wagon->getRemainingCapacity() : 0;
+        });
+
+        if ($totalFreeSpace <= 0) {
+            return false;
+        }
+
+        $amountToScout = $amount ?? random_int(1, 10);
+        $remaining = $amountToScout;
+        $totalAdded = 0;
+
+        foreach ($cargoWagons as $wagon) {
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $cargoWagon = $wagon->cargo_wagon;
+            if (!$cargoWagon) {
+                continue;
+            }
+
+            $freeSpace = $cargoWagon->getRemainingCapacity();
+            if ($freeSpace > 0) {
+                $toAdd = min($remaining, $freeSpace);
+
+                $cargoWagonResource = CargoWagonResource::firstOrNew([
+                    'cargo_wagon_id' => $cargoWagon->id,
+                    'resource_id' => $resource->id,
+                ]);
+
+                $cargoWagonResource->quantity = ($cargoWagonResource->quantity ?? 0) + $toAdd;
+                $cargoWagonResource->save();
+
+                $remaining -= $toAdd;
+                $totalAdded += $toAdd;
+            }
+        }
+
+        if ($totalAdded > 0) {
+            $this->consumeStamina(self::SCOUT_STAMINA_COST);
+            return true;
+        }
+
+        return false;
+    }
+
     // NEW: Helper method to process arrival
-    public function processArrival()
+    public function processArrival(): RedirectResponse
     {
         $route = $this->currentCityRoute;
 

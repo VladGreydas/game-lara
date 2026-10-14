@@ -15,4 +15,6 @@ return [
     'open_contract_board' => 'Open Contract Board',
     'back_to' => 'Back to',
     'footer' => '© The Blue Ram Tavern. All rights reserved.',
+    'rest_place' => 'A quiet place to rest. Future: contracts & quests.',
+    'visit_tavern' => 'Visit Tavern',
 ];

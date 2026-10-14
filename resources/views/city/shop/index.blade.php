@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Shop - ') . $city->name }}
+            {{ __('shop.shop') . ' - ' . $city->name }}
         </h2>
         <a href="{{ route('city.show', $city) }}"
            class="inline-block mt-2 px-4 py-2 bg-gray-800 text-white rounded font-semibold">
-            Back to City
+            {{ __('shop.back_to_city') }}
         </a>
         <x-player-info/>
     </x-slot>
@@ -19,34 +19,34 @@
         @endif
 
         <div class="mb-6">
-            <label for="shop-category" class="block mb-2 text-sm font-medium text-gray-700">Select Section</label>
+            <label for="shop-category" class="block mb-2 text-sm font-medium text-gray-700">{{ __('shop.select_section') }}</label>
             <select id="shop-category" class="form-select rounded-md border-gray-300 shadow-sm"
                     onchange="switchMainSection(this.value)">
-                <option value="buy-section">Buy Items</option>
-                <option value="sell-section">Sell Items</option>
-                <option value="buy-resources-section">Buy Resources</option>
-                <option value="sell-resources-section">Sell Resources</option>
+                <option value="buy-section">{{ __('shop.buy_items') }}</option>
+                <option value="sell-section">{{ __('shop.sell_items') }}</option>
+                <option value="buy-resources-section">{{ __('shop.buy_resources') }}</option>
+                <option value="sell-resources-section">{{ __('shop.sell_resources') }}</option>
             </select>
         </div>
 
         {{-- --- BUY SECTION (ЛОКОМОТИВИ, ВАГОНИ, ЗБРОЯ) --- --}}
         <div id="buy-section" class="main-shop-section">
-            <h3 class="text-xl font-bold mb-4">Buy Items</h3>
+            <h3 class="text-xl font-bold mb-4">{{ __('shop.buy_items') }}</h3>
 
             <div class="mb-6">
-                <label for="buy-category" class="block mb-2 text-sm font-medium text-gray-700">Select Category</label>
+                <label for="buy-category" class="block mb-2 text-sm font-medium text-gray-700">{{ __('shop.select_category') }}</label>
                 <select id="buy-category" class="form-select rounded-md border-gray-300 shadow-sm"
                         onchange="switchCategory(this.value, 'buy')">
-                    <option value="locomotives">Locomotives</option>
-                    <option value="wagons">Wagons</option>
-                    <option value="weapons">Weapons</option>
+                    <option value="locomotives">{{ __('shop.locomotives') }}</option>
+                    <option value="wagons">{{ __('shop.wagons') }}</option>
+                    <option value="weapons">{{ __('shop.weapons') }}</option>
                 </select>
             </div>
 
             <div id="buy-content">
                 {{-- Locomotives --}}
                 <div id="locomotives-buy" class="shop-category-section">
-                    <h4 class="text-lg font-bold mb-4">Available Locomotives</h4>
+                    <h4 class="text-lg font-bold mb-4">{{ __('shop.available_locomotives') }}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($locomotives as $locomotive)
                             <div class="p-4 border rounded-xl shadow bg-white">
@@ -60,7 +60,7 @@
                                 <form action="{{ route('shop.locomotive.buy', $locomotive->shop_uuid) }}" method="POST"
                                       class="mt-3">
                                     @csrf
-                                    <x-primary-button>Buy</x-primary-button>
+                                    <x-primary-button>{{ __('shop.buy') }}</x-primary-button>
                                 </form>
                             </div>
                         @endforeach
@@ -69,7 +69,7 @@
 
                 {{-- Wagons --}}
                 <div id="wagons-buy" class="shop-category-section hidden">
-                    <h4 class="text-lg font-bold mb-4">Available Wagons</h4>
+                    <h4 class="text-lg font-bold mb-4">{{ __('shop.available_wagons') }}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($wagons as $wagon)
                             <div class="p-4 border rounded-xl shadow bg-white">
@@ -87,7 +87,7 @@
                                 <form action="{{ route('shop.wagon.buy', $wagon->shop_uuid) }}" method="POST"
                                       class="mt-3">
                                     @csrf
-                                    <x-primary-button>Buy</x-primary-button>
+                                    <x-primary-button>{{ __('shop.buy') }}</x-primary-button>
                                 </form>
                             </div>
                         @endforeach
@@ -96,9 +96,9 @@
 
                 {{-- Weapons --}}
                 <div id="weapons-buy" class="shop-category-section hidden">
-                    <h4 class="text-lg font-bold mb-4">Available Weapons</h4>
+                    <h4 class="text-lg font-bold mb-4">{{ __('shop.available_weapons') }}</h4>
                     @if($weaponWagonsForMounting->isEmpty())
-                        <p class="text-red-600">You don’t have any Weapon Wagons to mount a weapon on.</p>
+                        <p class="text-red-600">{{ __('shop.no_weapon_wagons') }}</p>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($weapons as $weapon)

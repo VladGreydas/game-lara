@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\LocationResource;
 use App\Models\Player;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class PlayerController extends Controller
         $player = Auth::user()->player;
 
         if ($player) {
+            $player->regenerateStamina();
             $player->load([
                 'train.locomotive',
                 'train.wagons.cargo_wagon.resources.resource',
@@ -62,6 +64,9 @@ class PlayerController extends Controller
         $player->exp = 0;
         $player->max_exp = 100;
         $player->lvl = 1;
+        $player->stamina = 100;
+        $player->max_stamina = 100;
+        $player->last_stamina_regenerated_at = now();
 
         $startCity = City::first();
         if ($startCity) {
@@ -123,6 +128,32 @@ class PlayerController extends Controller
         $player->save();
 
         return redirect()->back()->with('success', 'Level up successful!');
+    }
+
+    public function scout(Player $player): RedirectResponse
+    {
+        $this->authorize('update', $player);
+
+        if ($player->isTraveling() || $player->hasArrived()) {
+            return redirect()->back()->with('error', __('error.location.scout_travelling'));
+        }
+
+        $player->regenerateStamina();
+
+        if ($player->stamina < Player::SCOUT_STAMINA_COST) {
+            return redirect()->back()->with('error', __('error.player.not_enough_stamina'));
+        }
+
+        $resource = $player->getProficientResource();
+        if (!$resource) {
+            return redirect()->back()->with('error', __('error.location.no_resources'));
+        }
+
+        if (!$player->scout()) {
+            return redirect()->back()->with('error', __('error.location.collect_error'));
+        }
+
+        return redirect()->back()->with('success', __('common.location.scout_success'));
     }
 
 

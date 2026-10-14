@@ -1,5 +1,7 @@
 <?php
+
 return [
+    'location' => 'Location',
     'welcome_to' => 'Welcome to',
     'no_description' => 'No description',
     'type' => 'Location type',

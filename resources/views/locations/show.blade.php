@@ -39,8 +39,8 @@
                         <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('location.resources') }}</h4>
                         @if($location->location_resource)
                             <div class="text-gray-800 mb-2">
-                                {{ __('entity.resource.'.$location->location_resource->resource->name) }}:
-                                {{ $location->location_resource->current_amount }} {{ __('common.'.$location->location_resource->resource->unit) }}
+                                {{ __('resource.'.$location->location_resource->resource->name) }}:
+                                {{ $location->location_resource->current_amount }} {{ __('resource.'.$location->location_resource->resource->unit) }}
                             </div>
                             <div class="flex flex-row">
                                 @if($location->location_resource->current_amount > 0)
@@ -87,14 +87,14 @@
                                         → {{ $outgoingRoute->toCity->name}}
                                     </span>
                                 <span class="ml-2 text-gray-600 text-sm italic">
-                                        ({{ __('city.fuel') }} {{ $player->train->locomotive->getFuelCost($outgoingRoute) }},
-                                        {{ __('city.time') }} {{ $player->train->locomotive->getTravelTime($outgoingRoute) }}h)
+                                        ({{ __('route.fuel') }} {{ $player->train->locomotive->getFuelCost($outgoingRoute) }},
+                                        {{ __('route.time') }} {{ $player->train->locomotive->getTravelTime($outgoingRoute) }}h)
                                     </span>
                             </div>
                             <form method="POST" action="{{ route('city.travel', $outgoingRoute) }}" class="inline">
                                 @csrf
                                 <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                                    {{ __('city.travel') }}
+                                    {{ __('route.travel') }}
                                 </button>
                             </form>
                         </li>

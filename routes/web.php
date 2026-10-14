@@ -71,6 +71,7 @@ Route::prefix('player')->group(function () {
     Route::get('/{player}/edit', [PlayerController::class, 'edit'])->name('player.edit');
     Route::patch('/{player}', [PlayerController::class, 'update'])->name('player.update');
     Route::post('/{player}/levelup', [PlayerController::class, 'levelUp'])->name('player.levelup')->middleware('can:update,player');
+    Route::post('/{player}/scout', [PlayerController::class, 'scout'])->name('player.scout')->middleware('can:update,player');
     Route::delete('/{player}', [PlayerController::class, 'destroy'])->name('player.destroy');
 });
 

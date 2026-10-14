@@ -19,7 +19,10 @@ class WorkshopController extends Controller
 
         $locomotive = $train->locomotive;
 
-        $wagons = $train->wagons;
+        $wagons = $train->wagons()->with([
+            'cargo_wagon.resources.resource',
+            'weapon_wagon.weapons',
+        ])->get();
 
         abort_unless($city && $city->has_workshop, 403);
 

@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-serif text-3xl text-[#5d3a1a]">
-            {{ __('city.player') }}
+            {{ __('player.player') }}
         </h2>
-        <p class="font-serif text-[#8b5a2b] italic">"{{ __('city.progress_but_with_dignity') }}"</p>
+        <p class="font-serif text-[#8b5a2b] italic">"{{ __('common.progress_but_with_dignity') }}"</p>
     </x-slot>
 
     <div class="mt-6 mx-auto max-w-7xl space-y-8">
@@ -11,7 +11,7 @@
             <div class="victorian-card">
                 <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
                     <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">
-                        {{ __('Welcome, ') . $player->nickname }}
+                        {{ __('player.welcome', ['nickname' => $player->nickname]) }}
                     </h3>
                 </div>
 
@@ -19,12 +19,13 @@
                     <div class="grid md:grid-cols-2 gap-6">
                         <!-- Player Info -->
                         <div class="p-4 bg-white border border-[#d4b483] rounded">
-                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('city.player_info') }}</h4>
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('player.player_info') }}</h4>
                             <ul class="space-y-2 text-gray-800">
-                                <li><strong>{{ __('city.nickname') }}:</strong> {{ $player->nickname }}</li>
-                                <li><strong>{{ __('city.level') }}:</strong> {{ $player->lvl }}</li>
-                                <li><strong>{{ __('city.cash') }}:</strong> ${{ $player->money }}</li>
-                                <li><strong>{{ __('city.exp') }}:</strong> {{ $player->exp }} / {{ $player->max_exp }}</li>
+                                <li><strong>{{ __('player.nickname') }}:</strong> {{ $player->nickname }}</li>
+                                <li><strong>{{ __('player.level') }}:</strong> {{ $player->lvl }}</li>
+                                <li><strong>{{ __('player.cash') }}:</strong> ${{ $player->money }}</li>
+                                <li><strong>{{ __('player.exp') }}:</strong> {{ $player->exp }} / {{ $player->max_exp }}</li>
+                                <li><strong>{{ __('player.stamina') }}:</strong> {{ $player->stamina }} / {{ $player->max_stamina }}</li>
                             </ul>
 
                             @if ($player->canLevelUp())
@@ -32,7 +33,7 @@
                                     <form method="POST" action="{{ route('player.levelup', $player) }}">
                                         @csrf
                                         <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                                            {{ __('city.level_up') }}
+                                            {{ __('player.level_up') }}
                                         </button>
                                     </form>
                                 </div>
@@ -41,27 +42,38 @@
 
                         <!-- Location & Services -->
                         <div class="p-4 bg-white border border-[#d4b483] rounded">
-                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('city.current_location') }}</h4>
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('player.current_location') }}</h4>
 
                             @if ($player->isTraveling())
                                 <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
-                                    <p class="font-bold text-blue-800 mb-2">{{ __('city.on_the_way') }}</p>
+                                    <p class="font-bold text-blue-800 mb-2">{{ __('route.on_the_way') }}</p>
                                     <p class="text-gray-700">
-                                        {{ __('city.from') }} {{ $player->currentCityRoute->fromCity ? $player->currentCityRoute->fromCity->name : $player->currentCityRoute->fromLocation->name }} → {{ $player->currentCityRoute->toCity->name ?? $player->currentCityRoute->toLocation->name }}
+                                        {{ __('route.from') }} {{ $player->currentCityRoute->fromCity ? $player->currentCityRoute->fromCity->name : $player->currentCityRoute->fromLocation->name }} → {{ $player->currentCityRoute->toCity->name ?? $player->currentCityRoute->toLocation->name }}
                                     </p>
                                     <p class="text-sm text-gray-600 mt-1">
-                                        {{ __('city.arrival') }} {{ $player->travel_finishes_at->format('H:i, M d') }}
+                                        {{ __('route.arrival') }} {{ $player->travel_finishes_at->format('H:i, M d') }}
                                     </p>
                                 </div>
                             @elseif ($player->inCity())
                                 <p class="text-gray-700 mb-2">
-                                    {{ __('city.you_are_in') }} <a href="{{route('city.show', $player->city)}}" class="text-[#8b5a2b] underline">{{$player->city->name}}</a>
+                                    {{ __('player.you_are_in') }} <a href="{{route('city.show', $player->city)}}" class="text-[#8b5a2b] underline">{{$player->city->name}}</a>
                                 </p>
                             @elseif ($player->currentLocation)
                                 <p class="text-gray-700 mb-2">
-                                    {{ __('city.you_are_at') }} <a href="{{route('locations.show', $player->currentLocation)}}" class="text-[#8b5a2b] underline">{{$player->currentLocation->name}}</a>
+                                    {{ __('player.you_are_at') }} <a href="{{route('locations.show', $player->currentLocation)}}" class="text-[#8b5a2b] underline">{{$player->currentLocation->name}}</a>
                                 </p>
                                 <p class="text-gray-600 italic">{{ $player->currentLocation->description }}</p>
+                            @endif
+
+                            @if (!$player->isTraveling())
+                                <div class="mt-4">
+                                    <form method="POST" action="{{ route('player.scout', $player) }}">
+                                        @csrf
+                                        <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                                            {{ __('player.scout_for_resources') }}
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
 
                             @if($player->city)
@@ -69,17 +81,17 @@
                                     <h5 class="font-bold text-[#5d3a1a] mb-2">{{ __('city.city_services') }}</h5>
                                     <ul class="space-y-1 text-sm text-gray-700">
                                         @if ($player->city->has_workshop)
-                                            <li><a href="{{ route('workshop.index') }}" class="text-[#8b5a2b] underline">{{ __('city.go_to_workshop') }}</a> — {{ __('city.upgrade_train') }}</li>
+                                            <li><a href="{{ route('workshop.index') }}" class="text-[#8b5a2b] underline">{{ __('workshop.go_to_workshop') }}</a> — {{ __('workshop.upgrade_train') }}</li>
                                         @else
                                             <li class="text-gray-500 italic">{{ __('city.no_workshop') }}</li>
                                         @endif
                                         @if ($player->city->has_shop)
-                                            <li><a href="{{ route('shop.index') }}" class="text-[#8b5a2b] underline">{{ __('city.go_to_shop') }}</a> — {{ __('city.buy_sell_locomotives') }}</li>
+                                            <li><a href="{{ route('shop.index') }}" class="text-[#8b5a2b] underline">{{ __('shop.go_to_shop') }}</a> — {{ __('shop.buy_sell_locomotives') }}</li>
                                         @else
                                             <li class="text-gray-500 italic">{{ __('city.no_shop') }}</li>
                                         @endif
                                         @if ($player->city->hasSaloon())
-                                            <li><a href="{{ route('city.saloon.show', $player->city) }}" class="text-[#8b5a2b] underline">{{ __('city.visit_tavern') }}</a> — {{ __('city.rest_place') }}</li>
+                                            <li><a href="{{ route('city.saloon.show', $player->city) }}" class="text-[#8b5a2b] underline">{{ __('tavern.visit_tavern') }}</a> — {{ __('tavern.rest_place') }}</li>
                                         @endif
                                     </ul>
                                 </div>
@@ -90,24 +102,24 @@
 
                     <!-- Train Info -->
                     <div class="mt-6 p-4 bg-white border border-[#d4b483] rounded">
-                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('city.your_train') }}</h4>
+                        <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('train.your_train') }}</h4>
                         @if($player->train)
                             <div class="mb-4">
-                                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('city.locomotive') }}:</h5>
+                                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('locomotive.locomotive') }}:</h5>
                                 <x-locomotive-card :locomotive="$player->train->locomotive" :upgrade="false" :rename="true"/>
                             </div>
                             <div class="mb-4">
-                                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('city.wagons') }}:</h5>
+                                <h5 class="text-lg font-bold text-[#5d3a1a]">{{ __('wagon.wagons') }}:</h5>
                                 @if($player->train->wagons->isNotEmpty())
                                     @foreach($player->train->wagons as $wagon)
                                         <x-wagon-card :wagon="$wagon" :upgrade="false" :rename="true"/>
                                     @endforeach
                                 @else
-                                    <p class="text-gray-600 italic">{{ __('city.you_have_no_wagons_yet') }}</p>
+                                    <p class="text-gray-600 italic">{{ __('wagon.you_have_no_wagons_yet') }}</p>
                                 @endif
                             </div>
                         @else
-                            <p class="text-gray-600 italic">{{ __('city.you_dont_have_a_train_yet') }}</p>
+                            <p class="text-gray-600 italic">{{ __('train.you_dont_have_a_train_yet') }}</p>
                         @endif
                     </div>
                 </div>
@@ -127,19 +139,19 @@
         @else
             <div class="victorian-card">
                 <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
-                    <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">{{ __('city.create_new_player') }}</h3>
+                    <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">{{ __('player.create_new_player') }}</h3>
                 </div>
                 <div class="p-6">
                     <form method="POST" action="{{ route('player.store') }}">
                         @csrf
                         <div class="mb-4">
-                            <label class="block text-[#5d3a1a] font-bold mb-2" for="nickname">{{ __('city.nickname') }}</label>
+                            <label class="block text-[#5d3a1a] font-bold mb-2" for="nickname">{{ __('player.nickname') }}</label>
                             <input autocomplete="off" type="text" name="nickname"
                                    class="w-full px-4 py-2 border border-[#d4b483] rounded focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]"
-                                   placeholder="{{ __('city.enter_your_nickname_here') }}">
+                                   placeholder="{{ __('player.enter_your_nickname_here') }}">
                         </div>
                         <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                            {{ __('city.create_new_player') }}
+                            {{ __('player.create_new_player') }}
                         </button>
                     </form>
                 </div>

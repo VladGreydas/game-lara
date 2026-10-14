@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-serif text-3xl text-[#5d3a1a]">
-            {{ __('city.workshop') . ' — ' . $city->name }}
+            {{ __('workshop.workshop') . ' — ' . $city->name }}
         </h2>
-        <p class="font-serif text-[#8b5a2b] italic">"{{ __('city.progress_but_with_dignity') }}"</p>
+        <p class="font-serif text-[#8b5a2b] italic">"{{ __('common.progress_but_with_dignity') }}"</p>
         <a href="{{ route('city.show', $city) }}" class="victorian-btn inline-block mt-2 py-2 px-4 rounded text-sm">
-            {{ __('city.back_to_city') }}
+            {{ __('workshop.back_to_city') }}
         </a>
         <x-player-info/>
     </x-slot>
@@ -24,7 +24,7 @@
 
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
-                <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">{{ __('city.train_equipment') }}</h3>
+                <h3 class="text-2xl font-bold text-[#5d3a1a] mb-2 font-serif">{{ __('train.train_equipment') }}</h3>
             </div>
             <div class="p-6">
                 <section class="mb-6">
@@ -33,7 +33,7 @@
 
                 <section class="mb-6">
                     <div class="mt-4 p-4 border border-[#d4b483] rounded shadow-sm bg-white">
-                        <h3 class="text-xl font-bold mb-2 text-[#5d3a1a] font-serif">🚃 {{ __('city.wagons') }}</h3>
+                        <h3 class="text-xl font-bold mb-2 text-[#5d3a1a] font-serif">🚃 {{ __('wagon.wagons') }}</h3>
                         @foreach($wagons as $wagon)
                             <x-wagon-card :wagon="$wagon" :rename="false" :upgrade="true"/>
                         @endforeach

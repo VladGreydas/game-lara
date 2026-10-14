@@ -20,6 +20,9 @@ return new class extends Migration
             $table->integer('exp')->nullable(false)->default(0);
             $table->integer('max_exp')->nullable(false);
             $table->integer('lvl')->nullable(false);
+            $table->integer('stamina')->default(100);
+            $table->integer('max_stamina')->default(100);
+            $table->timestamp('last_stamina_regenerated_at')->nullable();
             $table->timestamps();
         });
 

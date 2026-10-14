@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\CargoWagonResource;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 class LocationResource extends Model
 {
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass-assignable.
      *
      * @var array<int, string>
      */
@@ -42,7 +41,7 @@ class LocationResource extends Model
     }
 
     /**
-     * Get the resource that is produced at this location.
+     * Get the resource produced at this location.
      */
     public function resource(): BelongsTo
     {
@@ -52,10 +51,10 @@ class LocationResource extends Model
     /**
      * Збирає ресурси для гравця та додає їх у вільний вагон.
      *
-     * @param \App\Models\Player $player
+     * @param Player $player
      * @return bool
      */
-    public function collectForPlayer(\App\Models\Player $player): bool
+    public function collectForPlayer(Player $player): bool
     {
         Log::info('LocationResource::collectForPlayer() викликано', [
             'location_resource_id' => $this->id,
@@ -122,7 +121,7 @@ class LocationResource extends Model
         return true;
     }
 
-    public function produce()
+    public function produce(): void
     {
         $last = Carbon::parse($this->last_produced_at ?? now()->subHour());
         $diff = $last->diffInHours(now());
