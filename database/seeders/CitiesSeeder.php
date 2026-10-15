@@ -19,12 +19,17 @@ class CitiesSeeder extends Seeder
             2 => 'Silverbrook',
             3 => 'Ashenvale',
             4 => 'Rivermoor',
-            5 => 'Stormhelm',
+            5 => 'Nagihara',
             6 => 'Frostgate',
             7 => 'Dreadmoor',
             8 => 'Ebonreach',
             9 => 'Thornhall',
             10 => 'Sunspire',
+            11 => 'Goldmere',
+            12 => 'Blackwood',
+            13 => 'Highspire',
+            14 => 'Mistvale',
+            15 => 'Copperfield',
         ];
 
         $allResources = Resource::all();
@@ -55,7 +60,7 @@ class CitiesSeeder extends Seeder
                 switch ($counter) {
                     case 0: {$is_surplus = true; $is_deficit = false; break;}
                     case 1: {$is_surplus = false; $is_deficit = true; break;}
-                    case 2: {$is_surplus = false; $is_deficit = false; break;}
+                    default: {$is_surplus = false; $is_deficit = false; break;}
                 }
                 $city->resources()->firstOrCreate(
                     ['resource_id' => $resource->id],
@@ -73,7 +78,7 @@ class CitiesSeeder extends Seeder
             }
         }
 
-        City::whereIn('name', ['Ironforge', 'Stormhelm', 'Sunspire'])->update(['has_workshop' => true]);
+        City::whereIn('name', ['Ironforge', 'Nagihara', 'Sunspire'])->update(['has_workshop' => true]);
         City::whereIn('name', ['Silverbrook', 'Sunspire'])->update(['has_shop' => true]);
     }
 }

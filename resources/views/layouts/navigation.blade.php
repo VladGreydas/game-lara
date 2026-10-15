@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                         {{ __('menu.player') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('map.index')" :active="request()->routeIs('map.index')">
+                        {{ __('menu.map') }}
+                    </x-nav-link>
                     @php
                         $player = auth()->user()?->player;
                     @endphp
@@ -105,6 +108,9 @@
             </x-nav-link>
             <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                 {{ __('menu.player') }}
+            </x-nav-link>
+            <x-nav-link :href="route('map.index')" :active="request()->routeIs('map.index')">
+                {{ __('menu.map') }}
             </x-nav-link>
             @php
                 $player = auth()->user()?->player;

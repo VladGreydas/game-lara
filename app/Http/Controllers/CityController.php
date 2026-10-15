@@ -127,14 +127,12 @@ class CityController extends Controller
             }
             if ($refuelPrice == 0) {
                 /* @var Resource $refuelResource */
-                $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
-                Debugbar::info($refuelResource);
+                $refuelResource = Resource::where('slug', '=' ,$fuelType)->first();
                 $refuelPrice = $refuelResource->base_price;
             }
         } else {
             /* @var Resource $refuelResource */
-            $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first()->get();
-            Debugbar::info($refuelResource);
+            $refuelResource = Resource::where('slug', '=' ,$fuelType)->first();
             $refuelPrice = $refuelResource->base_price;
         }
 

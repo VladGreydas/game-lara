@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $name
  * @property string $slug
+ * @property string $tier
  * @property string|null $description
  * @property string $unit
  * @property bool $is_fuel
@@ -28,6 +29,10 @@ class Resource extends Model
 {
     use HasFactory;
 
+    protected $attributes = [
+        'tier' => '0',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -36,6 +41,7 @@ class Resource extends Model
     protected $fillable = [
         'name',
         'slug',
+        'tier',
         'description',
         'unit',
         'is_fuel',

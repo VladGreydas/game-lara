@@ -11,6 +11,7 @@ use App\Http\Controllers\WeaponController;
 use App\Http\Controllers\WorkshopController;
 use App\Http\Controllers\SaloonController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\MapController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // Не забудьте додати цей use
 
@@ -74,6 +75,8 @@ Route::prefix('player')->group(function () {
     Route::post('/{player}/scout', [PlayerController::class, 'scout'])->name('player.scout')->middleware('can:update,player');
     Route::delete('/{player}', [PlayerController::class, 'destroy'])->name('player.destroy');
 });
+
+Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
 Route::post('/locale/{locale}', function ($locale) {
     session()->put('locale', $locale);

@@ -54,6 +54,11 @@ class City extends Model
         return $this->hasMany(CityRoute::class, 'from_city_id');
     }
 
+    public function locations(): HasMany
+    {
+        return $this->hasMany(Location::class);
+    }
+
     public function players(): HasMany
     {
         return $this->hasMany(Player::class);

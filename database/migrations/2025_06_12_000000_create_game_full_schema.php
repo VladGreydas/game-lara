@@ -123,6 +123,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
+            $table->string('tier')->default('0');
             $table->text('description')->nullable();
             $table->string('unit')->default('unit');
             $table->boolean('is_fuel')->default(false);

@@ -23,7 +23,7 @@
                         <p class="text-gray-800 mb-2">
                             {{ $city->level }} / {{ $city->max_level }}
                         </p>
-                        <p class="text-sm text-gray-600 mb-4">{{ __('city.upgrade_cost') }} ${{ $city->getUpgradeCost() }}</p>
+                        <p class="text-sm text-gray-600 mb-4">{{ __('city.upgrade_cost') }} {{ $city->getUpgradeCost() }}</p>
 
                         @if($city->level < $city->max_level)
                             <form action="{{ route('city.upgrade') }}" method="POST" class="inline">
@@ -92,7 +92,7 @@
                         @foreach($city->resources as $resourceEntry)
                             <div class="p-4 bg-white border border-[#d4b483] rounded shadow-sm">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="font-bold text-[#5d3a1a] text-lg">{{ $resourceEntry->resource->name }}</span>
+                                    <span class="font-bold text-[#5d3a1a] text-lg">{{'T'.$resourceEntry->resource->tier.' '. __('resource.'.$resourceEntry->resource->name) }}</span>
                                     <span class="text-sm font-semibold px-2 py-1 rounded
                                         {{ $resourceEntry->isSurplus() ? 'bg-green-100 text-green-800' : '' }}
                                         {{ $resourceEntry->isDeficit() ? 'bg-red-100 text-red-800' : '' }}
@@ -108,7 +108,7 @@
                                     </span>
                                 </div>
                                 <div class="text-sm text-gray-700 space-y-1">
-                                    <div>{{ __('common.quantity') }}: {{ $resourceEntry->quantity }} {{ $resourceEntry->resource->unit }}</div>
+                                    <div>{{ __('common.quantity') }}: {{ $resourceEntry->quantity }} {{ __('resource.'.$resourceEntry->resource->unit) }}</div>
                                     <div>{{ __('common.buy_price') }}: ${{ $resourceEntry->getCurrentBuyPrice() }}</div>
                                     <div>{{ __('common.sell_price') }}: ${{ $resourceEntry->getCurrentSellPrice() }}</div>
                                 </div>
