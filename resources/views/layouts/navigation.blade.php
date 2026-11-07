@@ -21,9 +21,6 @@
                     <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                         {{ __('menu.player') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('map.index')" :active="request()->routeIs('map.index')">
-                        {{ __('menu.map') }}
-                    </x-nav-link>
                     @php
                         $player = auth()->user()?->player;
                     @endphp
@@ -35,6 +32,12 @@
                     @elseif ($player && $player->currentLocation)
                         <x-nav-link :href="route('locations.show', $player->currentLocation)" :active="request()->routeIs('locations.show')">
                             {{ __('menu.location') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if($player)
+                        <x-nav-link :href="route('map.index')" :active="request()->routeIs('map.index')">
+                            {{ __('menu.map') }}
                         </x-nav-link>
                     @endif
 
@@ -109,9 +112,6 @@
             <x-nav-link :href="route('player.index')" :active="request()->routeIs('player.index')">
                 {{ __('menu.player') }}
             </x-nav-link>
-            <x-nav-link :href="route('map.index')" :active="request()->routeIs('map.index')">
-                {{ __('menu.map') }}
-            </x-nav-link>
             @php
                 $player = auth()->user()?->player;
             @endphp
@@ -123,6 +123,12 @@
             @elseif ($player && $player->currentLocation)
                 <x-nav-link :href="route('locations.show', $player->currentLocation)" :active="request()->routeIs('locations.show')">
                     {{ __('menu.location') }}
+                </x-nav-link>
+            @endif
+
+            @if($player)
+                <x-nav-link :href="route('map.index')" :active="request()->routeIs('map.index')">
+                    {{ __('menu.map') }}
                 </x-nav-link>
             @endif
 

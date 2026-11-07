@@ -39,29 +39,35 @@ class CitiesSeeder extends Seeder
                 'id' => $id,
                 'name' => $name,
                 'has_workshop' => rand(0, 1) === 1,
-                'has_shop' => rand(0, 1) === 1,
+                'has_shop' => 1,
                 'has_saloon' => rand(0, 1) === 1,
                 'level' => 1,
                 'max_level' => 10
             ]);
 
-            $resourceAmountPerCity = 3;
-            $counter = 0;
+            $cityResources = $allResources->shuffle()->values();
 
-            $allResources = $allResources->shuffle();
+            $surplusResource = $cityResources->first();
+
+            // Якщо профіцитний ресурс - T1 (напр. Planks), дефіцитним має бути
+            // відповідний T0 ресурс, з якого він виробляється (напр. Wood).
+            $deficitResource = null;
+            if ($surplusResource->tier === '1' && $surplusResource->produced_from) {
+                $deficitResource = $cityResources->firstWhere('slug', $surplusResource->produced_from);
+            }
+
+            if (!$deficitResource) {
+                $deficitResource = $cityResources->where('id', '!=', $surplusResource->id)->first();
+            }
 
             // Тепер, для кожного щойно створеного або знайденого міста,
             // додаємо зв'язки з ресурсами
-            foreach ($allResources as $resource) {
-                if ($counter >= $resourceAmountPerCity) break;
+            foreach ($cityResources as $resource) {
                 // Встановлюємо початкові значення для кожного ресурсу в цьому місті
                 // Можете варіювати quantity/base_quantity для створення початкового дефіциту/профіциту
-                // Це також може бути визначено через фабрики або складнішу логіку
-                switch ($counter) {
-                    case 0: {$is_surplus = true; $is_deficit = false; break;}
-                    case 1: {$is_surplus = false; $is_deficit = true; break;}
-                    default: {$is_surplus = false; $is_deficit = false; break;}
-                }
+                $is_surplus = $resource->id === $surplusResource->id;
+                $is_deficit = !$is_surplus && $resource->id === $deficitResource->id;
+
                 $city->resources()->firstOrCreate(
                     ['resource_id' => $resource->id],
                     [
@@ -74,11 +80,9 @@ class CitiesSeeder extends Seeder
                         'is_deficit' =>         $is_deficit,                    // Чи є дефіцит цього ресурсу
                     ]
                 );
-                $counter++;
             }
         }
 
         City::whereIn('name', ['Ironforge', 'Nagihara', 'Sunspire'])->update(['has_workshop' => true]);
-        City::whereIn('name', ['Silverbrook', 'Sunspire'])->update(['has_shop' => true]);
     }
 }

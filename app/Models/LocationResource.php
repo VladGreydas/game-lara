@@ -123,7 +123,7 @@ class LocationResource extends Model
 
     public function produce(): void
     {
-        $last = Carbon::parse($this->last_produced_at ?? now()->subHour());
+        $last = Carbon::parse($this->last_produced_at ?? $this->updated_at);
         $diff = $last->diffInHours(now());
         $hours = max(0, $diff);
         $produced = (int) ($hours * $this->production_rate_per_hour);

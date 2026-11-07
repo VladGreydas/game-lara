@@ -27,29 +27,64 @@
                                 <ul class="list-disc list-inside text-gray-700 space-y-1">
                                     <li>{{ __('tavern.warm_stone_hearth') }}</li>
                                     <li>{{ __('tavern.candlelight') }}</li>
-                                    <li>{{ __('tavern.future_contracts') }}</li>
+                                    <li>{{ __('contract.contract_board') }}</li>
                                 </ul>
                             </div>
 
                             <p class="text-gray-700">
                                 {{ __('tavern.right_now') }}
                             </p>
+
+                            <!-- Session Messages -->
+                            @if(session('success'))
+                                <div class="p-3 bg-green-50 border border-green-200 rounded text-green-800 font-semibold text-sm">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+                            @if(session('error'))
+                                <div class="p-3 bg-red-50 border border-red-200 rounded text-red-800 font-semibold text-sm">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
+                            <!-- Contract Board -->
+                            <div class="bg-white border border-[#d4b483] rounded p-4">
+                                <h4 class="font-bold text-[#5d3a1a] mb-3 font-serif text-lg">📜 {{ __('contract.contract_board') }}</h4>
+
+                                @if($contracts->isEmpty())
+                                    <p class="text-gray-500 italic">{{ __('contract.no_contracts') }}</p>
+                                @else
+                                    <div class="space-y-3">
+                                        @foreach($contracts as $contract)
+                                            <div class="p-3 bg-[#f5e6c8] border border-[#d4b483] rounded flex items-center justify-between gap-3">
+                                                <div>
+                                                    <p class="font-semibold text-[#5d3a1a]">
+                                                        {{ __('contract.deliver_resource_to', [
+                                                            'quantity' => $contract->quantity,
+                                                            'resource' => __('resource.' . $contract->resource->name),
+                                                            'city' => $contract->destinationCity->name,
+                                                        ]) }}
+                                                    </p>
+                                                    <p class="text-xs text-[#8b5a2b]">{{ __('contract.reward') }}: ${{ $contract->reward }}</p>
+                                                </div>
+
+                                                @if($player && !$player->isTraveling() && $player->city_id === $city->id)
+                                                    <form method="POST" action="{{ route('contracts.accept', [$city, $contract]) }}">
+                                                        @csrf
+                                                        <button type="submit" class="victorian-btn py-1.5 px-3 rounded text-xs font-serif whitespace-nowrap">
+                                                            {{ __('contract.accept_contract') }}
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
                         <!-- Right: Action Area -->
                         <div class="flex flex-col justify-center space-y-4">
-                            <div class="bg-[#f5e6c8] rounded-lg p-4 text-center border border-[#d4b483]">
-                                <p class="text-[#8b5a2b] font-semibold mb-2">{{ __('tavern.coming_soon') }}</p>
-                                <div class="h-1 w-full bg-[#d4b483] rounded-full overflow-hidden">
-                                    <div class="h-full bg-[#8b5a2b] w-1/3 animate-pulse"></div>
-                                </div>
-                                <p class="text-xs text-[#6d4a24] mt-1">33% — {{ __('tavern.contracts_system') }}</p>
-                            </div>
-
-                            <button disabled class="w-full py-3 px-4 bg-[#8b5a2b] hover:bg-[#6d4a24] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded shadow transition-colors flex items-center justify-center gap-2">
-                                📜 {{ __('tavern.open_contract_board') }}
-                            </button>
-
                             <a href="{{ route('city.show', $city) }}" class="w-full py-2 px-4 bg-[#d4b483] hover:bg-[#c2a66f] text-[#3e2723] font-semibold rounded text-center transition-colors">
                                 ← {{ __('tavern.back_to') }} {{ $city->name }}
                             </a>

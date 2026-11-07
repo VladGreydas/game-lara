@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\LevelingService;
 use App\Services\PlayerSetupService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\RedirectResponse;
 
@@ -153,11 +155,6 @@ class Player extends Model
         }
     }
 
-    public function canLevelUp(): bool
-    {
-        return $this->exp >= $this->max_exp;
-    }
-
     /**
      * Get the proficient resource for the player's current city or location.
      */
@@ -256,6 +253,7 @@ class Player extends Model
 
         if ($totalAdded > 0) {
             $this->consumeStamina(self::SCOUT_STAMINA_COST);
+            app(LevelingService::class)->addExperience($this, LevelingService::SCOUT_EXP_REWARD, 'scout');
             return true;
         }
 
@@ -319,6 +317,22 @@ class Player extends Model
     public function currentLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class, 'current_location_id');
+    }
+
+    /**
+     * Contracts accepted (or completed) by this player.
+     */
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
+    }
+
+    /**
+     * Contracts the player currently has accepted and still needs to deliver.
+     */
+    public function activeContracts(): HasMany
+    {
+        return $this->contracts()->where('status', Contract::STATUS_ACCEPTED);
     }
 
     /**

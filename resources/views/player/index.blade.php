@@ -27,17 +27,6 @@
                                 <li><strong>{{ __('player.exp') }}:</strong> {{ $player->exp }} / {{ $player->max_exp }}</li>
                                 <li><strong>{{ __('player.stamina') }}:</strong> {{ $player->stamina }} / {{ $player->max_stamina }}</li>
                             </ul>
-
-                            @if ($player->canLevelUp())
-                                <div class="mt-6">
-                                    <form method="POST" action="{{ route('player.levelup', $player) }}">
-                                        @csrf
-                                        <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
-                                            {{ __('player.level_up') }}
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
                         </div>
 
                         <!-- Location & Services -->
@@ -99,6 +88,42 @@
 
                         </div>
                     </div>
+
+                    <!-- Active Contracts -->
+                    @if($player->activeContracts->isNotEmpty())
+                        <div class="mt-6 p-4 bg-white border border-[#d4b483] rounded">
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">📜 {{ __('contract.my_contracts') }}</h4>
+                            <div class="space-y-3">
+                                @foreach($player->activeContracts as $contract)
+                                    <div class="p-3 bg-[#f5e6c8] border border-[#d4b483] rounded flex items-center justify-between gap-3">
+                                        <div>
+                                            <p class="font-semibold text-[#5d3a1a]">
+                                                {{ __('contract.deliver_resource_to', [
+                                                    'quantity' => $contract->quantity,
+                                                    'resource' => __('resource.' . $contract->resource->name),
+                                                    'city' => $contract->destinationCity->name,
+                                                ]) }}
+                                            </p>
+                                            <p class="text-xs text-[#8b5a2b]">{{ __('contract.reward') }}: ${{ $contract->reward }}</p>
+                                        </div>
+
+                                        @if($contract->canBeDeliveredBy($player))
+                                            <form method="POST" action="{{ route('contracts.deliver', $contract) }}">
+                                                @csrf
+                                                <button type="submit" class="victorian-btn py-1.5 px-3 rounded text-xs font-serif whitespace-nowrap">
+                                                    {{ __('contract.deliver_contract') }}
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-xs text-gray-500 italic whitespace-nowrap">
+                                                {{ __('contract.need_resource_here') }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Train Info -->
                     <div class="mt-6 p-4 bg-white border border-[#d4b483] rounded">

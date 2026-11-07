@@ -124,6 +124,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->string('tier')->default('0');
+            $table->string('produced_from')->nullable();
             $table->text('description')->nullable();
             $table->string('unit')->default('unit');
             $table->boolean('is_fuel')->default(false);
@@ -205,6 +206,23 @@ return new class extends Migration
             // NEW: Add current_city_route_id to players
             $table->foreignId('current_city_route_id')->nullable()->after('travel_finishes_at')->constrained('city_routes')->nullOnDelete();
         });
+
+        //Contracts
+        Schema::create('contracts', function (Blueprint $table) {
+            $table->id();
+            // The saloon city offering this contract
+            $table->foreignId('city_id')->constrained('cities')->onDelete('cascade');
+            // The town the resource must be delivered to
+            $table->foreignId('destination_city_id')->constrained('cities')->onDelete('cascade');
+            $table->foreignId('resource_id')->constrained()->onDelete('cascade');
+            $table->unsignedInteger('quantity');
+            $table->unsignedInteger('reward');
+            $table->string('status')->default('available');
+            $table->foreignId('player_id')->nullable()->constrained()->nullOnDelete();
+            $table->timestamp('accepted_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -213,6 +231,7 @@ return new class extends Migration
     public function down(): void
     {
         // Drop tables in reverse order of creation to respect foreign key constraints
+        Schema::dropIfExists('contracts');
         Schema::dropIfExists('location_resources');
         Schema::dropIfExists('locations');
         Schema::dropIfExists('cargo_wagon_resources');

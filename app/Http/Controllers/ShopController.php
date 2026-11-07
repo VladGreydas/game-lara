@@ -229,7 +229,7 @@ class ShopController extends Controller
             return back()->with('error', 'Validation error: ' . $e->getMessage())->withErrors($e->errors());
         } catch (AuthorizationException $e) {
             return back()->with('error', $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error("Sell wagon error: " . $e->getMessage(), ['player_id' => $player->id, 'wagon_id' => $wagon->id]);
             return back()->with('error', 'An unexpected error occurred during wagon sale. ' . $e->getMessage());
         }

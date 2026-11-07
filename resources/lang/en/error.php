@@ -11,4 +11,11 @@ return [
     'player' => [
         'not_enough_stamina' => 'Not enough stamina to scout for resources.',
     ],
+    'contract' => [
+        'accept_travelling' => 'You can`t accept a contract while travelling',
+        'accept_wrong_city' => 'You must be in this city to accept a contract.',
+        'not_available' => 'This contract is no longer available.',
+        'deliver_travelling' => 'You can`t deliver a contract while travelling',
+        'deliver_error' => 'You can`t deliver this contract right now. Make sure you are in the destination town with enough resources.',
+    ],
 ];

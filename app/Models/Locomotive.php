@@ -84,7 +84,10 @@ class Locomotive extends Model
 
     public function getTravelTime(CityRoute $route)
     {
-        $baseTime = 1;
+        $baseTime = 0.002;
+        if (config('app.env') === 'local') {
+            return $baseTime;
+        }
         // Add logic for time calculation
         $speed = $this->speed * $this->train->getSpeedMultiplierAttribute();
         $travelTime = $baseTime;

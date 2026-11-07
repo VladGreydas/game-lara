@@ -524,6 +524,80 @@ class ScoutResourcesTest extends TestCase
         $this->assertNull($cargoWagonResource);
     }
 
+    public function test_successful_scout_grants_fixed_experience_reward(): void
+    {
+        $user = User::factory()->create();
+        $city = City::create(['name' => 'Iron City', 'slug' => 'iron-city', 'level' => 1]);
+
+        $iron = Resource::create([
+            'name' => 'Iron Ore',
+            'slug' => 'iron-ore',
+            'description' => 'Raw iron ore',
+            'base_price' => 15,
+        ]);
+
+        CityResource::create([
+            'city_id' => $city->id,
+            'resource_id' => $iron->id,
+            'is_surplus' => true,
+        ]);
+
+        $player = Player::create([
+            'user_id' => $user->id,
+            'nickname' => 'ExpScout',
+            'money' => 1000,
+            'exp' => 0,
+            'max_exp' => 100,
+            'lvl' => 1,
+            'city_id' => $city->id,
+        ]);
+
+        $success = $player->scout(5);
+
+        $this->assertTrue($success);
+
+        $player->refresh();
+        $this->assertEquals(\App\Services\LevelingService::SCOUT_EXP_REWARD, $player->exp);
+    }
+
+    public function test_failed_scout_does_not_grant_experience(): void
+    {
+        $user = User::factory()->create();
+        $city = City::create(['name' => 'Iron City', 'slug' => 'iron-city', 'level' => 1]);
+
+        $iron = Resource::create([
+            'name' => 'Iron Ore',
+            'slug' => 'iron-ore',
+            'description' => 'Raw iron ore',
+            'base_price' => 15,
+        ]);
+
+        CityResource::create([
+            'city_id' => $city->id,
+            'resource_id' => $iron->id,
+            'is_surplus' => true,
+        ]);
+
+        $player = Player::create([
+            'user_id' => $user->id,
+            'nickname' => 'NoExpScout',
+            'money' => 1000,
+            'exp' => 0,
+            'max_exp' => 100,
+            'lvl' => 1,
+            'city_id' => $city->id,
+            'stamina' => 0,
+            'last_stamina_regenerated_at' => Carbon::now(),
+        ]);
+
+        $success = $player->scout(5);
+
+        $this->assertFalse($success);
+
+        $player->refresh();
+        $this->assertEquals(0, $player->exp);
+    }
+
     public function test_stamina_regenerates_over_time(): void
     {
         $user = User::factory()->create();

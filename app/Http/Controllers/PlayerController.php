@@ -112,24 +112,6 @@ class PlayerController extends Controller
         return redirect(route('player.index'));
     }
 
-    public function levelUp(Player $player)
-    {
-        // Це можна винести в окремий сервіс
-        if (!$player->canLevelUp()) {
-            return redirect()->back()->withErrors('Not enough experience to level up.');
-        }
-
-        $this->authorize('update', $player);
-
-        $player->lvl += 1;
-        $player->exp -= $player->max_exp;
-        $player->max_exp = ceil($player->max_exp * 1.75);
-        $player->money += 500;
-        $player->save();
-
-        return redirect()->back()->with('success', 'Level up successful!');
-    }
-
     public function scout(Player $player): RedirectResponse
     {
         $this->authorize('update', $player);

@@ -95,7 +95,6 @@ class CityController extends Controller
     {
         /** @var Player $player */
         $player = auth()->user()->player;
-        /** @var Locomotive $locomotive */
         $locomotive = $player->train->locomotive;
 
         // Prevent refuel if player is traveling
@@ -135,6 +134,8 @@ class CityController extends Controller
             $refuelResource = Resource::where('slug', '=' ,$fuelType)->first();
             $refuelPrice = $refuelResource->base_price;
         }
+
+        $refuelPrice *= $locomotive->max_fuel - $locomotive->fuel;
 
         if ($player->money < $refuelPrice) {
             return back()->with('error', 'Not enough money to refuel.');

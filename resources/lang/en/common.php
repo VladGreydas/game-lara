@@ -24,4 +24,8 @@ return [
         'refuel_success' => 'Refund Success',
         'scout_success' => 'Scouted for resources successfully!',
     ],
+    'contract' => [
+        'accept_success' => 'Contract accepted! Check your active contracts.',
+        'deliver_success' => 'Contract delivered! You earned $:reward.',
+    ],
 ];

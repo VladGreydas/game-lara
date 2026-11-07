@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $slug
  * @property string $tier
+ * @property string|null $produced_from
  * @property string|null $description
  * @property string $unit
  * @property bool $is_fuel
@@ -42,6 +43,7 @@ class Resource extends Model
         'name',
         'slug',
         'tier',
+        'produced_from',
         'description',
         'unit',
         'is_fuel',
@@ -68,5 +70,17 @@ class Resource extends Model
     public function locations(): HasMany
     {
         return $this->hasMany(LocationResource::class);
+    }
+
+    /**
+     * Get the T0 resource this (T1) resource is produced from, if any.
+     */
+    public function producedFrom(): ?Resource
+    {
+        if (empty($this->produced_from)) {
+            return null;
+        }
+
+        return self::where('slug', $this->produced_from)->first();
     }
 }

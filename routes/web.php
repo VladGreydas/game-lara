@@ -10,6 +10,7 @@ use App\Http\Controllers\WagonController;
 use App\Http\Controllers\WeaponController;
 use App\Http\Controllers\WorkshopController;
 use App\Http\Controllers\SaloonController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MapController;
 use Illuminate\Support\Facades\Route;
@@ -71,7 +72,6 @@ Route::prefix('player')->group(function () {
     Route::post('store', [PlayerController::class, 'store'])->name('player.store');
     Route::get('/{player}/edit', [PlayerController::class, 'edit'])->name('player.edit');
     Route::patch('/{player}', [PlayerController::class, 'update'])->name('player.update');
-    Route::post('/{player}/levelup', [PlayerController::class, 'levelUp'])->name('player.levelup')->middleware('can:update,player');
     Route::post('/{player}/scout', [PlayerController::class, 'scout'])->name('player.scout')->middleware('can:update,player');
     Route::delete('/{player}', [PlayerController::class, 'destroy'])->name('player.destroy');
 });
@@ -112,6 +112,12 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
         Route::post('/city/upgrade', 'upgradeCity')->name('city.upgrade');
         Route::post('/city/resource/{cityResource}/upgrade', 'upgradeResource')->name('city.resource.upgrade');
         Route::get('/city/{city}/saloon', [SaloonController::class, 'show'])->name('city.saloon.show');
+    });
+
+    // Контракти
+    Route::controller(ContractController::class)->prefix('contracts')->group(function () {
+        Route::post('/city/{city}/{contract}/accept', 'accept')->name('contracts.accept');
+        Route::post('/{contract}/deliver', 'deliver')->name('contracts.deliver');
     });
 
     // Локації

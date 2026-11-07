@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\CargoWagon;
 use App\Models\CityResource;
 use App\Models\Player;
 use App\Models\Wagon;
@@ -10,6 +9,7 @@ use App\Models\Weapon;
 use App\Models\WeaponWagon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Throwable;
 
