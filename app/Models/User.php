@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,7 +13,6 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name User name
  * @property string $email User email
  * @property $password User password
- * @property $chirps User chirps
  * @property Player $player player
  */
 class User extends Authenticatable
@@ -51,11 +49,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function chirps(): HasMany
-    {
-        return $this->hasMany(Chirp::class);
-    }
 
     public function player(): HasOne
     {

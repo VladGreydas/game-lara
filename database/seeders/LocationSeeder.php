@@ -18,6 +18,7 @@ class LocationSeeder extends Seeder
     public function run(): void
     {
         $locationsConfig = \Config::get('locations');
+        $resourcesConfig = \Config::get('resource');
 
         $cities = City::all();
 
@@ -41,7 +42,7 @@ class LocationSeeder extends Seeder
 
             if (isset($location)) {
                 // Second: create location resource for this location
-                LocationResource::firstOrCreate(
+                $locationResource = LocationResource::firstOrCreate(
                     [
                         'location_id' => $location->id,
                         'resource_id' => $resource->resource->id,
@@ -52,6 +53,41 @@ class LocationSeeder extends Seeder
                         'current_amount' => 0,
                     ]
                 );
+
+                // If this is a T1 location (produces a processed resource), set up processing info
+                $producedResource = $resource->resource;
+                if ($producedResource->tier == '1' && $producedResource->produced_from) {
+                    // Find the input (T0) resource
+                    $inputResource = Resource::where('slug', $producedResource->produced_from)->first();
+
+                    if ($inputResource) {
+                        // Find the config entry for this resource
+                        $resourceConfig = null;
+                        foreach ($resourcesConfig as $rc) {
+                            if ($rc['slug'] === $producedResource->slug) {
+                                $resourceConfig = $rc;
+                                break;
+                            }
+                        }
+
+                        $updateData = [
+                            'input_resource_id' => $inputResource->id,
+                            'processing_ratio_input' => $resourceConfig['processing_ratio']['input'] ?? 1,
+                            'processing_ratio_output' => $resourceConfig['processing_ratio']['output'] ?? 1,
+                        ];
+
+                        // If this resource has a second input (e.g., coal for smelters)
+                        if (isset($resourceConfig['second_input'])) {
+                            $secondInputResource = Resource::where('slug', $resourceConfig['second_input'])->first();
+                            if ($secondInputResource) {
+                                $updateData['input_resource_2_id'] = $secondInputResource->id;
+                                $updateData['processing_ratio_input2'] = $resourceConfig['second_input_ratio'] ?? 1;
+                            }
+                        }
+
+                        $locationResource->update($updateData);
+                    }
+                }
 
                 // Third: create routes between city and location
                 CityRoute::firstOrCreate(

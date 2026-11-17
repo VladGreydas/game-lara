@@ -35,7 +35,7 @@ class LocomotivePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function upgrade(User $user, Locomotive $locomotive): bool
+    public function update(User $user, Locomotive $locomotive): bool
     {
         return optional($user->player->train->locomotive)->is($locomotive);
     }

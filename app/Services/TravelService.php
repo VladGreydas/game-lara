@@ -12,6 +12,7 @@ class TravelService
     {
         $arrivedPlayers = Player::whereNotNull('current_city_route_id')
             ->where('travel_finishes_at', '<=', now())
+            ->with(['currentCityRoute.toCity', 'currentCityRoute.toLocation'])
             ->get();
 
         foreach ($arrivedPlayers as $player) {

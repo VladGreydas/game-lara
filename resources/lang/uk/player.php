@@ -16,4 +16,5 @@ return [
     'create_new_player' => 'Створити нового гравця',
     'enter_your_nickname_here' => 'Введіть свій нікнейм...',
     'welcome' => 'Ласкаво просимо, :nickname',
+    'level_up_message' => 'Рівень підвищено! Ви тепер рівня :level!',
 ];

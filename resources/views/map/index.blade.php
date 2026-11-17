@@ -209,7 +209,7 @@
                                 <!-- Surplus Resources Badges -->
                                 @if($cNode['surplus_resources']->count())
                                     @foreach($cNode['surplus_resources'] as $sIndex => $sRes)
-                                        <g transform="translate({{ $cNode['x'] - 45 }}, {{ $cNode['y'] - 38 - ($sIndex * 17) }})">
+                                        <g transform="translate({{ $cNode['x'] - 45 }}, {{ $cNode['badges_base_y'] + $cNode['surplus_offset'] - 10}})">
                                             <rect width="90" height="15" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.2" />
                                             <text x="45" y="11" font-size="8" text-anchor="middle" fill="#15803d" font-weight="bold">
                                                 ★ {{ __('resource.' . $sRes->resource->name) }} (T{{ $sRes->resource->tier }})
@@ -221,7 +221,7 @@
                                 <!-- Deficit Resources Badges -->
                                 @if($cNode['deficit_resources']->count())
                                     @foreach($cNode['deficit_resources'] as $dIndex => $dRes)
-                                        <g transform="translate({{ $cNode['x'] - 45 }}, {{ $cNode['y'] + 44 + ($dIndex * 17) }})">
+                                        <g transform="translate({{ $cNode['x'] - 45 }}, {{ $cNode['badges_base_y'] + $cNode['deficit_offset'] - 10}})">
                                             <rect width="90" height="15" rx="3" fill="#fee2e2" stroke="#dc2626" stroke-width="1.2" />
                                             <text x="45" y="11" font-size="8" text-anchor="middle" fill="#b91c1c" font-weight="bold">
                                                 ▼ {{ __('resource.' . $dRes->resource->name) }} (T{{ $dRes->resource->tier }})
@@ -464,23 +464,4 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .victorian-card {
-            background: #fff8e7;
-            border: 2px solid #c5a059;
-            box-shadow: 4px 4px 12px rgba(93, 58, 26, 0.15);
-        }
-        .victorian-btn {
-            background: #8b5a2b;
-            color: #fff8e7;
-            border: 2px solid #c5a059;
-            transition: all 0.2s ease;
-        }
-        .victorian-btn:hover {
-            background: #6d4a24;
-            transform: translateY(-1px);
-            box-shadow: 2px 2px 6px rgba(93, 58, 26, 0.2);
-        }
-    </style>
 </x-app-layout>

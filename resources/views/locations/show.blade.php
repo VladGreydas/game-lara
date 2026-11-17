@@ -68,6 +68,167 @@
             </div>
         </div>
 
+        <!-- Production Progress Section (T0 locations only) -->
+        @if($productionStatus)
+            <div class="victorian-card">
+                <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
+                    <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">{{ __('location.production') }}</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Production Info -->
+                        <div class="p-4 bg-white border border-[#d4b483] rounded">
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('location.production_info') }}</h4>
+                            <p class="text-gray-800 mb-2">
+                                {{ __('location.current_amount') }}:
+                                <strong>{{ $productionStatus['current_amount'] }}</strong>
+                                {{ __('resource.' . $location->location_resource->resource->unit) }}
+                            </p>
+                            <p class="text-gray-800 mb-2">
+                                {{ __('location.max_capacity') }}:
+                                {{ $productionStatus['max_capacity'] }} {{ __('resource.' . $location->location_resource->resource->unit) }}
+                            </p>
+                            <p class="text-gray-800">
+                                {{ __('location.production_rate') }}:
+                                {{ $productionStatus['production_rate_per_hour'] }} {{ __('location.per_hour') }}
+                            </p>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="p-4 bg-white border border-[#d4b483] rounded">
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('location.production_progress') }}</h4>
+                            <div class="mb-2 flex justify-between text-sm text-gray-600">
+                                <span>{{ __('location.progress') }}: {{ $productionStatus['progress_percent'] }}%</span>
+                                @if($productionStatus['estimated_time_minutes'] > 0)
+                                    <span>{{ __('location.estimated_time') }}: {{ $productionStatus['estimated_time_minutes'] }} {{ __('location.minutes') }}</span>
+                                @else
+                                    <span>{{ __('location.capacity_full') }}</span>
+                                @endif
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4 border border-[#d4b483]">
+                                <div class="bg-[#c5a059] h-4 rounded-full transition-all duration-300"
+                                     style="width: {{ $productionStatus['progress_percent'] }}%"></div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2 italic">
+                                {{ __('location.production_description_t0', ['resource' => __('resource.' . $location->location_resource->resource->name)]) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Processing Section (T1 locations only) -->
+        @if($processingStatus && $processingStatus['has_processing'])
+            <div class="victorian-card">
+                <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
+                    <h3 class="text-2xl font-bold text-[#5d3a1a] font-serif">{{ __('location.processing') }}</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Processing Info -->
+                        <div class="p-4 bg-white border border-[#d4b483] rounded">
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('location.processing_info') }}</h4>
+                            <p class="text-gray-800 mb-2">
+                                {{ __('location.input_resource') }}:
+                                {{ $processingStatus['input_resource'] ? __('resource.' . $processingStatus['input_resource']->name) : __('location.unknown') }}
+                            </p>
+                            @if($processingStatus['has_second_input'] && $processingStatus['input_resource_2'])
+                                <p class="text-gray-800 mb-2">
+                                    {{ __('location.second_input_resource') }}:
+                                    {{ __('resource.' . $processingStatus['input_resource_2']->name) }}
+                                </p>
+                            @endif
+                            <p class="text-gray-800 mb-2">
+                                {{ __('location.ratio') }}:
+                                {{ $processingStatus['ratio_input'] }} {{ __('location.input_resource') }}
+                                @if($processingStatus['has_second_input'])
+                                    + {{ $processingStatus['ratio_input2'] }} {{ __('location.second_input_resource') }}
+                                @endif
+                                → {{ $processingStatus['ratio_output'] }} {{ __('resource.' . $location->location_resource->resource->name) }}
+                            </p>
+                            <p class="text-gray-800 mb-2">
+                                {{ __('location.processing_queue') }}:
+                                {{ $processingStatus['processing_amount'] }} {{ __('resource.' . $location->location_resource->resource->name) }}
+                            </p>
+                            <p class="text-gray-800">
+                                {{ __('location.production_rate') }}:
+                                {{ $processingStatus['production_rate_per_hour'] }} {{ __('location.per_hour') }}
+                            </p>
+                        </div>
+
+                        <!-- Unload Form -->
+                        <div class="p-4 bg-white border border-[#d4b483] rounded">
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('location.unload_resources') }}</h4>
+                            @php
+                                $hasSecondInput = isset($availableInputs['second']);
+                                $canUnload = $availableInputs['available_amount'] > 0;
+                                if ($hasSecondInput) {
+                                    $canUnload = $canUnload && $availableInputs['second']['available_amount'] > 0;
+                                }
+                            @endphp
+                            @if($canUnload)
+                                <p class="text-gray-800 mb-2">
+                                    {{ __('location.available_in_wagons') }}:
+                                    <strong>{{ $availableInputs['available_amount'] }}</strong>
+                                    {{ __('resource.' . $availableInputs['resource_name']) }}
+                                </p>
+                                @if($hasSecondInput)
+                                    <p class="text-gray-800 mb-3">
+                                        <strong>{{ $availableInputs['second']['available_amount'] }}</strong>
+                                        {{ __('resource.' . $availableInputs['second']['resource_name']) }}
+                                        ({{ __('location.second_input_resource') }})
+                                    </p>
+                                @endif
+                                <form method="POST" action="{{ route('locations.unload', $location) }}" class="flex flex-col gap-3">
+                                    @csrf
+                                    <div>
+                                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
+                                            {{ __('location.unload_amount') }} ({{ __('resource.' . $availableInputs['resource_name']) }})
+                                        </label>
+                                        <input type="number" name="amount" id="amount" min="1" max="{{ $availableInputs['available_amount'] }}" value="1"
+                                               class="w-full px-3 py-2 border border-[#d4b483] rounded bg-[#faf3e6] text-[#5d3a1a] font-serif focus:outline-none focus:ring-2 focus:ring-[#c5a059]">
+                                    </div>
+                                    @if($hasSecondInput)
+                                        <p class="text-sm text-gray-600 italic">
+                                            {{ __('location.second_input_auto', ['amount' => ':amount', 'resource' => __('resource.' . $availableInputs['second']['resource_name'])]) }}
+                                        </p>
+                                    @endif
+                                    <button type="submit" class="victorian-btn py-2 px-6 rounded text-sm font-serif">
+                                        {{ __('location.unload') }}
+                                    </button>
+                                </form>
+                            @else
+                                @if(!$hasSecondInput)
+                                    <p class="text-gray-600 italic">{{ __('location.no_input_resource_in_wagons') }}</p>
+                                @else
+                                    <p class="text-gray-600 italic">{{ __('location.no_input_resource_2_in_wagons') }}</p>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    @if($processingStatus['processing_amount'] > 0)
+                        <div class="mt-6 p-4 bg-white border border-[#d4b483] rounded">
+                            <h4 class="text-xl font-bold text-[#5d3a1a] mb-3 font-serif">{{ __('location.production_progress') }}</h4>
+                            <div class="mb-2 flex justify-between text-sm text-gray-600">
+                                <span>{{ __('location.progress') }}: {{ $processingStatus['progress_percent'] }}%</span>
+                                <span>{{ __('location.estimated_time') }}: {{ $processingStatus['estimated_time_minutes'] }} {{ __('location.minutes') }}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4 border border-[#d4b483]">
+                                <div class="bg-[#c5a059] h-4 rounded-full transition-all duration-300"
+                                     style="width: {{ $processingStatus['progress_percent'] }}%"></div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2 italic">
+                                {{ __('location.processing_description', ['input' => $processingStatus['ratio_input'], 'output' => $processingStatus['ratio_output'], 'resource' => __('resource.' . $location->location_resource->resource->name)]) }}
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <!-- Outgoing Routes -->
         <div class="victorian-card">
             <div class="p-6 border-b border-[#c5a059] bg-[#f5e6c8]">
@@ -117,23 +278,4 @@
             </div>
         @endif
     </div>
-
-    <style>
-        .victorian-card {
-            background: #fff8e7;
-            border: 2px solid #c5a059;
-            box-shadow: 4px 4px 12px rgba(93, 58, 26, 0.15);
-        }
-        .victorian-btn {
-            background: #8b5a2b;
-            color: #fff8e7;
-            border: 2px solid #c5a059;
-            transition: all 0.2s ease;
-        }
-        .victorian-btn:hover {
-            background: #6d4a24;
-            transform: translateY(-1px);
-            box-shadow: 2px 2px 6px rgba(93, 58, 26, 0.2);
-        }
-    </style>
 </x-app-layout>

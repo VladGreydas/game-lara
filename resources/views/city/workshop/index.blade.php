@@ -42,23 +42,4 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .victorian-card {
-            background: #fff8e7;
-            border: 2px solid #c5a059;
-            box-shadow: 4px 4px 12px rgba(93, 58, 26, 0.15);
-        }
-        .victorian-btn {
-            background: #8b5a2b;
-            color: #fff8e7;
-            border: 2px solid #c5a059;
-            transition: all 0.2s ease;
-        }
-        .victorian-btn:hover {
-            background: #6d4a24;
-            transform: translateY(-1px);
-            box-shadow: 2px 2px 6px rgba(93, 58, 26, 0.2);
-        }
-    </style>
 </x-app-layout>

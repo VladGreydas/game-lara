@@ -12,15 +12,4 @@
      'upgrade' => 'Upgrade',
      'fuel_consumption' => 'Fuel Consumption',
      'per_km' => ' unit/100km',
-     'resource' => [
-         'Wood' => 'Wood',
-         'Iron Ore' => 'Iron Ore',
-         'Copper Ore' => 'Copper Ore',
-         'Coal' => 'Coal',
-         'Grain' => 'Grain',
-         'Stone' => 'Stone',
-         'Crude Oil' => 'Crude Oil',
-         'Clay' => 'Clay',
-         'Sand' => 'Sand',
-     ],
  ];

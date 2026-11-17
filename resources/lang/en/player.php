@@ -16,4 +16,5 @@ return [
     'create_new_player' => 'Create New Player',
     'enter_your_nickname_here' => 'Enter your nickname here...',
     'welcome' => 'Welcome, :nickname',
+    'level_up_message' => 'Level up! You are now level :level!',
 ];

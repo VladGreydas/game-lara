@@ -4,7 +4,6 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\LocomotiveController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ChirpController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WagonController;
 use App\Http\Controllers\WeaponController;
@@ -32,20 +31,6 @@ Route::get('/', function () {
 });
 
 Route::view('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
-
-/*
-|--------------------------------------------------------------------------
-| Chirps
-|--------------------------------------------------------------------------
-|
-| Here are Chirps routes - some kind of chatting
-| First project on Laravel, so I keep it
-|
- */
-
-Route::resource('chirps', ChirpController::class)
-    ->only(['index', 'store', 'edit', 'update', 'destroy'])
-    ->middleware(['auth', 'verified']);
 
 /*
 |--------------------------------------------------------------------------
@@ -125,6 +110,7 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
         Route::get('/locations/{location}', 'show')->name('locations.show');
         Route::post('/locations/{location}/collect', 'collect')->name('locations.collect');
         Route::post('/locations/{location}/refuel', 'refuel')->name('locations.refuel');
+        Route::post('/locations/{location}/unload', 'unload')->name('locations.unload');
     });
 
     // Майстерня

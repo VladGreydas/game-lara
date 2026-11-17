@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Log;
  * @property int $id
  * @property int $location_id
  * @property int $resource_id
+ * @property int|null $input_resource_id
+ * @property int|null $input_resource_2_id
+ * @property int $processing_ratio_input
+ * @property int $processing_ratio_input2
+ * @property int $processing_ratio_output
+ * @property int $processing_amount
+ * @property \Illuminate\Support\Carbon|null $processing_started_at
  * @property float $production_rate_per_hour
  * @property int $max_capacity
  * @property int $current_amount
@@ -26,6 +33,13 @@ class LocationResource extends Model
     protected $fillable = [
         'location_id',
         'resource_id',
+        'input_resource_id',
+        'input_resource_2_id',
+        'processing_ratio_input',
+        'processing_ratio_input2',
+        'processing_ratio_output',
+        'processing_amount',
+        'processing_started_at',
         'production_rate_per_hour',
         'max_capacity',
         'current_amount',
@@ -46,6 +60,22 @@ class LocationResource extends Model
     public function resource(): BelongsTo
     {
         return $this->belongsTo(Resource::class);
+    }
+
+    /**
+     * Get the input (T0) resource needed for processing (T1 locations only).
+     */
+    public function inputResource(): BelongsTo
+    {
+        return $this->belongsTo(Resource::class, 'input_resource_id');
+    }
+
+    /**
+     * Get the second input (T0) resource needed for processing (some T1 locations).
+     */
+    public function inputResource2(): BelongsTo
+    {
+        return $this->belongsTo(Resource::class, 'input_resource_2_id');
     }
 
     /**

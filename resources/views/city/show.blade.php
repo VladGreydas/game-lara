@@ -43,28 +43,7 @@
                         <p class="text-gray-800 mb-2">
                             {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}
                         </p>
-                        @php
-                            $locomotive = $player->train->locomotive;
-                            $fuelType = $locomotive->getFuelType();
-                            $refuelPrice = 0;
-                            if ($city->resources->count()) {
-                                $resources = $city->resources;
-                                foreach ($resources as $resource) {
-                                    if ($resource->resource->slug == $fuelType) {
-                                        $refuelPrice = $resource->getCurrentBuyPrice();
-                                        break;
-                                    }
-                                }
-                                if ($refuelPrice == 0) {
-                                    $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first();
-                                    if ($refuelResource) $refuelPrice = $refuelResource->base_price;
-                                }
-                            } else {
-                                $refuelResource = \App\Models\Resource::where('slug', $fuelType)->first();
-                                if ($refuelResource) $refuelPrice = $refuelResource->base_price;
-                            }
-                        @endphp
-                        <p class="text-sm text-gray-600 mb-4">{{ __('locomotive.refueling_cost') . ($locomotive->max_fuel-$locomotive->fuel)*$refuelPrice }}</p>
+                        <p class="text-sm text-gray-600 mb-4">{{ __('locomotive.refueling_cost') . ($player->train->locomotive->max_fuel - $player->train->locomotive->fuel) * $refuelPrice }}</p>
 
                         @if($player->train->locomotive->fuel < $player->train->locomotive->max_fuel)
                             <form action="{{ route('city.refuel') }}" method="POST" class="inline">
@@ -207,23 +186,4 @@
             </div>
         @endif
     </div>
-
-    <style>
-        .victorian-card {
-            background: #fff8e7;
-            border: 2px solid #c5a059;
-            box-shadow: 4px 4px 12px rgba(93, 58, 26, 0.15);
-        }
-        .victorian-btn {
-            background: #8b5a2b;
-            color: #fff8e7;
-            border: 2px solid #c5a059;
-            transition: all 0.2s ease;
-        }
-        .victorian-btn:hover {
-            background: #6d4a24;
-            transform: translateY(-1px);
-            box-shadow: 2px 2px 6px rgba(93, 58, 26, 0.2);
-        }
-    </style>
 </x-app-layout>

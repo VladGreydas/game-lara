@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
-use App\Models\LocationResource;
 use App\Models\Player;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,25 +56,18 @@ class PlayerController extends Controller
             ],
         ]);
 
-        $player = new Player();
-        $player->user_id = Auth::id();
-        $player->nickname = $validated['nickname'];
-        $player->money = 1000;
-        $player->exp = 0;
-        $player->max_exp = 100;
-        $player->lvl = 1;
-        $player->stamina = 100;
-        $player->max_stamina = 100;
-        $player->last_stamina_regenerated_at = now();
-
         $startCity = City::first();
-        if ($startCity) {
-            $player->city_id = $startCity->id;
-        } else {
+        if (!$startCity) {
             return back()->withErrors(['message' => 'No starting city available. Please seed cities first.']);
         }
 
-        $player->save();
+        $player = Player::create([
+            'user_id' => Auth::id(),
+            'nickname' => $validated['nickname'],
+            'city_id' => $startCity->id,
+        ]);
+
+        // PlayerSetupService::setupInitialAssets() is called automatically via Player::created event
 
         return redirect()->route('player.index')->with('success', 'Player "' . $player->nickname . '" created successfully!');
     }
@@ -101,10 +93,6 @@ class PlayerController extends Controller
 
         $validated = $request->validate([
             'nickname' => 'string|max:255',
-            'lvl' => 'int',
-            'money' => 'int',
-            'exp' => 'int',
-            'max_exp' => 'int'
         ]);
 
         $player->update($validated);

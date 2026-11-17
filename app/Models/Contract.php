@@ -104,8 +104,12 @@ class Contract extends Model
             return;
         }
 
-        $resources = Resource::all();
-        $destinationCities = City::where('id', '!=', $city->id)->get();
+        $resources = \Illuminate\Support\Facades\Cache::remember('resources.all', 3600, function () {
+            return Resource::all();
+        });
+        $destinationCities = \Illuminate\Support\Facades\Cache::remember('cities.all', 3600, function () {
+            return City::all();
+        })->where('id', '!=', $city->id);
 
         if ($resources->isEmpty() || $destinationCities->isEmpty()) {
             return;

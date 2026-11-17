@@ -2,45 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CargoWagon;
-use App\Models\Train;
 use App\Models\Wagon;
-use App\Models\WeaponWagon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Auth;
 
 class WagonController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Upgrade the specified wagon.
      */
-    public function index()
+    public function upgrade(Wagon $wagon): RedirectResponse
     {
-        //
-    }
+        $this->authorize('update', $wagon);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function upgrade(Wagon $wagon)
-    {
         try {
             if (!$wagon->lvlUp()) {
                 return back()->with('error', 'Not enough money or max level reached.');
@@ -53,53 +28,12 @@ class WagonController extends Controller
     }
 
     /**
-     * Create (purchase) the wagon in storage.
+     * Rename a wagon.
      */
-    public function purchase(Request $request, Train $train)
+    public function rename(Request $request, Wagon $wagon): RedirectResponse
     {
-        $new_wagon = (array)json_decode($request['wagon']);
-        $response = $train->addWagon($new_wagon);
-        return redirect(route('town.index'))->with('status', $response);
-    }
+        $this->authorize('update', $wagon);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function sell(Request $request, Wagon $wagon)
-    {
-        $player = $wagon->train->player;
-        $wagonName = $wagon->name;
-        $money = 0;
-
-        switch ($wagon->getType()) {
-            case 'cargo': {
-                //TODO: Transfer resources or sell them
-                $money = $wagon->price / 2;
-                break;
-            }
-            case 'weapon': {
-                $money = $wagon->price / 2;
-                //TODO: Keep weapons as items into Cargo Wagons (if available)
-                foreach ($wagon->wagonable->weapons as $weapon) {
-                    $money += $weapon->price / 2;
-                }
-                break;
-            }
-        }
-
-        $player->addMoney($money);
-
-        $wagon->destroyRelatives();
-        $wagon->delete();
-
-        $response['status'] = 'success';
-        $response['message'] = 'Successfully sold '.$wagonName;
-
-        return redirect(route('town.index'))->with('status', $response);
-    }
-
-    public function rename(Request $request, Wagon $wagon)
-    {
         $name = (string)$request['new_name'];
         $wagon->update(['name' => $name]);
 
@@ -108,17 +42,15 @@ class WagonController extends Controller
 
     /**
      * Repair the wagon.
-     *
-     * @param Wagon $wagon
-     * @return RedirectResponse
      */
-    public function repair(Wagon $wagon)
+    public function repair(Wagon $wagon): RedirectResponse
     {
+        $this->authorize('update', $wagon);
+
         if (! $wagon->repair()) {
             return back()->with('error', 'Cannot repair Wagon');
         }
 
         return back()->with('success', 'Wagon repaired!');
     }
-
 }

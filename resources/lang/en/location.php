@@ -33,4 +33,50 @@ return [
     'outgoing_routes' => 'Outgoing routes',
     'no_resources' => 'No resources',
     'no_outgoing_routes' => 'Don`t have any outgoing routes. Please contact support.',
+
+    // Production (T0 locations)
+    'production' => 'Resource Production',
+    'production_info' => 'Production Info',
+    'current_amount' => 'Current amount',
+    'max_capacity' => 'Max capacity',
+    'production_description_t0' => ':resource accumulates over time.',
+
+    // Processing (T0 → T1)
+    'processing' => 'Resource Processing',
+    'processing_info' => 'Processing Info',
+    'input_resource' => 'Input resource',
+    'second_input_resource' => 'Second input resource',
+    'ratio' => 'Ratio',
+    'processing_queue' => 'Processing queue',
+    'production_rate' => 'Production rate',
+    'per_hour' => 'per hour',
+    'unknown' => 'Unknown',
+    'unload_resources' => 'Unload Resources',
+    'available_in_wagons' => 'Available in wagons',
+    'unload_amount' => 'Amount to unload',
+    'unload' => 'Unload',
+    'no_input_resource_in_wagons' => 'No input resources in your wagons. Deliver some first!',
+    'no_input_resource_2_in_wagons' => 'Missing second input resource in your wagons. Deliver some first!',
+    'second_input_auto' => 'The required amount of :resource will be deducted automatically.',
+    'production_progress' => 'Production Progress',
+    'progress' => 'Progress',
+    'estimated_time' => 'Estimated time',
+    'minutes' => 'minutes',
+    'processing_description' => 'Processing :input → :output :resource over time.',
+
+    // Success messages
+    'success' => [
+        'unloaded' => 'Successfully unloaded resources. :amount units will be produced.',
+    ],
+
+    // Error messages
+    'error' => [
+        'not_processing_location' => 'This location does not process resources.',
+        'input_resource_not_found' => 'Input resource not found.',
+        'not_enough_input_resource' => 'Not enough input resources in your wagons.',
+        'input_resource_2_not_found' => 'Second input resource not found.',
+        'not_enough_input_resource_2' => 'Not enough second input resource in your wagons.',
+        'capacity_full' => 'Location capacity is full.',
+        'unload_travelling' => 'You cannot unload resources while traveling.',
+    ],
 ];

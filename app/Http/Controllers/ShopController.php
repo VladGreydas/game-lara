@@ -2,34 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Factories\WagonShopFactory;
-use App\Models\CargoWagon;
-use App\Models\CargoWagonResource;
 use App\Models\City;
-use App\Models\CityResource;
-use App\Models\Locomotive;
 use App\Models\Player;
 use App\Models\Resource;
 use App\Models\Wagon;
 use App\Models\Weapon;
 use App\Models\WeaponWagon;
+use App\Services\ShopBuyService;
 use App\Services\ShopSellService;
 use App\Services\ShopSetupService;
-use Database\Factories\CargoWagonFactory;
-use Database\Factories\WeaponWagonFactory;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ShopController extends Controller
 {
-    public function __construct(protected ShopSetupService $shopSetupService, protected ShopSellService $shopSellService)
-    {
-
+    public function __construct(
+        protected ShopSetupService $shopSetupService,
+        protected ShopSellService $shopSellService,
+        protected ShopBuyService $shopBuyService
+    ) {
     }
 
     public function index(Request $request)
@@ -50,17 +44,21 @@ class ShopController extends Controller
         $wagons = $shopInventory['wagons'];
         $weapons = $shopInventory['weapons'];
 
+        // Eager loading для потяга гравця з усіма вагонами та ресурсами
+        $player->loadMissing([
+            'train.locomotive',
+            'train.wagons.cargo_wagon.resources.resource',
+            'train.wagons.weapon_wagon.weapons',
+        ]);
+
         $weaponWagonsForMounting = $player->train->checkAvailableWeaponWagons();
         $weaponWagonsForMounting = collect($weaponWagonsForMounting);
 
-        $playerWagonsForSale = \App\Models\Wagon::whereHas('train', function ($query) use ($player) {
-            $query->where('player_id', $player->id);
-        })
-            ->get();
+        // Eager loading замість whereHas — один запит замість двох
+        $playerWagonsForSale = \App\Models\Wagon::where('train_id', $player->train->id)->get();
         $playerWeaponsForSale = \App\Models\Weapon::whereHas('weapon_wagon.wagon.train', function ($query) use ($player) {
             $query->where('player_id', $player->id);
-        })
-            ->get();
+        })->with('weapon_wagon')->get();
 
         // --- ДОДАНО: ЛОГІКА ДЛЯ РЕСУРСІВ ---
 
@@ -76,8 +74,6 @@ class ShopController extends Controller
         if ($player->train) {
             foreach ($player->train->wagons as $wagon) {
                 if ($wagon->isCargo() && $wagon->cargo_wagon) {
-                    // Завантажуємо ресурси для кожного вантажного вагона
-                    $wagon->cargo_wagon->load('resources.resource'); // Завантажуємо ресурси та їх визначення
                     $totalCargoCapacity += $wagon->cargo_wagon->capacity;
                     $currentCargoCapacity += $wagon->cargo_wagon->getCurrentCapacity();
 
@@ -122,91 +118,24 @@ class ShopController extends Controller
     {
         $player = Auth::user()->player;
 
-        /** @var Locomotive|null $shopLoco */
-        $shopLoco = session("shop.locomotives.$uuid");
-
-        if (!$shopLoco) {
-            return back()->with('error', 'Locomotive not available.');
+        try {
+            $this->shopBuyService->buyLocomotive($player, $uuid);
+            return back()->with('success', 'Locomotive successfully purchased and installed!');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        $currentLoco = $player->train->locomotive;
-
-        $currentValue = $currentLoco?->price ?? 0;
-        $priceDifference = $shopLoco->price - $currentValue;
-
-        if ($player->money < $priceDifference) {
-            return back()->with('error', 'Not enough money, even after trading in your current locomotive.');
-        }
-
-        // Видалення старого локомотива (якщо є)
-        if ($currentLoco) {
-            $currentLoco->delete();
-        }
-
-        // Купівля нового
-        $newLoco = new Locomotive($shopLoco->toArray());
-        $newLoco->train_id = $player->train->id;
-        $newLoco->save();
-
-        // Віднімання різниці в ціні
-        $player->decrement('money', $priceDifference);
-
-        // Видалення із сесії
-        session()->forget("shop.locomotives.$uuid");
-
-        return back()->with('success', 'Locomotive successfully purchased and installed!');
     }
 
     public function buyWagon(string $uuid)
     {
         $player = Auth::user()->player;
-        $train = $player->train;
 
-        /** @var Wagon $wagon */
-        $wagon = session("shop.wagons.$uuid");
-
-        if (!$wagon) {
-            return back()->with('error', 'Wagon not found in shop.');
+        try {
+            $this->shopBuyService->buyWagon($player, $uuid);
+            return back()->with('success', 'Wagon purchased successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // Перевірка балансу
-        if ($player->money < $wagon->price) {
-            return back()->with('error', 'Not enough money.');
-        }
-
-        // Створення основного запису
-        $wagonModel = Wagon::create([
-            'train_id' => $train->id,
-            'name' => $wagon->name,
-            'type' => $wagon->type,
-            'weight' => $wagon->weight,
-            'armor' => $wagon->armor,
-            'max_armor' => $wagon->max_armor,
-            'lvl' => 1,
-            'price' => $wagon->price,
-            'upgrade_cost' => $wagon->upgrade_cost,
-        ]);
-
-        // Дочірній тип
-        if ($wagon->type === 'cargo' && isset($wagon->cargo_data)) {
-            CargoWagon::create([
-                'wagon_id' => $wagonModel->id,
-                'capacity' => $wagon->cargo_data['capacity'],
-            ]);
-        }
-
-        if ($wagon->type === 'weapon' && isset($wagon->weapon_data)) {
-            WeaponWagon::create([
-                'wagon_id' => $wagonModel->id,
-                'slots_available' => $wagon->weapon_data['slots_available'],
-            ]);
-        }
-
-        // Зняти кошти
-        $player->money -= $wagon->price;
-        $player->save();
-
-        return back()->with('success', 'Wagon purchased successfully.');
     }
 
     public function sellWagon(Request $request, Wagon $wagon) // <-- Тепер приймає об'єкт Wagon
@@ -238,48 +167,19 @@ class ShopController extends Controller
     public function buyWeapon(Request $request, string $shop_uuid)
     {
         $player = Auth::user()->player;
-        $weaponData = session("shop.weapons.$shop_uuid");;
 
-        if (!$weaponData) {
-            return back()->with('error', 'Weapon not found in shop.');
-        }
-
-        // Валідація вибору вагона
         $validated = $request->validate([
             'weapon_wagon_id' => ['required', 'exists:weapon_wagons,id'],
         ]);
 
-        $weaponWagon = WeaponWagon::with('wagon')->findOrFail($validated['weapon_wagon_id']);
-
-        // Перевірка, чи цей вагон належить потягу гравця
-        if ($weaponWagon->wagon->train_id !== $player->train->id) {
-            abort(403, 'You do not own this weapon wagon.');
+        try {
+            $weapon = $this->shopBuyService->buyWeapon($player, $shop_uuid, $validated['weapon_wagon_id']);
+            return back()->with('success', "Weapon {$weapon->name} successfully mounted on wagon #{$weapon->weapon_wagon_id}.");
+        } catch (AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // Перевірка балансу
-        if ($player->money < $weaponData['price']) {
-            return back()->with('error', 'Not enough money.');
-        }
-
-        // Покупка
-        $player->money -= $weaponData['price'];
-        $player->save();
-
-        // Створення нової зброї
-        $weapon = Weapon::create([
-            'name' => $weaponData['name'],
-            'type' => $weaponData['type'],
-            'damage' => $weaponData['damage'],
-            'weight' => $weaponData['weight'],
-            'price' => $weaponData['price'],
-            'lvl' => 1,
-            'upgrade_cost' => $weaponData['upgrade_cost'],
-            'weapon_wagon_id' => $weaponWagon->id,
-        ]);
-
-        $weaponWagon->decrement('slots_available');
-
-        return back()->with('success', "Weapon {$weapon->name} successfully mounted on wagon #{$weaponWagon->id}.");
     }
 
     public function sellWeapon(Request $request, Weapon $weapon) // <-- Тепер приймає об'єкт Weapon
@@ -305,195 +205,43 @@ class ShopController extends Controller
         }
     }
 
-    // --- НОВИЙ МЕТОД: buyResource ---
     public function buyResource(Request $request, Resource $resource)
     {
-        /** @var Player $player */
         $player = Auth::user()->player;
-        $city = $player->city;
 
-        // 1. Валідація вхідних даних
         $validated = $request->validate([
             'city_resource_id' => ['required', 'integer', 'exists:city_resources,id'],
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        $cityResource = CityResource::with('resource')->findOrFail($validated['city_resource_id']);
-
-        // 2. Перевірки ресурсів
-        // Перевірка, чи CityResource належить поточному місту гравця
-        if ($cityResource->city_id !== $city->id) {
-            throw new AuthorizationException('This resource is not available in your current city.');
+        try {
+            $this->shopBuyService->buyResource(
+                $player,
+                $validated['city_resource_id'],
+                $validated['quantity'],
+                $resource->slug
+            );
+            return back()->with('success', 'Successfully purchased ' . $validated['quantity'] . ' ' . $resource->name . '.');
+        } catch (AuthorizationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // Перевірка, чи ресурс в URL відповідає ресурсу з city_resource_id
-        if ($cityResource->resource->slug !== $resource->slug) {
-            return back()->with('error', 'Mismatched resource ID and slug.');
-        }
-
-        // Перевірка наявності достатньої кількості в місті
-        if ($validated['quantity'] > $cityResource->quantity) {
-            return back()->with('error', 'Not enough ' . $resource->name . ' available in the city.');
-        }
-
-        // Розрахунок вартості
-        $totalCost = $cityResource->getCurrentBuyPrice() * $validated['quantity'];
-
-        // Перевірка грошей гравця
-        if ($player->money < $totalCost) {
-            return back()->with('error', 'You do not have enough money to buy this amount of ' . $resource->name . '.');
-        }
-
-        // Перевірка вільного місця у вантажних вагонах
-        $availableCargoSpace = 0;
-        if ($player->train) {
-            $player->train->load('wagons.cargo_wagon'); // Завантажуємо cargo_wagon для кожного вагона
-            foreach ($player->train->wagons as $wagon) {
-                if ($wagon->isCargo() && $wagon->cargo_wagon) {
-                    $availableCargoSpace += $wagon->cargo_wagon->getRemainingCapacity();
-                }
-            }
-        }
-
-        if ($validated['quantity'] > $availableCargoSpace) {
-            return back()->with('error', 'Not enough free cargo space in your train for this amount of ' . $resource->name . '.');
-        }
-
-        // --- 3. Виконання транзакції ---
-        DB::transaction(function () use ($player, $cityResource, $validated, $totalCost, $resource) {
-            // 3.1. Зняття грошей з гравця
-            $player->decrement('money', $totalCost);
-
-            // 3.2. Зменшення кількості ресурсу в місті
-            $cityResource->decrement('quantity', $validated['quantity']);
-            // Оновлення price_multiplier відбудеться автоматично через хук "saving" у CityResource
-
-            // 3.3. Додавання ресурсів до вантажних вагонів гравця
-            $remainingQuantity = $validated['quantity'];
-            if ($player->train) {
-                $player->train->load('wagons.cargo_wagon.resources'); // Перезавантажуємо, щоб мати актуальні ресурси
-
-                foreach ($player->train->wagons as $wagon) {
-                    if ($wagon->isCargo() && $wagon->cargo_wagon && $remainingQuantity > 0) {
-                        $cargoWagon = $wagon->cargo_wagon;
-                        $wagonFreeSpace = $cargoWagon->getRemainingCapacity();
-
-                        if ($wagonFreeSpace > 0) {
-                            $quantityToAdd = min($remainingQuantity, $wagonFreeSpace);
-
-                            // Шукаємо, чи вже є такий ресурс у цьому вагоні
-                            $existingCargoResource = $cargoWagon->resources()
-                                ->where('resource_id', $resource->id)
-                                ->first();
-
-                            if ($existingCargoResource) {
-                                $existingCargoResource->increment('quantity', $quantityToAdd);
-                            } else {
-                                CargoWagonResource::create([
-                                    'cargo_wagon_id' => $cargoWagon->id,
-                                    'resource_id' => $resource->id,
-                                    'quantity' => $quantityToAdd,
-                                ]);
-                            }
-                            $remainingQuantity -= $quantityToAdd;
-                        }
-                    }
-                }
-            }
-
-            // Перевірка, чи всі ресурси були додані (на випадок логічної помилки)
-            if ($remainingQuantity > 0) {
-                throw new \Exception('Failed to fully add resources to train cargo. Remaining: ' . $remainingQuantity);
-            }
-        });
-
-        return back()->with('success', 'Successfully purchased ' . $validated['quantity'] . ' ' . $resource->name . '.');
     }
 
-    // --- НОВИЙ МЕТОД: sellResource ---
     public function sellResource(Request $request, Resource $resource)
     {
-        /** @var Player $player */
         $player = Auth::user()->player;
-        $city = $player->city;
 
-        // 1. Валідація вхідних даних
         $validated = $request->validate([
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        // 2. Перевірка ресурсів
-        // Знаходимо CityResource для поточного міста та даного ресурсу
-        $cityResource = CityResource::where('city_id', $city->id)
-            ->where('resource_id', $resource->id)
-            ->first();
-
-        if (!$cityResource) {
-            return back()->with('error', 'This resource cannot be sold in this city.');
+        try {
+            $totalSellPrice = $this->shopBuyService->sellResource($player, $resource, $validated['quantity']);
+            return back()->with('success', 'Successfully sold ' . $validated['quantity'] . ' ' . $resource->name . ' for $' . number_format($totalSellPrice, 2) . '.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // Перевіряємо, чи достатньо ресурсів у гравця для продажу (сумуємо по всіх вагонах)
-        $playerResourceQuantity = 0;
-        $playerCargoWagonResourcesForThisType = collect(); // Зберігаємо конкретні CargoWagonResource
-        // для подальшого зменшення
-
-        if ($player->train) {
-            $player->train->load(['wagons.cargo_wagon.resources' => function($query) use ($resource) {
-                $query->where('resource_id', $resource->id); // Завантажуємо тільки потрібні ресурси
-            }]);
-
-            foreach ($player->train->wagons as $wagon) {
-                if ($wagon->isCargo() && $wagon->cargo_wagon) {
-                    foreach ($wagon->cargo_wagon->resources as $cargoWagonResource) {
-                        $playerResourceQuantity += $cargoWagonResource->quantity;
-                        $playerCargoWagonResourcesForThisType->push($cargoWagonResource);
-                    }
-                }
-            }
-        }
-
-        if ($validated['quantity'] > $playerResourceQuantity) {
-            return back()->with('error', 'You do not have ' . $validated['quantity'] . ' ' . $resource->name . ' to sell.');
-        }
-
-        // Розрахунок вартості продажу
-        $totalSellPrice = $cityResource->getCurrentSellPrice() * $validated['quantity'];
-
-        // --- 3. Виконання транзакції ---
-        DB::transaction(function () use ($player, $cityResource, $validated, $totalSellPrice, $playerCargoWagonResourcesForThisType) {
-            // 3.1. Додавання грошей гравцю
-            $player->increment('money', $totalSellPrice);
-
-            // 3.2. Збільшення кількості ресурсу в місті
-            $cityResource->increment('quantity', $validated['quantity']);
-            // Оновлення price_multiplier відбудеться автоматично
-
-            // 3.3. Зменшення кількості ресурсів у вантажних вагонах гравця
-            $remainingQuantityToSell = $validated['quantity'];
-
-            // Сортуємо вагони за кількістю ресурсу (можливо, не потрібно, але може допомогти в оптимізації)
-            // Або просто проходимо по них і віднімаємо
-            foreach ($playerCargoWagonResourcesForThisType as $cargoWagonResource) {
-                if ($remainingQuantityToSell <= 0) {
-                    break;
-                }
-
-                $quantityToDecrement = min($remainingQuantityToSell, $cargoWagonResource->quantity);
-                $cargoWagonResource->decrement('quantity', $quantityToDecrement);
-                $remainingQuantityToSell -= $quantityToDecrement;
-
-                // Якщо кількість стала 0, видаляємо запис
-                if ($cargoWagonResource->quantity <= 0) {
-                    $cargoWagonResource->delete();
-                }
-            }
-
-            // Перевірка, чи всі ресурси були продані
-            if ($remainingQuantityToSell > 0) {
-                throw new \Exception('Failed to fully sell resources from train cargo. Remaining: ' . $remainingQuantityToSell);
-            }
-        });
-
-        return back()->with('success', 'Successfully sold ' . $validated['quantity'] . ' ' . $resource->name . ' for $' . number_format($totalSellPrice, 2) . '.');
     }
 }

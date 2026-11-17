@@ -33,4 +33,50 @@ return [
     'outgoing_routes' => 'Вихідні маршрути',
     'no_resources' => 'Немає ресурсів',
     'no_outgoing_routes' => 'Немає вихідних маршрутів. Будь ласка зв`яжіться з підтримкою',
+
+    // Production (T0 locations)
+    'production' => 'Виробництво ресурсів',
+    'production_info' => 'Інформація про виробництво',
+    'current_amount' => 'Поточна кількість',
+    'max_capacity' => 'Максимальна місткість',
+    'production_description_t0' => ':resource накопичується з часом.',
+
+    // Processing (T0 → T1)
+    'processing' => 'Переробка ресурсів',
+    'processing_info' => 'Інформація про переробку',
+    'input_resource' => 'Вхідний ресурс',
+    'second_input_resource' => 'Другий вхідний ресурс',
+    'ratio' => 'Пропорція',
+    'processing_queue' => 'Черга переробки',
+    'production_rate' => 'Швидкість виробництва',
+    'per_hour' => 'на годину',
+    'unknown' => 'Невідомо',
+    'unload_resources' => 'Вивантажити ресурси',
+    'available_in_wagons' => 'Доступно у вагонах',
+    'unload_amount' => 'Кількість для вивантаження',
+    'unload' => 'Вивантажити',
+    'no_input_resource_in_wagons' => 'У ваших вагонах немає вхідних ресурсів. Спочатку доставте сировину!',
+    'no_input_resource_2_in_wagons' => 'Не вистачає другого вхідного ресурсу у вагонах. Спочатку доставте його!',
+    'second_input_auto' => 'Необхідна кількість :resource буде знята автоматично.',
+    'production_progress' => 'Прогрес виробництва',
+    'progress' => 'Прогрес',
+    'estimated_time' => 'Орієнтовний час',
+    'minutes' => 'хвилин',
+    'processing_description' => 'Переробка :input → :output :resource з часом.',
+
+    // Success messages
+    'success' => [
+        'unloaded' => 'Ресурси успішно вивантажено. Буде вироблено :amount одиниць.',
+    ],
+
+    // Error messages
+    'error' => [
+        'not_processing_location' => 'Ця локація не переробляє ресурси.',
+        'input_resource_not_found' => 'Вхідний ресурс не знайдено.',
+        'not_enough_input_resource' => 'Недостатньо вхідних ресурсів у ваших вагонах.',
+        'input_resource_2_not_found' => 'Другий вхідний ресурс не знайдено.',
+        'not_enough_input_resource_2' => 'Недостатньо другого вхідного ресурсу у ваших вагонах.',
+        'capacity_full' => 'Місткість локації повна.',
+        'unload_travelling' => 'Ви не можете вивантажувати ресурси під час подорожі.',
+    ],
 ];

@@ -15,9 +15,15 @@ class ResourceSeeder extends Seeder
         $resources = \Config::get('resource');
 
         foreach ($resources as $resourceData) {
+            // Виключити поля конфігурації які не існують в таблиці resources
+            $dataForDb = array_diff_key(
+                $resourceData,
+                array_flip(['processing_ratio', 'second_input', 'second_input_ratio'])
+            );
+
             Resource::firstOrCreate(
-                ['slug' => $resourceData['slug']], // Шукаємо за slug, щоб уникнути дублікатів
-                $resourceData
+                ['slug' => $resourceData['slug']],
+                $dataForDb
             );
         }
     }
