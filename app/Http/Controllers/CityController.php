@@ -7,6 +7,7 @@ use App\Models\Locomotive;
 use App\Models\Player;
 use App\Models\CityResource;
 use App\Models\Resource;
+use App\Services\TravelEventService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -25,9 +26,15 @@ class CityController extends Controller
                 // Travel has finished, process arrival
                 return $player->processArrival($player);
             } else {
+                // Check for travel events
+                $eventService = app(TravelEventService::class);
+                $eventService->checkAndTrigger($player);
+                $activeEvent = $eventService->getActiveEvent($player);
+                $unresolvedCount = $eventService->getUnresolvedEventCount($player);
+
                 // Still traveling, redirect to a travel status page or show a message
                 $route = CityRoute::find($player->current_city_route_id);
-                return view('city.on_route', compact('player', 'route')); // NEW: Create a travel status view
+                return view('city.on_route', compact('player', 'route', 'activeEvent', 'unresolvedCount'));
             }
         }
 

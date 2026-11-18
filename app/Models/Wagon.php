@@ -21,6 +21,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property $upgrade_cost Wagon upgrade cost
  * @property CargoWagon $cargo_wagon Cargo wagon
  * @property WeaponWagon $weapon_wagon Weapon wagon
+ * @property PassengerWagon $passenger_wagon Passenger wagon
+ * @property ExplorerWagon $explorer_wagon Explorer wagon
+ * @property ScrapperWagon $scrapper_wagon Scrapper wagon
+ * @property CrafterWagon $crafter_wagon Crafter wagon
  * @property Train $train Train
  */
 class Wagon extends Model
@@ -43,7 +47,11 @@ class Wagon extends Model
     {
         $cost = match ($this->type) {
             'cargo' => 2,
-            'weapon' => 5
+            'weapon' => 5,
+            'passenger' => 3,
+            'explorer' => 4,
+            'scrapper' => 6,
+            'crafter' => 5,
         };
 
         return $this->repairWith(
@@ -62,6 +70,26 @@ class Wagon extends Model
     public function isWeapon(): bool
     {
         return $this->type === 'weapon' && $this->weapon_wagon !== null;
+    }
+
+    public function isPassenger(): bool
+    {
+        return $this->type === 'passenger' && $this->passenger_wagon !== null;
+    }
+
+    public function isExplorer(): bool
+    {
+        return $this->type === 'explorer' && $this->explorer_wagon !== null;
+    }
+
+    public function isScrapper(): bool
+    {
+        return $this->type === 'scrapper' && $this->scrapper_wagon !== null;
+    }
+
+    public function isCrafter(): bool
+    {
+        return $this->type === 'crafter' && $this->crafter_wagon !== null;
     }
 
     public function lvlUp(): bool
@@ -88,6 +116,31 @@ class Wagon extends Model
                 'armor' => 150,
                 'max_armor' => 150,
             ];
+        } elseif ($this->isPassenger()) {
+            $baseScale = [
+                'weight' => 30,
+                'armor' => 50,
+                'max_armor' => 50,
+            ];
+        } elseif ($this->isExplorer()) {
+            $baseScale = [
+                'weight' => 40,
+                'armor' => 75,
+                'max_armor' => 75,
+            ];
+        } elseif ($this->isScrapper()) {
+            $baseScale = [
+                'weight' => 80,
+                'armor' => 120,
+                'max_armor' => 120,
+            ];
+        } elseif ($this->isCrafter()) {
+            $baseScale = [
+                'weight' => 60,
+                'armor' => 100,
+                'max_armor' => 100,
+            ];
+            $extraScale = ['craft_slots' => 1];
         }
 
         $success = $this->lvlUpWith(fn () => $player, $baseScale);
@@ -98,7 +151,9 @@ class Wagon extends Model
 
         // Update extra fields in the related table
         if ($this->isCargo()) {
-            $this->cargo_wagon->incrementEach($extraScale, $this->lvl);
+            $this->cargo_wagon->upgradeFields($extraScale, $this->lvl);
+        } elseif ($this->isCrafter()) {
+            $this->crafter_wagon->upgradeFields($extraScale, $this->lvl);
         }
 
         return true;
@@ -142,5 +197,25 @@ class Wagon extends Model
     public function weapon_wagon(): HasOne
     {
         return $this->hasOne(WeaponWagon::class);
+    }
+
+    public function passenger_wagon(): HasOne
+    {
+        return $this->hasOne(PassengerWagon::class);
+    }
+
+    public function explorer_wagon(): HasOne
+    {
+        return $this->hasOne(ExplorerWagon::class);
+    }
+
+    public function scrapper_wagon(): HasOne
+    {
+        return $this->hasOne(ScrapperWagon::class);
+    }
+
+    public function crafter_wagon(): HasOne
+    {
+        return $this->hasOne(CrafterWagon::class);
     }
 }

@@ -1,7 +1,7 @@
-<div class="victorian-card">
-    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
-        <h4 class="text-lg font-bold text-[#5d3a1a] font-serif">
-            {{ $weapon->name }} <span class="text-sm text-gray-600">({{ $weapon->type }})</span>
+<div class="industrial-card">
+    <div class="p-4 border-b border-[#3f3f3f] bg-[#2d2d2d]">
+        <h4 class="text-lg font-bold text-[#e5e5e5] font-serif">
+            {{ $weapon->name }} <span class="text-sm text-[#a3a3a3]">({{ $weapon->type }})</span>
         </h4>
     </div>
     <div class="p-4">
@@ -16,8 +16,8 @@
             <form method="POST" action="{{ route('weapon.rename', $weapon) }}" class="mt-4">
                 @csrf
                 <div class="flex gap-2">
-                    <input type="text" name="name" value="{{ $weapon->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]">
-                    <button type="submit" class="victorian-btn py-1 px-3 rounded text-xs">
+                    <input type="text" name="name" value="{{ $weapon->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#eab308]">
+                    <button type="submit" class="industrial-btn py-1 px-3 rounded text-xs">
                         {{ __('weapon.rename') }}
                     </button>
                 </div>
@@ -28,7 +28,7 @@
             <div class="mt-4">
                 <form method="POST" action="{{ route('weapon.upgrade', $weapon) }}">
                     @csrf
-                    <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                    <button type="submit" class="industrial-btn py-2 px-4 rounded text-sm">
                         {{ __('weapon.upgrade') }} ({{ $weapon->upgrade_cost }})
                     </button>
                 </form>

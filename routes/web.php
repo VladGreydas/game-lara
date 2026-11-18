@@ -113,6 +113,9 @@ Route::controller(LocomotiveController::class)->prefix('locomotive')->group(func
         Route::post('/locations/{location}/unload', 'unload')->name('locations.unload');
     });
 
+    // Travel events
+    Route::post('/travel-event/resolve', [LocationController::class, 'resolveEvent'])->name('travel_event.resolve');
+
     // Майстерня
     Route::controller(WorkshopController::class)->prefix('workshop')->group(function () {
         Route::get('/city/', 'index')->name('workshop.index');

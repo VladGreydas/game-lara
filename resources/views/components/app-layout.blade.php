@@ -15,16 +15,16 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-[#1f1f1f]">
             <!-- Navigation -->
-            <nav class="bg-white border-b border-gray-100">
+            <nav class="bg-[#1f1f1f] border-b border-[#3f3f3f]">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
                                 <a href="{{ route('dashboard') }}" class="flex items-center">
-                                    <span class="font-bold text-xl text-gray-800">{{ __('tavern.tavern') }}</span>
+                                    <span class="font-bold text-xl text-[#e5e5e5]">{{ __('tavern.tavern') }}</span>
                                 </a>
                             </div>
 
@@ -40,7 +40,7 @@
                         <div class="ml-3 relative">
                             <form action="{{ route('locale.set', app()->getLocale() === 'en' ? 'uk' : 'en') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-[#a3a3a3] bg-[#1f1f1f] hover:bg-[#2d2d2d] hover:text-[#d4d4d4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     {{ app()->getLocale() === 'en' ? '🇺🇦 UA' : '🇬🇧 EN' }}
                                 </button>
                             </form>
@@ -50,7 +50,7 @@
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
-                                    <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                    <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-[#a3a3a3] bg-[#1f1f1f] hover:text-[#d4d4d4] focus:outline-none transition ease-in-out duration-150">
                                         <div>{{ Auth::user()->name }}</div>
 
                                         <div class="ml-1">
@@ -82,7 +82,7 @@
 
                         <!-- Hamburger -->
                         <div class="-mr-2 flex items-center sm:hidden">
-                            <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                            <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="inline-flex items-center justify-center p-2 rounded-md text-[#737373] hover:text-[#a3a3a3] hover:bg-[#2d2d2d] focus:outline-none focus:bg-[#2d2d2d] focus:text-[#a3a3a3] transition duration-150 ease-in-out">
                                 <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
@@ -100,11 +100,11 @@
                     </div>
 
                     <!-- Language Switcher (Mobile) -->
-                    <div class="pt-4 pb-1 border-t border-gray-200">
+                    <div class="pt-4 pb-1 border-t border-[#3f3f3f]">
                         <div class="px-4">
                             <form action="{{ route('locale.set', app()->getLocale() === 'en' ? 'uk' : 'en') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-800 transition duration-150 ease-in-out">
+                                <button type="submit" class="block w-full text-left px-4 py-2 text-base font-medium text-[#a3a3a3] hover:text-[#e5e5e5] hover:bg-[#2d2d2d] focus:outline-none focus:bg-[#2d2d2d] focus:text-[#e5e5e5] transition duration-150 ease-in-out">
                                     {{ app()->getLocale() === 'en' ? '🇺🇦 UA' : '🇬🇧 EN' }}
                                 </button>
                             </form>
@@ -112,10 +112,10 @@
                     </div>
 
                     <!-- Responsive Settings Options -->
-                    <div class="pt-4 pb-1 border-t border-gray-200">
+                    <div class="pt-4 pb-1 border-t border-[#3f3f3f]">
                         <div class="px-4">
-                            <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                            <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                            <div class="font-medium text-base text-[#e5e5e5]">{{ Auth::user()->name }}</div>
+                            <div class="font-medium text-sm text-[#a3a3a3]">{{ Auth::user()->email }}</div>
                         </div>
 
                         <div class="mt-3 space-y-1">
@@ -139,7 +139,7 @@
             </nav>
 
             <!-- Page Heading -->
-            <header class="bg-white shadow">
+            <header class="bg-[#1f1f1f] shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>

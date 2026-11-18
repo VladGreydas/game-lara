@@ -21,7 +21,7 @@ class CargoWagon extends Model
 {
     protected $fillable = ['wagon_id', 'capacity'];
 
-    public function incrementEach(array $fields, int $lvl): void
+    public function upgradeFields(array $fields, int $lvl): void
     {
         foreach ($fields as $field => $valuePerLvl) {
             $this->increment($field, $valuePerLvl * $lvl);

@@ -40,6 +40,10 @@ class CityResource extends Model
         'level',
     ];
 
+    // Quantity bounds to keep prices stable
+    protected const MIN_QUANTITY = 100;
+    protected const MAX_QUANTITY = 3000;
+
     /**
      * The "booted" method of the model.
      */
@@ -164,5 +168,50 @@ class CityResource extends Model
     public function resource(): BelongsTo
     {
         return $this->belongsTo(Resource::class);
+    }
+
+    /**
+     * Adjust quantity with bounds and update price multiplier.
+     * This is the public entry point for ShopBuyService to change prices.
+     *
+     * @param int $delta Positive to add, negative to remove
+     * @return int The actual quantity change applied (may be clamped)
+     */
+    public function adjustQuantity(int $delta): int
+    {
+        $newQuantity = $this->quantity + $delta;
+
+        // Clamp to bounds
+        if ($newQuantity < self::MIN_QUANTITY) {
+            $newQuantity = self::MIN_QUANTITY;
+        } elseif ($newQuantity > self::MAX_QUANTITY) {
+            $newQuantity = self::MAX_QUANTITY;
+        }
+
+        $actualDelta = $newQuantity - $this->quantity;
+
+        if ($actualDelta !== 0) {
+            $this->quantity = $newQuantity;
+            $this->updatePriceMultiplier();
+            $this->save();
+        }
+
+        return $actualDelta;
+    }
+
+    /**
+     * Get the price direction compared to base price.
+     * Returns 'up' if price is higher, 'down' if lower, 'stable' if close to base.
+     *
+     * @return string 'up', 'down', or 'stable'
+     */
+    public function getPriceDirection(): string
+    {
+        if ($this->price_multiplier > 1.05) {
+            return 'up';
+        } elseif ($this->price_multiplier < 0.95) {
+            return 'down';
+        }
+        return 'stable';
     }
 }

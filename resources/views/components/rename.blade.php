@@ -9,7 +9,7 @@
     {{-- Модалка --}}
     <x-modal name="modal-rename-{{ $type }}-{{ $id }}" :show="false" maxWidth="md">
         <div class="p-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">
+            <h2 class="text-lg font-medium text-[#e5e5e5] mb-4">
                 {{ __('Rename ' . ucfirst($type)) }}
             </h2>
 
@@ -18,7 +18,7 @@
                 @method('PATCH')
 
                 <div>
-                    <label for="new_name" class="block text-sm font-medium text-gray-700">
+                    <label for="new_name" class="block text-sm font-medium text-[#d4d4d4]">
                         {{ __('Enter new name:') }}
                     </label>
                     <input type="text"
@@ -27,7 +27,7 @@
                            required
                            placeholder="Enter here..."
                            autocomplete="off"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                           class="mt-1 block w-full rounded-md border-[#3f3f3f] shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                            value="{{ $name }}">
                 </div>
 
@@ -37,7 +37,7 @@
                     </x-primary-button>
 
                     <button type="button"
-                            class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                            class="px-4 py-2 bg-gray-300 text-[#e5e5e5] rounded-md hover:bg-gray-400"
                             onclick="window.dispatchEvent(new CustomEvent('close-modal', { detail: 'modal-rename-{{ $type }}-{{ $id }}' }))">
                         {{ __('Cancel') }}
                     </button>

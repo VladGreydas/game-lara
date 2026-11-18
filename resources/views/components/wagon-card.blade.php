@@ -1,7 +1,7 @@
-<div class="victorian-card mb-4">
-    <div class="p-4 border-b border-[#c5a059] bg-[#f5e6c8]">
-        <h4 class="text-lg font-bold text-[#5d3a1a] font-serif">
-            {{ $wagon->name }} <span class="text-sm text-gray-600">({{ $wagon->isWeapon() ? __('wagon.weapon') : __('wagon.cargo') }})</span>
+<div class="industrial-card mb-4">
+    <div class="p-4 border-b border-[#3f3f3f] bg-[#2d2d2d]">
+        <h4 class="text-lg font-bold text-[#e5e5e5] font-serif">
+            {{ $wagon->name }} <span class="text-sm text-[#a3a3a3]">({{ $wagon->isWeapon() ? __('wagon.weapon') : __('wagon.cargo') }})</span>
         </h4>
     </div>
     <div class="p-4">
@@ -17,8 +17,8 @@
             <form method="POST" action="{{ route('wagon.rename', $wagon) }}" class="mt-4">
                 @csrf
                 <div class="flex gap-2">
-                    <input type="text" name="name" value="{{ $wagon->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]">
-                    <button type="submit" class="victorian-btn py-1 px-3 rounded text-xs">
+                    <input type="text" name="name" value="{{ $wagon->name }}" class="flex-1 px-3 py-1 border border-[#d4b483] rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#eab308]">
+                    <button type="submit" class="industrial-btn py-1 px-3 rounded text-xs">
                         {{ __('wagon.rename') }}
                     </button>
                 </div>
@@ -28,7 +28,7 @@
             <div class="mt-4">
                 <form method="POST" action="{{ route('wagon.upgrade', $wagon) }}">
                     @csrf
-                    <button type="submit" class="victorian-btn py-2 px-4 rounded text-sm">
+                    <button type="submit" class="industrial-btn py-2 px-4 rounded text-sm">
                         {{ __('wagon.upgrade') }} ({{ $wagon->upgrade_cost }})
                     </button>
                 </form>
@@ -36,30 +36,30 @@
         @endif
         @if($wagon->isCargo())
             <div class="mt-4">
-                <h5 class="text-lg font-bold text-[#5d3a1a] mb-2">{{ __('resource.resources') }}:</h5>
+                <h5 class="text-lg font-bold text-[#e5e5e5] mb-2">{{ __('resource.resources') }}:</h5>
                 @if($wagon->cargo_wagon->resources->where('quantity', '>', 0)->isNotEmpty())
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         @foreach($wagon->cargo_wagon->resources->where('quantity', '>', 0) as $cargoWagonResource)
-                            <div class="p-2 bg-[#fff8e7] border border-[#d4b483] rounded flex justify-between items-center text-sm">
-                                <span class="font-semibold text-[#5d3a1a]">{{ $cargoWagonResource->resource->name }}</span>
-                                <span class="text-gray-700 font-bold">{{ $cargoWagonResource->quantity }}</span>
+                            <div class="p-2 bg-[#1f1f1f] border border-[#d4b483] rounded flex justify-between items-center text-sm">
+                                <span class="font-semibold text-[#e5e5e5]">{{ $cargoWagonResource->resource->name }}</span>
+                                <span class="text-[#d4d4d4] font-bold">{{ $cargoWagonResource->quantity }}</span>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <p class="text-gray-600 italic">{{ __('resource.you_have_no_resources_yet') }}</p>
+                    <p class="text-[#a3a3a3] italic">{{ __('resource.you_have_no_resources_yet') }}</p>
                 @endif
             </div>
         @endif
         @if($wagon->isWeapon())
             <div class="mt-4">
-                <h5 class="text-lg font-bold text-[#5d3a1a] mb-2">{{ __('weapon.weapons') }}:</h5>
+                <h5 class="text-lg font-bold text-[#e5e5e5] mb-2">{{ __('weapon.weapons') }}:</h5>
                 @if($wagon->weapon_wagon->weapons->isNotEmpty())
                     @foreach($wagon->weapon_wagon->weapons as $weapon)
                         <x-weapon-card :weapon="$weapon" :upgrade="$upgrade" :rename="true"/>
                     @endforeach
                 @else
-                    <p class="text-gray-600 italic">{{ __('weapon.you_have_no_weapons_yet') }}</p>
+                    <p class="text-[#a3a3a3] italic">{{ __('weapon.you_have_no_weapons_yet') }}</p>
                 @endif
             </div>
         @endif

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-[#e5e5e5] leading-tight">
             {{ __('shop.shop') . ' - ' . $city->name }}
         </h2>
         <a href="{{ route('city.show', $city) }}"
@@ -10,17 +10,17 @@
         <x-player-info/>
     </x-slot>
 
-    <div class="mt-6 mx-auto max-w-7xl bg-white shadow-sm rounded-lg p-6 space-y-4">
+    <div class="mt-6 mx-auto max-w-7xl bg-[#1f1f1f] shadow-sm rounded-lg p-6 space-y-4">
         @if(session('success'))
-            <div class="text-green-600 font-semibold">{{ session('success') }}</div>
+            <div class="text-[#4ade80] font-semibold">{{ session('success') }}</div>
         @endif
         @if(session('error'))
-            <div class="text-red-600 font-semibold">{{ session('error') }}</div>
+            <div class="text-[#f87171] font-semibold">{{ session('error') }}</div>
         @endif
 
         <div class="mb-6">
-            <label for="shop-category" class="block mb-2 text-sm font-medium text-gray-700">{{ __('shop.select_section') }}</label>
-            <select id="shop-category" class="form-select rounded-md border-gray-300 shadow-sm"
+            <label for="shop-category" class="block mb-2 text-sm font-medium text-[#d4d4d4]">{{ __('shop.select_section') }}</label>
+            <select id="shop-category" class="form-select rounded-md border-[#3f3f3f] shadow-sm"
                     onchange="switchMainSection(this.value)">
                 <option value="buy-section">{{ __('shop.buy_items') }}</option>
                 <option value="sell-section">{{ __('shop.sell_items') }}</option>
@@ -34,8 +34,8 @@
             <h3 class="text-xl font-bold mb-4">{{ __('shop.buy_items') }}</h3>
 
             <div class="mb-6">
-                <label for="buy-category" class="block mb-2 text-sm font-medium text-gray-700">{{ __('shop.select_category') }}</label>
-                <select id="buy-category" class="form-select rounded-md border-gray-300 shadow-sm"
+                <label for="buy-category" class="block mb-2 text-sm font-medium text-[#d4d4d4]">{{ __('shop.select_category') }}</label>
+                <select id="buy-category" class="form-select rounded-md border-[#3f3f3f] shadow-sm"
                         onchange="switchCategory(this.value, 'buy')">
                     <option value="locomotives">{{ __('shop.locomotives') }}</option>
                     <option value="wagons">{{ __('shop.wagons') }}</option>
@@ -49,7 +49,7 @@
                     <h4 class="text-lg font-bold mb-4">{{ __('shop.available_locomotives') }}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($locomotives as $locomotive)
-                            <div class="p-4 border rounded-xl shadow bg-white">
+                            <div class="p-4 border rounded-xl shadow bg-[#1f1f1f]">
                                 <h5 class="text-lg font-semibold">{{ $locomotive->name }}</h5>
                                 <p>Type: {{ $locomotive->type }}</p>
                                 <p>Power: {{ $locomotive->power }}</p>
@@ -72,7 +72,7 @@
                     <h4 class="text-lg font-bold mb-4">{{ __('shop.available_wagons') }}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($wagons as $wagon)
-                            <div class="p-4 border rounded-xl shadow bg-white">
+                            <div class="p-4 border rounded-xl shadow bg-[#1f1f1f]">
                                 <h5 class="text-lg font-semibold capitalize">{{ $wagon->name }}</h5>
                                 <p>Weight: {{ $wagon->weight }}</p>
                                 <p>Level: {{ $wagon->lvl }}</p>
@@ -98,11 +98,11 @@
                 <div id="weapons-buy" class="shop-category-section hidden">
                     <h4 class="text-lg font-bold mb-4">{{ __('shop.available_weapons') }}</h4>
                     @if($weaponWagonsForMounting->isEmpty())
-                        <p class="text-red-600">{{ __('shop.no_weapon_wagons') }}</p>
+                        <p class="text-[#f87171]">{{ __('shop.no_weapon_wagons') }}</p>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($weapons as $weapon)
-                                <div class="p-4 border rounded-xl shadow bg-white">
+                                <div class="p-4 border rounded-xl shadow bg-[#1f1f1f]">
                                     <h5 class="text-lg font-semibold">{{ $weapon->name }}</h5>
                                     <p>Type: {{ $weapon->type }}</p>
                                     <p>Damage: {{ $weapon->damage }}</p>
@@ -112,11 +112,11 @@
                                           class="mt-3 space-y-2">
                                         @csrf
                                         <label for="wagon_{{ $weapon->shop_uuid }}"
-                                               class="block text-sm font-medium text-gray-700">
+                                               class="block text-sm font-medium text-[#d4d4d4]">
                                             Mount on Weapon Wagon:
                                         </label>
                                         <select name="weapon_wagon_id" id="wagon_{{ $weapon->shop_uuid }}"
-                                                class="form-select rounded-md border-gray-300 shadow-sm w-full">
+                                                class="form-select rounded-md border-[#3f3f3f] shadow-sm w-full">
                                             @foreach($weaponWagonsForMounting as $wagon)
                                                 <option value="{{ $wagon->id }}">#{{ $wagon->id }}
                                                     ({{ $wagon->wagon->name }})
@@ -139,8 +139,8 @@
             <h3 class="font-bold text-xl mb-4">Sell Items</h3>
 
             <div class="mb-6">
-                <label for="sell-category" class="block mb-2 font-medium text-sm text-gray-700">Select Category</label>
-                <select id="sell-category" class="form-select rounded-md border-gray-300 shadow-sm"
+                <label for="sell-category" class="block mb-2 font-medium text-sm text-[#d4d4d4]">Select Category</label>
+                <select id="sell-category" class="form-select rounded-md border-[#3f3f3f] shadow-sm"
                         onchange="switchCategory(this.value, 'sell')">
                     <option value="wagons">Your Wagons</option>
                     <option value="weapons">Your Weapons</option>
@@ -152,7 +152,7 @@
                 <div id="wagons-sell" class="shop-category-section">
                     <h4 class="font-bold text-lg mb-4">Your Wagons (For Sale)</h4>
                     @if($playerWagonsForSale->isEmpty())
-                        <p class="rounded-xl bg-white p-4 text-gray-600 shadow">
+                        <p class="rounded-xl bg-[#1f1f1f] p-4 text-[#a3a3a3] shadow">
                             You don't have any wagons to sell.
                         </p>
                     @else
@@ -161,7 +161,7 @@
                                 @php
                                     $price = $wagon->price / 2;
                                 @endphp
-                                <div class="rounded-xl border bg-white p-4 shadow">
+                                <div class="rounded-xl border bg-[#1f1f1f] p-4 shadow">
                                     <h5 class="font-semibold capitalize text-lg">{{ $wagon->name }}</h5>
                                     <p>Weight: {{ $wagon->weight }}</p>
                                     <p>Armor: {{ $wagon->armor }}/{{ $wagon->max_armor }}</p>
@@ -176,7 +176,7 @@
                                         <p>Weapon Slots: {{ $weaponWagonData->slots_available }} available
                                             / {{ $attachedWeapons->count() }} attached</p>
                                         @if($attachedWeapons->isNotEmpty())
-                                            <p class="font-bold text-red-600">Attached Weapons:</p>
+                                            <p class="font-bold text-[#f87171]">Attached Weapons:</p>
                                             <ul>
                                                 @foreach($attachedWeapons as $attachedWeapon)
                                                     @php
@@ -205,11 +205,11 @@
 
                                         @if($wagon->type === 'weapon' && $wagon->weapon_wagon->weapons->isNotEmpty())
                                             <label for="dest_wagon_{{ $wagon->id }}"
-                                                   class="block font-medium text-sm text-gray-700">
+                                                   class="block font-medium text-sm text-[#d4d4d4]">
                                                 Transfer attached weapons to another wagon or sell them:
                                             </label>
                                             <select name="destination_wagon_id" id="dest_wagon_{{ $wagon->id }}"
-                                                    class="form-select w-full rounded-md border-gray-300 shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
+                                                    class="form-select w-full rounded-md border-[#3f3f3f] shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
                                                 <option value="">Sell weapons along with wagon</option>
                                                 @foreach($weaponWagonsForMounting->where('wagon_id', '!=', $wagon->id) as $destWagon)
                                                     <option value="{{ $destWagon->id }}" id="dest_wagon_option_{{ $destWagon->id }}">
@@ -222,11 +222,11 @@
 
                                         @if($wagon->type === 'cargo' && $wagon->cargo_wagon->isNotEmpty())
                                             <label for="dest_wagon_{{ $wagon->id }}"
-                                                   class="block font-medium text-sm text-gray-700">
+                                                   class="block font-medium text-sm text-[#d4d4d4]">
                                                 Transfer resources to another wagon or sell them:
                                             </label>
                                             <select name="destination_wagon_id" id="dest_wagon_{{ $wagon->id }}"
-                                                    class="form-select w-full rounded-md border-gray-300 shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
+                                                    class="form-select w-full rounded-md border-[#3f3f3f] shadow-sm" onchange="updateSellPrice({{ $wagon->id }})">
                                                 <option value="">Sell cargo along with wagon</option>
                                                 @foreach($playerWagonsForSale->where('type', 'cargo')->where('id', '!=', $wagon->id) as $destWagon)
                                                     <option value="{{ $destWagon->id }}" id="dest_wagon_option_{{ $destWagon->id }}">
@@ -237,7 +237,7 @@
                                             </select>
                                         @endif
 
-                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600" onclick="return confirm('Are you sure you want to sell the wagon')">Sell Wagon
+                                        <x-primary-button class="w-full bg-[#991b1b] hover:bg-red-600" onclick="return confirm('Are you sure you want to sell the wagon')">Sell Wagon
                                         </x-primary-button>
                                     </form>
                                     {{-- --- КІНЕЦЬ ФОРМИ ПРОДАЖУ ВАГОНА --- --}}
@@ -251,21 +251,21 @@
                 <div id="weapons-sell" class="shop-category-section hidden">
                     <h4 class="font-bold text-lg mb-4">Your Weapons (For Sale)</h4>
                     @if($playerWeaponsForSale->isEmpty())
-                        <p class="rounded-xl bg-white p-4 text-gray-600 shadow">
+                        <p class="rounded-xl bg-[#1f1f1f] p-4 text-[#a3a3a3] shadow">
                             You don't have any weapons to sell.
                         </p>
                     @else
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                             @foreach($playerWeaponsForSale as $weapon)
-                                <div class="rounded-xl border bg-white p-4 shadow">
+                                <div class="rounded-xl border bg-[#1f1f1f] p-4 shadow">
                                     <h5 class="font-semibold text-lg">{{ $weapon->name }}</h5>
                                     <p>Type: {{ $weapon->type }}</p>
                                     <p>Damage: {{ $weapon->damage }}</p>
                                     @if($weapon->weapon_wagon_id)
-                                        <p class="text-red-600">Mounted
+                                        <p class="text-[#f87171]">Mounted
                                             on: {{ $weapon->weapon_wagon->wagon->name ?? 'Unknown Wagon' }}</p>
                                     @else
-                                        <p class="text-green-600">Status: Unmounted</p>
+                                        <p class="text-[#4ade80]">Status: Unmounted</p>
                                     @endif
                                     <p>UUID: {{ $weapon->uuid }}</p>
                                     <p class="font-bold text-red-700">Sell Price: ${{ $weapon->price / 2 }}</p>
@@ -275,7 +275,7 @@
                                           class="mt-3"> {{-- Змінено action --}}
                                         @csrf
                                         @method('DELETE') {{-- ДОДАНО: Для імітації DELETE запиту --}}
-                                        <x-primary-button class="w-full bg-red-500 hover:bg-red-600">Sell Weapon
+                                        <x-primary-button class="w-full bg-[#991b1b] hover:bg-red-600">Sell Weapon
                                         </x-primary-button>
                                     </form>
                                     {{-- --- КІНЕЦЬ ФОРМИ ПРОДАЖУ ЗБРОЇ --- --}}
@@ -292,16 +292,16 @@
             <h3 class="text-xl font-bold mb-4">Buy Resources</h3>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border-collapse">
+                <table class="min-w-full bg-[#1f1f1f] border-collapse">
                     <thead>
                     <tr>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Resource</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Available Qty</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Buy Price</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Your Cargo Space
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Resource</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Available Qty</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Buy Price</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Your Cargo Space
                         </th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Amount</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Action</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Amount</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -314,13 +314,13 @@
                             <td class="py-2 px-4 border-b">
                                 ${{ number_format($cityResource->getCurrentBuyPrice(), 2) }}</td>
                             <td class="py-2 px-4 border-b">
-                                <span class="text-green-600">{{ $availableCargoSpace }}</span> / <span
-                                    class="text-gray-500">{{ $totalCargoCapacity }}</span>
+                                <span class="text-[#4ade80]">{{ $availableCargoSpace }}</span> / <span
+                                    class="text-[#a3a3a3]">{{ $totalCargoCapacity }}</span>
                             </td>
                             <td class="py-2 px-4 border-b">
                                 <input type="number" name="quantity" min="1"
                                        max="{{ min($cityResource->quantity, $availableCargoSpace) }}"
-                                       class="w-24 form-input rounded-md border-gray-300 shadow-sm text-sm"
+                                       class="w-24 form-input rounded-md border-[#3f3f3f] shadow-sm text-sm"
                                        value="1" form="buy-resource-form-{{ $cityResource->id }}">
                             </td>
                             <td class="py-2 px-4 border-b">
@@ -336,7 +336,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-4 px-4 text-center text-gray-500">No resources available for
+                            <td colspan="6" class="py-4 px-4 text-center text-[#a3a3a3]">No resources available for
                                 purchase in this city.
                             </td>
                         </tr>
@@ -344,7 +344,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="mt-4 text-sm text-gray-600">Current Money: ${{ number_format($player->money, 2) }}</p>
+            <p class="mt-4 text-sm text-[#a3a3a3]">Current Money: ${{ number_format($player->money, 2) }}</p>
         </div>
 
         {{-- --- SELL RESOURCES SECTION --- --}}
@@ -352,16 +352,16 @@
             <h3 class="text-xl font-bold mb-4">Sell Resources</h3>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border-collapse">
+                <table class="min-w-full bg-[#1f1f1f] border-collapse">
                     <thead>
                     <tr>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Resource</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Your Qty</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Sell Price
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Resource</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Your Qty</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Sell Price
                             (in {{ $city->name }})
                         </th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Amount</th>
-                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-gray-600">Action</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Amount</th>
+                        <th class="py-2 px-4 border-b text-left text-sm font-semibold text-[#a3a3a3]">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -383,7 +383,7 @@
                                     ${{ number_format($cityResource->getCurrentSellPrice(), 2) }}</td>
                                 <td class="py-2 px-4 border-b">
                                     <input type="number" name="quantity" min="1" max="{{ $wagonResource->quantity }}"
-                                           class="w-24 form-input rounded-md border-gray-300 shadow-sm text-sm"
+                                           class="w-24 form-input rounded-md border-[#3f3f3f] shadow-sm text-sm"
                                            value="1"
                                            form="sell-resource-form-{{ $wagonResource->resource_id }}"> {{-- Використовуємо resource_id для унікальності форми --}}
                                 </td>
@@ -396,14 +396,14 @@
                                         @method('DELETE')
                                         {{-- Не потрібно передавати cargo_wagon_resource_id, оскільки продаємо "загальну" кількість --}}
                                         {{-- Контролер сам знайде, з яких CargoWagonResource відняти --}}
-                                        <x-primary-button class="bg-red-500 hover:bg-red-600">Sell</x-primary-button>
+                                        <x-primary-button class="bg-[#991b1b] hover:bg-red-600">Sell</x-primary-button>
                                     </form>
                                 </td>
                             </tr>
                         @endif
                     @empty
                         <tr>
-                            <td colspan="5" class="py-4 px-4 text-center text-gray-500">You don't have any resources to
+                            <td colspan="5" class="py-4 px-4 text-center text-[#a3a3a3]">You don't have any resources to
                                 sell.
                             </td>
                         </tr>
@@ -411,7 +411,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="mt-4 text-sm text-gray-600">Current Money: ${{ number_format($player->money, 2) }}</p>
+            <p class="mt-4 text-sm text-[#a3a3a3]">Current Money: ${{ number_format($player->money, 2) }}</p>
         </div>
     </div>
 

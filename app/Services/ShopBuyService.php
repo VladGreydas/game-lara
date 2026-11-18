@@ -5,9 +5,13 @@ namespace App\Services;
 use App\Models\CargoWagon;
 use App\Models\CargoWagonResource;
 use App\Models\CityResource;
+use App\Models\CrafterWagon;
+use App\Models\ExplorerWagon;
 use App\Models\Locomotive;
+use App\Models\PassengerWagon;
 use App\Models\Player;
 use App\Models\Resource;
+use App\Models\ScrapperWagon;
 use App\Models\Wagon;
 use App\Models\Weapon;
 use App\Models\WeaponWagon;
@@ -114,6 +118,31 @@ class ShopBuyService
                 WeaponWagon::create([
                     'wagon_id' => $wagonModel->id,
                     'slots_available' => $wagon->weapon_data['slots_available'],
+                ]);
+            }
+
+            if ($wagon->type === 'passenger') {
+                PassengerWagon::create([
+                    'wagon_id' => $wagonModel->id,
+                ]);
+            }
+
+            if ($wagon->type === 'explorer') {
+                ExplorerWagon::create([
+                    'wagon_id' => $wagonModel->id,
+                ]);
+            }
+
+            if ($wagon->type === 'scrapper') {
+                ScrapperWagon::create([
+                    'wagon_id' => $wagonModel->id,
+                ]);
+            }
+
+            if ($wagon->type === 'crafter' && isset($wagon->crafter_data)) {
+                CrafterWagon::create([
+                    'wagon_id' => $wagonModel->id,
+                    'craft_slots' => $wagon->crafter_data['craft_slots'],
                 ]);
             }
 
@@ -231,8 +260,8 @@ class ShopBuyService
             // Зняття грошей
             $player->decrement('money', $totalCost);
 
-            // Зменшення кількості ресурсу в місті
-            $cityResource->decrement('quantity', $quantity);
+            // Зменшення кількості ресурсу в місті з оновленням ціни
+            $cityResource->adjustQuantity(-$quantity);
 
             // Додавання ресурсів до вантажних вагонів гравця
             $this->addResourcesToCargo($player, $cityResource->resource->id, $quantity);
@@ -275,8 +304,8 @@ class ShopBuyService
             // Додавання грошей гравцеві
             $player->increment('money', $totalSellPrice);
 
-            // Збільшення кількості ресурсу в місті
-            $cityResource->increment('quantity', $quantity);
+            // Збільшення кількості ресурсу в місті з оновленням ціни
+            $cityResource->adjustQuantity($quantity);
 
             // Зменшення кількості ресурсів у вантажних вагонах гравця
             $this->removeResourcesFromCargo($player, $resource->id, $quantity);

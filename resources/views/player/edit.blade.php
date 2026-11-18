@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-[#e5e5e5] leading-tight">
             {{ __('Edit Player') }}
         </h2>
     </x-slot>
@@ -8,7 +8,7 @@
         <form method="POST" action="{{ route('player.update', $player) }}">
             @csrf
             @method('PATCH')
-            <input autocomplete="off" type="text" name="nickname" class="ml-10 h-12 w-4/5 border-gray-300 focus:border-indigo-300 focus:ring focus:ring-opacity-50 rounded-md shadow-sm" placeholder="Enter your nickname here..." value="{{ $player->nickname }}">
+            <input autocomplete="off" type="text" name="nickname" class="ml-10 h-12 w-4/5 border-[#3f3f3f] focus:border-indigo-300 focus:ring focus:ring-opacity-50 rounded-md shadow-sm" placeholder="Enter your nickname here..." value="{{ $player->nickname }}">
             <x-input-error :messages="$errors->get('nickname')" class="mt-2" />
             <div class="mt-4 space-x-2">
                 <x-primary-button>{{ __('Save') }}</x-primary-button>

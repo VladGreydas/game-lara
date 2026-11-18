@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CityRoute;
 use App\Models\Location;
 use App\Services\ProcessingService;
+use App\Services\TravelEventService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,9 +23,15 @@ class LocationController extends Controller
                 // Travel has finished, process arrival
                 return $player->processArrival($player);
             } else {
+                // Check for travel events
+                $eventService = app(TravelEventService::class);
+                $eventService->checkAndTrigger($player);
+                $activeEvent = $eventService->getActiveEvent($player);
+                $unresolvedCount = $eventService->getUnresolvedEventCount($player);
+
                 // Still traveling, redirect to a travel status page or show a message
                 $route = CityRoute::find($player->current_city_route_id);
-                return view('city.on_route', compact('player', 'route')); // NEW: Create a travel status view
+                return view('city.on_route', compact('player', 'route', 'activeEvent', 'unresolvedCount'));
             }
         }
 
@@ -153,6 +160,28 @@ class LocationController extends Controller
             return redirect()->back()->with('success', __('location.success.unloaded', ['amount' => $result['output_amount']]));
         } else {
             return redirect()->back()->with('error', __($result['message']));
+        }
+    }
+
+    public function resolveEvent(Request $request, TravelEventService $eventService): RedirectResponse
+    {
+        $player = $request->user()->player;
+
+        $validated = $request->validate([
+            'event_id' => 'required|integer',
+            'choice' => 'required|string',
+        ]);
+
+        $result = $eventService->resolveEvent($player, $validated['event_id'], $validated['choice']);
+
+        if ($result['success']) {
+            // Resume travel after event resolution
+            $eventService->resumeTravel($player);
+
+            $message = $result['message'];
+            return redirect()->back()->with('success', $message ?: __('travel_events.event_resolved'));
+        } else {
+            return redirect()->back()->with('error', $result['message'] ?? __('travel_events.invalid_choice'));
         }
     }
 }
