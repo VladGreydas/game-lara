@@ -64,9 +64,25 @@ return [
     'minutes' => 'хвилин',
     'processing_description' => 'Переробка :input → :output :resource з часом.',
 
+    // Level & Upgrade
+    'level' => 'Рівень локації',
+    'level_info' => 'Інформація про рівень',
+    'current_level' => 'Поточний рівень',
+    'production_bonus' => 'Бонус до виробництва',
+    'production_bonus_description' => 'швидкість виробництва множиться на рівень',
+    'capacity_bonus' => 'Бонус до місткості',
+    'capacity_bonus_description' => 'місткість множиться на рівень',
+    'upgrade' => 'Апгрейд',
+    'upgrade_cost' => 'Вартість апгрейду',
+    'upgrade_description' => 'Підвищити рівень з :from на :to — виробництво та місткість зростуть у :to разів',
+    'upgrade_to_level' => 'Апгрейд до рівня :level',
+    'not_enough_money' => 'Недостатньо грошей. Потрібно :cost, у вас :have',
+    'max_level_reached' => 'Максимальний рівень досягнуто!',
+
     // Success messages
     'success' => [
         'unloaded' => 'Ресурси успішно вивантажено. Буде вироблено :amount одиниць.',
+        'upgraded' => 'Локацію підвищено до рівня :level! Вартість: :cost монет.',
     ],
 
     // Error messages
@@ -78,5 +94,8 @@ return [
         'not_enough_input_resource_2' => 'Недостатньо другого вхідного ресурсу у ваших вагонах.',
         'capacity_full' => 'Місткість локації повна.',
         'unload_travelling' => 'Ви не можете вивантажувати ресурси під час подорожі.',
+        'upgrade_travelling' => 'Ви не можете апгрейдити локацію під час подорожі.',
+        'max_level' => 'Локація вже на максимальному рівні.',
+        'not_enough_money' => 'Недостатньо грошей для апгрейду. Потрібно :cost монет.',
     ],
 ];

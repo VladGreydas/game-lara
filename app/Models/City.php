@@ -131,28 +131,28 @@ class City extends Model
 
     /**
      * Get discount rate for Workshop.
-     * 10% * city level discount for repairs.
-     * 5% * city level for upgrades
+     * 5% * (level-1) discount for repairs.
+     * 3% * (level-1) for upgrades.
      * @param string $type - Upgrade/Repair
      * @return float
      */
     public function getWorkshopDiscount(string $type): float
     {
         return match ($type) {
-            'repair' => ($this->level - 1) * 0.1,
-            'upgrade' => ($this->level - 1) * 0.05
+            'repair' => ($this->level - 1) * 0.05,
+            'upgrade' => ($this->level - 1) * 0.03
         };
     }
 
     /**
      * Get discount rate for purchases in Shop (Resources, Wagons, Locomotives, Weapons).
-     * 10% discount if city has shop.
+     * 3% * (level-1) discount.
      *
      * @return float
      */
     public function getShopDiscount(): float
     {
-        return ($this->level - 1) * 0.05;
+        return ($this->level - 1) * 0.03;
     }
 
     /**

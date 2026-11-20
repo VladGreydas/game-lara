@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Log;
  * @property int $processing_ratio_output
  * @property int $processing_amount
  * @property \Illuminate\Support\Carbon|null $processing_started_at
+ * @property float $base_production_rate
  * @property float $production_rate_per_hour
+ * @property int $base_max_capacity
  * @property int $max_capacity
  * @property int $current_amount
  * @property \Illuminate\Support\Carbon|null $last_produced_at
@@ -40,11 +42,33 @@ class LocationResource extends Model
         'processing_ratio_output',
         'processing_amount',
         'processing_started_at',
+        'base_production_rate',
+        'base_max_capacity',
         'production_rate_per_hour',
         'max_capacity',
         'current_amount',
         'last_produced_at'
     ];
+
+    /**
+     * Get the effective production rate (base × location level).
+     */
+    public function getProductionRateAttribute(): float
+    {
+        $base = $this->getAttribute('base_production_rate') ?? $this->getAttribute('production_rate_per_hour') ?? 0;
+        $level = $this->location->lvl ?? 1;
+        return $base * $level;
+    }
+
+    /**
+     * Get the effective max capacity (base × location level).
+     */
+    public function getMaxCapacityAttribute(): int
+    {
+        $base = $this->getAttribute('base_max_capacity') ?? $this->getAttribute('max_capacity') ?? 0;
+        $level = $this->location->lvl ?? 1;
+        return (int) ($base * $level);
+    }
 
     /**
      * Get the location that owns the resource.
@@ -156,7 +180,7 @@ class LocationResource extends Model
         $last = Carbon::parse($this->last_produced_at ?? $this->updated_at);
         $diff = $last->diffInHours(now());
         $hours = max(0, $diff);
-        $produced = (int) ($hours * $this->production_rate_per_hour);
+        $produced = (int) ($hours * $this->production_rate);
         Log::info('LocationResource::produce() — розрахунок виробництва', [
             'hours' => $hours,
             'produced' => $produced,

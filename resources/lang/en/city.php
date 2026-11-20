@@ -16,4 +16,9 @@ return [
     'visit_location' => 'Visit Location',
     'travel_cost' => 'Travel Cost',
     'no_resources_available' => 'No resources available in this city.',
+    'shop_discount' => 'Shop Discount',
+    'shop_discount_desc' => 'Discount on all shop purchases',
+    'workshop_discount' => 'Workshop Discount',
+    'repair' => 'Repair',
+    'upgrade' => 'Upgrade',
 ];

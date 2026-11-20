@@ -16,4 +16,9 @@ return [
     'visit_location' => 'Відвідати локацію',
     'travel_cost' => 'Ціна подорожі',
     'no_resources_available' => 'У цьому місті немає доступних ресурсів.',
+    'shop_discount' => 'Знижка в магазині',
+    'shop_discount_desc' => 'Знижка на всі покупки в магазині',
+    'workshop_discount' => 'Знижка в майстерні',
+    'repair' => 'Ремонт',
+    'upgrade' => 'Апгрейд',
 ];

@@ -98,7 +98,37 @@ class LocationController extends Controller
             }
         }
 
-        return view('locations.show', compact('location', 'player', 'processingStatus', 'productionStatus', 'availableInputs'));
+        // Get upgrade info for the location
+        $upgradeCost = $location->getUpgradeCost();
+        $canUpgrade = $location->canUpgrade();
+
+        return view('locations.show', compact('location', 'player', 'processingStatus', 'productionStatus', 'availableInputs', 'upgradeCost', 'canUpgrade'));
+    }
+
+    public function upgrade(Request $request, Location $location): RedirectResponse
+    {
+        $player = $request->user()->player;
+
+        if ($player->isTraveling() || $player->hasArrived()) {
+            return redirect()->back()->with('error', __('error.location.upgrade_travelling'));
+        }
+
+        if (!$location->canUpgrade()) {
+            return redirect()->back()->with('error', __('error.location.max_level'));
+        }
+
+        $cost = $location->getUpgradeCost();
+
+        if ($player->money < $cost) {
+            return redirect()->back()->with('error', __('error.location.not_enough_money', ['cost' => $cost]));
+        }
+
+        $player->money -= $cost;
+        $player->save();
+
+        $location->upgrade();
+
+        return redirect()->back()->with('success', __('location.success.upgraded', ['level' => $location->lvl, 'cost' => $cost]));
     }
 
     public function collect(Request $request, Location $location, ProcessingService $processingService): RedirectResponse

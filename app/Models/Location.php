@@ -13,15 +13,20 @@ use Illuminate\Support\Facades\Log;
  * @property string $name
  * @property string $type
  * @property string slug
+ * @property int $lvl
  * @property LocationResource location_resource
 */
 class Location extends Model
 {
+    const MAX_LEVEL = 10;
+    const UPGRADE_BASE_COST = 500;
+
     protected $fillable = [
         'city_id',
         'name',
         'type',
-        'slug'
+        'slug',
+        'lvl'
     ];
 
     public function getOutgoingRoute()
@@ -87,5 +92,34 @@ class Location extends Model
     public function location_resource(): HasOne
     {
         return $this->hasOne(LocationResource::class, 'location_id');
+    }
+
+    /**
+     * Get the cost to upgrade to the next level.
+     */
+    public function getUpgradeCost(): int
+    {
+        return self::UPGRADE_BASE_COST * $this->lvl;
+    }
+
+    /**
+     * Check if the location can be upgraded.
+     */
+    public function canUpgrade(): bool
+    {
+        return $this->lvl < self::MAX_LEVEL;
+    }
+
+    /**
+     * Upgrade the location to the next level.
+     */
+    public function upgrade(): bool
+    {
+        if (!$this->canUpgrade()) {
+            return false;
+        }
+
+        $this->lvl++;
+        return $this->save();
     }
 }

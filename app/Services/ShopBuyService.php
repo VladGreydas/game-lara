@@ -46,6 +46,10 @@ class ShopBuyService
         $currentValue = $currentLoco?->price ?? 0;
         $priceDifference = $shopLoco->price - $currentValue;
 
+        // Apply city shop discount
+        $discount = $player->city ? $player->city->getShopDiscount() : 0;
+        $priceDifference = (int) round($priceDifference * (1 - $discount));
+
         if ($player->money < $priceDifference) {
             throw new \Exception('Not enough money, even after trading in your current locomotive.');
         }
@@ -88,7 +92,11 @@ class ShopBuyService
             throw new \Exception('Wagon not found in shop.');
         }
 
-        if ($player->money < $wagon->price) {
+        // Apply city shop discount
+        $discount = $player->city ? $player->city->getShopDiscount() : 0;
+        $price = (int) round($wagon->price * (1 - $discount));
+
+        if ($player->money < $price) {
             throw new \Exception('Not enough money.');
         }
 
@@ -147,7 +155,7 @@ class ShopBuyService
             }
 
             // Зняти кошти
-            $player->decrement('money', $wagon->price);
+            $player->decrement('money', $price);
 
             // Видалення із сесії
             Session::forget("shop.wagons.$uuid");
@@ -181,13 +189,17 @@ class ShopBuyService
             throw new AuthorizationException('You do not own this weapon wagon.');
         }
 
-        if ($player->money < $weaponData['price']) {
+        // Apply city shop discount
+        $discount = $player->city ? $player->city->getShopDiscount() : 0;
+        $price = (int) round($weaponData['price'] * (1 - $discount));
+
+        if ($player->money < $price) {
             throw new \Exception('Not enough money.');
         }
 
-        return DB::transaction(function () use ($player, $weaponData, $weaponWagon, $shopUuid) {
+        return DB::transaction(function () use ($player, $weaponData, $weaponWagon, $shopUuid, $price) {
             // Покупка
-            $player->decrement('money', $weaponData['price']);
+            $player->decrement('money', $price);
 
             // Створення нової зброї
             $weapon = Weapon::create([
@@ -242,6 +254,10 @@ class ShopBuyService
 
         // Розрахунок вартості
         $totalCost = $cityResource->getCurrentBuyPrice() * $quantity;
+
+        // Apply city shop discount
+        $discount = $city->getShopDiscount();
+        $totalCost = (int) round($totalCost * (1 - $discount));
 
         // Перевірка грошей гравця
         if ($player->money < $totalCost) {

@@ -64,9 +64,25 @@ return [
     'minutes' => 'minutes',
     'processing_description' => 'Processing :input → :output :resource over time.',
 
+    // Level & Upgrade
+    'level' => 'Location Level',
+    'level_info' => 'Level Info',
+    'current_level' => 'Current level',
+    'production_bonus' => 'Production bonus',
+    'production_bonus_description' => 'production rate multiplied by level',
+    'capacity_bonus' => 'Capacity bonus',
+    'capacity_bonus_description' => 'capacity multiplied by level',
+    'upgrade' => 'Upgrade',
+    'upgrade_cost' => 'Upgrade cost',
+    'upgrade_description' => 'Upgrade from level :from to :to — production and capacity will be ×:to',
+    'upgrade_to_level' => 'Upgrade to level :level',
+    'not_enough_money' => 'Not enough money. Need :cost, you have :have',
+    'max_level_reached' => 'Maximum level reached!',
+
     // Success messages
     'success' => [
         'unloaded' => 'Successfully unloaded resources. :amount units will be produced.',
+        'upgraded' => 'Location upgraded to level :level! Cost: :cost coins.',
     ],
 
     // Error messages
@@ -78,5 +94,8 @@ return [
         'not_enough_input_resource_2' => 'Not enough second input resource in your wagons.',
         'capacity_full' => 'Location capacity is full.',
         'unload_travelling' => 'You cannot unload resources while traveling.',
+        'upgrade_travelling' => 'You cannot upgrade location while traveling.',
+        'max_level' => 'Location is already at maximum level.',
+        'not_enough_money' => 'Not enough money for upgrade. Need :cost coins.',
     ],
 ];

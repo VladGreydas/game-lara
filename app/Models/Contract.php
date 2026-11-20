@@ -93,9 +93,12 @@ class Contract extends Model
     /**
      * Make sure a saloon city's contract board has enough available contracts,
      * generating new random "deliver X resource to Y town" offers if needed.
+     * Count depends on city level: 3 + level²/10
      */
-    public static function generateForCity(City $city, int $count = 3): void
+    public static function generateForCity(City $city): void
     {
+        $count = 3 + (int) floor($city->level * $city->level / 10);
+
         $existingAvailable = self::where('city_id', $city->id)
             ->where('status', self::STATUS_AVAILABLE)
             ->count();

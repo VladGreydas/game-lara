@@ -16,7 +16,7 @@
             </div>
 
             <div class="p-6">
-                <div class="grid md:grid-cols-2 gap-6">
+                <div class="grid md:grid-cols-3 gap-6">
                     <!-- City Level -->
                     <div class="p-4 bg-[#1f1f1f] border border-[#d4b483] rounded">
                         <h4 class="text-xl font-bold text-[#e5e5e5] mb-3 font-serif">{{ __('city.city_level') }}</h4>
@@ -37,8 +37,40 @@
                         @endif
                     </div>
 
-                    <!-- Refuel -->
+                    <!-- Shop Discount -->
+                    @if($city->has_shop)
                     <div class="p-4 bg-[#1f1f1f] border border-[#d4b483] rounded">
+                        <h4 class="text-xl font-bold text-[#e5e5e5] mb-3 font-serif">{{ __('city.shop_discount') }}</h4>
+                        <p class="text-[#e5e5e5] mb-2">
+                            {{ number_format($city->getShopDiscount() * 100, 0) }}%
+                        </p>
+                        <p class="text-sm text-[#a3a3a3]">{{ __('city.shop_discount_desc') }}</p>
+                    </div>
+                    @endif
+
+                    <!-- Workshop Discount -->
+                    @if($city->has_workshop)
+                    <div class="p-4 bg-[#1f1f1f] border border-[#d4b483] rounded">
+                        <h4 class="text-xl font-bold text-[#e5e5e5] mb-3 font-serif">{{ __('city.workshop_discount') }}</h4>
+                        <p class="text-sm text-[#d4d4d4] mb-1">
+                            {{ __('city.repair') }}: {{ number_format($city->getWorkshopDiscount('repair') * 100, 0) }}%
+                        </p>
+                        <p class="text-sm text-[#d4d4d4] mb-2">
+                            {{ __('city.upgrade') }}: {{ number_format($city->getWorkshopDiscount('upgrade') * 100, 0) }}%
+                        </p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Refuel Card -->
+        <div class="industrial-card">
+            <div class="p-6 border-b border-[#3f3f3f] bg-[#2d2d2d]">
+                <h3 class="text-2xl font-bold text-[#e5e5e5] font-serif">{{ __('locomotive.locomotive_fuel') }}</h3>
+            </div>
+            <div class="p-6">
+                <div class="p-4 bg-[#1f1f1f] border border-[#d4b483] rounded">
                         <h4 class="text-xl font-bold text-[#e5e5e5] mb-3 font-serif">{{ __('locomotive.locomotive_fuel') }}</h4>
                         <p class="text-[#e5e5e5] mb-2">
                             {{ $player->train->locomotive->fuel }} / {{ $player->train->locomotive->max_fuel }}

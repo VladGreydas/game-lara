@@ -68,6 +68,65 @@
             </div>
         </div>
 
+        <!-- Level & Upgrade Section -->
+        <div class="industrial-card">
+            <div class="p-6 border-b border-[#3f3f3f] bg-[#2d2d2d]">
+                <h3 class="text-2xl font-bold text-[#e5e5e5] font-serif">{{ __('location.level') }}</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Level Info -->
+                    <div class="p-4 bg-[#1f1f1f] border border-[#d4b483] rounded">
+                        <h4 class="text-xl font-bold text-[#e5e5e5] mb-3 font-serif">{{ __('location.level_info') }}</h4>
+                        <p class="text-[#e5e5e5] mb-2">
+                            {{ __('location.current_level') }}:
+                            <strong class="text-[#eab308]">{{ $location->lvl }}</strong> / {{ \App\Models\Location::MAX_LEVEL }}
+                        </p>
+                        <p class="text-[#e5e5e5] mb-2">
+                            {{ __('location.production_bonus') }}:
+                            <strong class="text-[#4ade80]">×{{ $location->lvl }}</strong>
+                            {{ __('location.production_bonus_description') }}
+                        </p>
+                        <p class="text-[#e5e5e5]">
+                            {{ __('location.capacity_bonus') }}:
+                            <strong class="text-[#4ade80]">×{{ $location->lvl }}</strong>
+                            {{ __('location.capacity_bonus_description') }}
+                        </p>
+                    </div>
+
+                    <!-- Upgrade Button -->
+                    <div class="p-4 bg-[#1f1f1f] border border-[#d4b483] rounded">
+                        <h4 class="text-xl font-bold text-[#e5e5e5] mb-3 font-serif">{{ __('location.upgrade') }}</h4>
+                        @if($canUpgrade)
+                            <p class="text-[#e5e5e5] mb-3">
+                                {{ __('location.upgrade_cost') }}:
+                                <strong class="text-[#eab308]">{{ $upgradeCost }}</strong> {{ __('common.money') }}
+                            </p>
+                            <p class="text-sm text-[#a3a3a3] mb-3 italic">
+                                {{ __('location.upgrade_description', ['from' => $location->lvl, 'to' => $location->lvl + 1]) }}
+                            </p>
+                            @if($player->money >= $upgradeCost)
+                                <form method="POST" action="{{ route('locations.upgrade', $location) }}">
+                                    @csrf
+                                    <button type="submit" class="industrial-btn py-2 px-6 rounded text-sm font-serif">
+                                        {{ __('location.upgrade_to_level', ['level' => $location->lvl + 1]) }}
+                                    </button>
+                                </form>
+                            @else
+                                <p class="text-[#f87171] italic">
+                                    {{ __('location.not_enough_money', ['cost' => $upgradeCost, 'have' => $player->money]) }}
+                                </p>
+                            @endif
+                        @else
+                            <p class="text-[#4ade80] font-bold">
+                                {{ __('location.max_level_reached') }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Production Progress Section (T0 locations only) -->
         @if($productionStatus)
             <div class="industrial-card">
